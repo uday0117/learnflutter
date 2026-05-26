@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../bindings/home_binding.dart';
+import '../bindings/onboarding_binding.dart';
 import '../bindings/splash_binding.dart';
 import '../views/api_integration/api_integration_screen.dart';
 import '../views/favorites/favorites_screen.dart';
@@ -10,6 +11,7 @@ import '../views/flutter_basics/flutter_basics_screen.dart';
 import '../views/home/home_screen.dart';
 import '../views/interview_questions/interview_questions_screen.dart';
 import '../views/interview_questions/question_detail_screen.dart';
+import '../views/onboarding/onboarding_screen.dart';
 import '../views/projects/projects_screen.dart';
 import '../views/search/search_screen.dart';
 import '../views/splash/splash_screen.dart';
@@ -27,6 +29,12 @@ class AppPages {
       page: () => const SplashScreen(),
       binding: SplashBinding(),
       transition: Transition.fade,
+    ),
+    GetPage(
+      name: AppRoutes.onboarding,
+      page: () => const OnboardingScreen(),
+      binding: OnboardingBinding(),
+      transition: Transition.fadeIn,
     ),
     GetPage(
       name: AppRoutes.home,

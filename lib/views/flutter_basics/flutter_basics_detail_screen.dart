@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../controllers/favorites_controller.dart';
 import '../../models/tutorial_model.dart';
 import '../../widgets/code_viewer.dart';
 
@@ -9,9 +11,27 @@ class FlutterBasicsDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TutorialModel tutorial = Get.arguments;
+    final favoritesController = Get.find<FavoritesController>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(tutorial.title)),
+      appBar: AppBar(
+        title: Text(tutorial.title),
+        actions: [
+          Obx(
+            () => IconButton(
+              icon: Icon(
+                favoritesController.isFavorite(tutorial.id)
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: favoritesController.isFavorite(tutorial.id)
+                    ? Colors.red
+                    : null,
+              ),
+              onPressed: () => favoritesController.toggleFavorite(tutorial.id),
+            ),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

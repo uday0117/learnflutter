@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/favorites_controller.dart';
+import '../../data/api_integration_data.dart';
+import '../../data/firebase_data.dart';
+import '../../data/flutter_basics_data.dart';
+import '../../data/projects_data.dart';
+import '../../data/state_management_data.dart';
+import '../../models/tutorial_model.dart';
+import '../../routes/app_routes.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/tutorial_card.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -59,25 +67,52 @@ class FavoritesScreen extends StatelessWidget {
           );
         }
 
+        // Collect all tutorials from all data sources
+        final allTutorials = <TutorialModel>[
+          ...FlutterBasicsData.getAllTutorials(),
+          ...FirebaseData.getAllTutorials(),
+          ...StateManagementData.getAllTutorials(),
+          ...ApiIntegrationData.getAllTutorials(),
+          ...ProjectsData.getAllProjects(),
+        ];
+
+        // Filter to show only favorites
+        final favoriteTutorials = allTutorials
+            .where((tutorial) => controller.isFavorite(tutorial.id))
+            .toList();
+
+        if (favoriteTutorials.isEmpty) {
+          return EmptyState(
+            icon: Icons.favorite_border,
+            title: 'No Favorites Found',
+            message: 'Your favorited items may have been removed',
+            action: ElevatedButton(
+              onPressed: () => Get.back(),
+              child: const Text('Browse Tutorials'),
+            ),
+          );
+        }
+
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: controller.favorites.length,
+          itemCount: favoriteTutorials.length,
           itemBuilder: (context, index) {
-            final favoriteId = controller.favorites[index];
-            return Card(
-              elevation: 2,
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                leading: const Icon(Icons.favorite, color: Colors.red),
-                title: Text('Favorite Item #$favoriteId'),
-                subtitle: const Text('Tap to view details'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => controller.toggleFavorite(favoriteId),
-                ),
-                onTap: () {
-                  // Navigate to detail based on favoriteId
-                },
+            final tutorial = favoriteTutorials[index];
+            return TutorialCard(
+              title: tutorial.title,
+              description: '${tutorial.category} • ${tutorial.difficulty}',
+              onTap: () {
+                // Navigate to detail screen
+                Get.toNamed(
+                  tutorial.category == 'Interview Questions'
+                      ? AppRoutes.questionDetail
+                      : AppRoutes.flutterBasicsDetail,
+                  arguments: tutorial,
+                );
+              },
+              trailing: IconButton(
+                icon: const Icon(Icons.favorite, color: Colors.red),
+                onPressed: () => controller.toggleFavorite(tutorial.id),
               ),
             );
           },

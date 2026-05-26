@@ -8,6 +8,8 @@ class TutorialModel {
   final String? output;
   final List<String> keyPoints;
   final String? imageUrl;
+  final String category;
+  final String difficulty;
 
   TutorialModel({
     required this.id,
@@ -19,6 +21,8 @@ class TutorialModel {
     this.output,
     this.keyPoints = const [],
     this.imageUrl,
+    this.category = '',
+    this.difficulty = 'Beginner',
   });
 
   Map<String, dynamic> toJson() => {

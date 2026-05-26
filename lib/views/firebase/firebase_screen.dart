@@ -1,35 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../data/firebase_data.dart';
+import '../../routes/app_routes.dart';
+import '../../widgets/tutorial_card.dart';
 
 class FirebaseScreen extends StatelessWidget {
   const FirebaseScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final topics = [
-      {'title': 'Firebase Setup', 'description': 'Setup Firebase in Flutter'},
-      {'title': 'Authentication', 'description': 'User authentication'},
-      {'title': 'Firestore', 'description': 'Cloud Firestore database'},
-      {'title': 'Cloud Storage', 'description': 'Store files in cloud'},
-      {'title': 'Push Notifications', 'description': 'FCM notifications'},
-    ];
+    final tutorials = FirebaseData.getAllTutorials();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Firebase')),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: topics.length,
+        itemCount: tutorials.length,
         itemBuilder: (context, index) {
-          final topic = topics[index];
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListTile(
-              leading: const Icon(Icons.cloud),
-              title: Text(topic['title']!),
-              subtitle: Text(topic['description']!),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {},
-            ),
+          final tutorial = tutorials[index];
+          return TutorialCard(
+            title: tutorial.title,
+            description: tutorial.description,
+            onTap: () {
+              Get.toNamed(AppRoutes.flutterBasicsDetail, arguments: tutorial);
+            },
           );
         },
       ),
