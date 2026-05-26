@@ -13,18 +13,30 @@ class StateManagementScreen extends StatelessWidget {
     final tutorials = StateManagementData.getAllTutorials();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('State Management')),
+      appBar: AppBar(title: const Text('State Management'), elevation: 0),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: tutorials.length,
         itemBuilder: (context, index) {
           final tutorial = tutorials[index];
-          return TutorialCard(
-            title: tutorial.title,
-            description: tutorial.description,
-            onTap: () {
-              Get.toNamed(AppRoutes.flutterBasicsDetail, arguments: tutorial);
+          return TweenAnimationBuilder<double>(
+            key: ValueKey(tutorial.id),
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 300 + (index * 50)),
+            curve: Curves.easeOut,
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: Opacity(opacity: value, child: child),
+              );
             },
+            child: TutorialCard(
+              title: tutorial.title,
+              description: tutorial.description,
+              onTap: () {
+                Get.toNamed(AppRoutes.flutterBasicsDetail, arguments: tutorial);
+              },
+            ),
           );
         },
       ),
