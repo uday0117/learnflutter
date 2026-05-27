@@ -19,14 +19,16 @@ class LearnFlutterApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Get.find<ThemeController>();
-    
-    return Obx(() => GetMaterialApp(
-      title: 'LearnFlutter',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme(themeController.primaryColor.value),
-      darkTheme: AppTheme.darkTheme(themeController.primaryColor.value),
-      themeMode: themeController.themeMode.value,
-      home: const HomeScreen(),
-    ));
+
+    return Obx(
+      () => GetMaterialApp(
+        title: 'LearnFlutter',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme(themeController.primaryColor.value),
+        darkTheme: AppTheme.darkTheme(themeController.primaryColor.value),
+        themeMode: themeController.themeMode.value,
+        home: const HomeScreen(),
+      ),
+    );
   }
 }

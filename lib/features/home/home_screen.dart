@@ -3,7 +3,10 @@ import 'package:get/get.dart';
 
 import '../../core/services/data_service.dart';
 import '../dart_basics/dart_basics_screen.dart';
+import '../flutter_basics/flutter_basics_screen.dart';
 import '../settings/settings_screen.dart';
+import '../ui_examples/ui_examples_screen.dart';
+import '../widgets/widget_reference_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -105,8 +108,17 @@ class _CategoryCard extends StatelessWidget {
       child: InkWell(
         onTap: () {
           if (category.id == '1') {
-            // Navigate to Dart Basics (example implemented)
+            // Navigate to Dart Basics
             Get.to(() => const DartBasicsScreen());
+          } else if (category.id == '2') {
+            // Navigate to Flutter Basics
+            Get.to(() => const FlutterBasicsScreen());
+          } else if (category.id == '3') {
+            // Navigate to Widget Reference
+            Get.to(() => const WidgetReferenceScreen());
+          } else if (category.id == '4') {
+            // Navigate to UI Examples
+            Get.to(() => const UIExamplesScreen());
           } else {
             // TODO: Implement other categories
             Get.snackbar(
@@ -149,16 +161,6 @@ class _CategoryCard extends StatelessWidget {
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              // Description
-              Text(
-                category.description,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

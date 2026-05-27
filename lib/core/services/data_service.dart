@@ -1105,4 +1105,2465 @@ extension NullableListExt<T> on List<T> {
       ),
     ];
   }
+
+  // Flutter Basics Topics
+  static List<Topic> getFlutterBasicsTopics() {
+    return [
+      Topic(
+        id: 'flutter_1',
+        categoryId: '2',
+        title: 'StatelessWidget vs StatefulWidget',
+        description: 'Understanding the two fundamental widget types',
+        difficulty: 'beginner',
+        content: '''
+# StatelessWidget vs StatefulWidget
+
+Flutter has two types of widgets for building UI.
+
+## StatelessWidget
+
+Immutable widgets that don't change over time:
+```dart
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Text('Hello');
+  }
+}
+```
+
+**Use when:**
+- UI doesn't change after creation
+- No user interaction needed
+- Data is static
+
+## StatefulWidget
+
+Widgets that can change state:
+```dart
+class Counter extends StatefulWidget {
+  @override
+  _CounterState createState() => _CounterState();
+}
+
+class _CounterState extends State<Counter> {
+  int count = 0;
+  
+  @override
+  Widget build(BuildContext context) {
+    return Text('\$count');
+  }
+}
+```
+
+**Use when:**
+- UI changes based on user input
+- Animations
+- Data updates over time
+
+## setState()
+
+Update UI by calling setState():
+```dart
+void increment() {
+  setState(() {
+    count++;
+  });
+}
+```
+
+## Lifecycle Methods
+
+- `initState()`: Called once when state is created
+- `dispose()`: Clean up resources
+- `didUpdateWidget()`: Called when widget configuration changes
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'StatefulWidget Counter',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class Counter extends StatefulWidget {
+  const Counter({super.key});
+
+  @override
+  State<Counter> createState() => _CounterState();
+}
+
+class _CounterState extends State<Counter> {
+  int _count = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    print('Counter initialized');
+  }
+
+  void _increment() {
+    setState(() {
+      _count++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          '\$_count',
+          style: const TextStyle(fontSize: 48),
+        ),
+        ElevatedButton(
+          onPressed: _increment,
+          child: const Text('Increment'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    print('Counter disposed');
+    super.dispose();
+  }
+}''',
+            explanation: 'Complete stateful widget with lifecycle methods',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'flutter_2',
+        categoryId: '2',
+        title: 'Layout Widgets (Row, Column, Stack)',
+        description: 'Master Flutter layout fundamentals',
+        difficulty: 'beginner',
+        content: '''
+# Layout Widgets
+
+Flutter provides powerful widgets for arranging children.
+
+## Column
+
+Arrange widgets vertically:
+```dart
+Column(
+  mainAxisAlignment: MainAxisAlignment.center,
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Text('First'),
+    Text('Second'),
+  ],
+)
+```
+
+## Row
+
+Arrange widgets horizontally:
+```dart
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    Icon(Icons.home),
+    Text('Home'),
+  ],
+)
+```
+
+## Stack
+
+Layer widgets on top of each other:
+```dart
+Stack(
+  children: [
+    Container(color: Colors.blue),
+    Positioned(
+      top: 10,
+      left: 10,
+      child: Text('Overlay'),
+    ),
+  ],
+)
+```
+
+## MainAxisAlignment
+
+- `start`, `end`, `center`
+- `spaceBetween`, `spaceAround`, `spaceEvenly`
+
+## CrossAxisAlignment
+
+- `start`, `end`, `center`
+- `stretch`, `baseline`
+
+## Expanded & Flexible
+
+Control how children fill available space:
+```dart
+Row(
+  children: [
+    Expanded(child: Container(color: Colors.red)),
+    Flexible(child: Container(color: Colors.blue)),
+  ],
+)
+```
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Layout Example',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class LayoutDemo extends StatelessWidget {
+  const LayoutDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Layout Demo')),
+      body: Column(
+        children: [
+          // Row example
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Icon(Icons.home, size: 40),
+              Icon(Icons.favorite, size: 40),
+              Icon(Icons.settings, size: 40),
+            ],
+          ),
+          const SizedBox(height: 20),
+          
+          // Expanded in Row
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Container(
+                  height: 50,
+                  color: Colors.red,
+                  child: const Center(child: Text('2x')),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  height: 50,
+                  color: Colors.blue,
+                  child: const Center(child: Text('1x')),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          
+          // Stack example
+          SizedBox(
+            height: 200,
+            child: Stack(
+              children: [
+                Container(
+                  color: Colors.grey[300],
+                ),
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    color: Colors.orange,
+                    child: const Text('Positioned'),
+                  ),
+                ),
+                const Align(
+                  alignment: Alignment.bottomRight,
+                  child: Icon(Icons.star, size: 50),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}''',
+            explanation:
+                'Demonstrates Row, Column, Stack with Expanded and Positioned',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'flutter_3',
+        categoryId: '2',
+        title: 'Container, Padding, and Margin',
+        description: 'Box model and styling basics',
+        difficulty: 'beginner',
+        content: '''
+# Container, Padding, and Margin
+
+## Container
+
+The most versatile widget for styling:
+```dart
+Container(
+  width: 200,
+  height: 100,
+  padding: const EdgeInsets.all(16),
+  margin: const EdgeInsets.symmetric(horizontal: 20),
+  decoration: BoxDecoration(
+    color: Colors.blue,
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black26,
+        blurRadius: 8,
+        offset: Offset(0, 4),
+      ),
+    ],
+  ),
+  child: Text('Hello'),
+)
+```
+
+## Padding
+
+Add space inside a widget:
+```dart
+Padding(
+  padding: const EdgeInsets.all(16),
+  child: Text('Padded text'),
+)
+```
+
+## EdgeInsets Types
+
+- `EdgeInsets.all(16)`: Same on all sides
+- `EdgeInsets.symmetric(horizontal: 20, vertical: 10)`
+- `EdgeInsets.only(left: 10, top: 5)`
+- `EdgeInsets.fromLTRB(10, 5, 10, 5)`
+
+## BoxDecoration
+
+Style containers:
+```dart
+BoxDecoration(
+  color: Colors.white,
+  borderRadius: BorderRadius.circular(12),
+  border: Border.all(color: Colors.blue, width: 2),
+  gradient: LinearGradient(
+    colors: [Colors.blue, Colors.purple],
+  ),
+  boxShadow: [...],
+)
+```
+
+## SizedBox
+
+Fixed size spacer:
+```dart
+SizedBox(width: 20, height: 20)
+const SizedBox(height: 10) // spacing
+```
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Container Styling',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class ContainerDemo extends StatelessWidget {
+  const ContainerDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Container Demo')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Basic container
+            Container(
+              width: 200,
+              height: 100,
+              color: Colors.blue,
+              child: const Center(
+                child: Text(
+                  'Basic',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Styled container
+            Container(
+              width: 200,
+              height: 100,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Colors.purple, Colors.blue],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Text(
+                  'Styled',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}''',
+            explanation: 'Shows Container styling with decoration and shadows',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'flutter_4',
+        categoryId: '2',
+        title: 'ListView and GridView',
+        description: 'Scrollable lists and grids',
+        difficulty: 'beginner',
+        content: '''
+# ListView and GridView
+
+Display scrollable content efficiently.
+
+## ListView
+
+### Static List
+```dart
+ListView(
+  children: [
+    ListTile(title: Text('Item 1')),
+    ListTile(title: Text('Item 2')),
+  ],
+)
+```
+
+### ListView.builder
+For dynamic/large lists:
+```dart
+ListView.builder(
+  itemCount: 100,
+  itemBuilder: (context, index) {
+    return ListTile(
+      title: Text('Item \$index'),
+    );
+  },
+)
+```
+
+### ListView.separated
+With separators:
+```dart
+ListView.separated(
+  itemCount: 10,
+  itemBuilder: (context, index) => ListTile(title: Text('Item \$index')),
+  separatorBuilder: (context, index) => Divider(),
+)
+```
+
+## GridView
+
+Display items in a grid:
+```dart
+GridView.count(
+  crossAxisCount: 2,
+  children: [
+    Card(child: Center(child: Text('1'))),
+    Card(child: Center(child: Text('2'))),
+  ],
+)
+```
+
+### GridView.builder
+```dart
+GridView.builder(
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 3,
+    crossAxisSpacing: 10,
+    mainAxisSpacing: 10,
+  ),
+  itemCount: 20,
+  itemBuilder: (context, index) {
+    return Card(child: Center(child: Text('\$index')));
+  },
+)
+```
+
+## Performance
+
+- Use `.builder()` for large lists
+- Implement lazy loading
+- Use `shrinkWrap: true` carefully
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'ListView and GridView',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class ListGridDemo extends StatelessWidget {
+  const ListGridDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('List & Grid'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'ListView'),
+              Tab(text: 'GridView'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            // ListView Tab
+            ListView.separated(
+              itemCount: 20,
+              padding: const EdgeInsets.all(8),
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: CircleAvatar(
+                    child: Text('\${index + 1}'),
+                  ),
+                  title: Text('Item \${index + 1}'),
+                  subtitle: Text('Subtitle for item \${index + 1}'),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () {},
+                );
+              },
+              separatorBuilder: (context, index) => const Divider(),
+            ),
+            
+            // GridView Tab
+            GridView.builder(
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1.5,
+              ),
+              itemCount: 20,
+              itemBuilder: (context, index) {
+                return Card(
+                  color: Colors.primaries[index % Colors.primaries.length],
+                  child: Center(
+                    child: Text(
+                      'Item \${index + 1}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}''',
+            explanation: 'Demonstrates ListView.separated and GridView.builder',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'flutter_5',
+        categoryId: '2',
+        title: 'Navigation & Routes',
+        description: 'Navigate between screens',
+        difficulty: 'intermediate',
+        content: '''
+# Navigation & Routes
+
+Navigate between screens in Flutter.
+
+## Basic Navigation
+
+### Push to new screen
+```dart
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => SecondScreen()),
+);
+```
+
+### Pop back
+```dart
+Navigator.pop(context);
+```
+
+## Passing Data
+
+### Forward
+```dart
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => DetailScreen(data: 'Hello'),
+  ),
+);
+```
+
+### Backward
+```dart
+Navigator.pop(context, 'Result data');
+```
+
+## Named Routes
+
+Define routes in MaterialApp:
+```dart
+MaterialApp(
+  routes: {
+    '/': (context) => HomeScreen(),
+    '/details': (context) => DetailsScreen(),
+  },
+)
+```
+
+Navigate using names:
+```dart
+Navigator.pushNamed(context, '/details');
+Navigator.pushReplacementNamed(context, '/home');
+```
+
+## Advanced Navigation
+
+### Replace current screen
+```dart
+Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => NewScreen()),
+);
+```
+
+### Clear stack and push
+```dart
+Navigator.pushAndRemoveUntil(
+  context,
+  MaterialPageRoute(builder: (context) => HomeScreen()),
+  (route) => false,
+);
+```
+
+## Page Transitions
+
+Custom animations:
+```dart
+PageRouteBuilder(
+  pageBuilder: (context, animation, secondaryAnimation) => NewScreen(),
+  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    return FadeTransition(opacity: animation, child: child);
+  },
+)
+```
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Navigation Example',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+void main() => runApp(const NavigationApp());
+
+class NavigationApp extends StatelessWidget {
+  const NavigationApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: const HomeScreen(),
+      routes: {
+        '/second': (context) => const SecondScreen(),
+      },
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () async {
+                // Navigate and wait for result
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SecondScreen(),
+                  ),
+                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Result: \$result')),
+                  );
+                }
+              },
+              child: const Text('Go to Second Screen'),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/second');
+              },
+              child: const Text('Go to Second (Named)'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SecondScreen extends StatelessWidget {
+  const SecondScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Second Screen')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context, 'Data from second screen');
+          },
+          child: const Text('Go Back'),
+        ),
+      ),
+    );
+  }
+}''',
+            explanation: 'Shows navigation with data passing and named routes',
+          ),
+        ],
+      ),
+    ];
+  }
+
+  // Widget Reference Topics
+  static List<Topic> getWidgetReferenceTopics() {
+    return [
+      Topic(
+        id: 'widget_1',
+        categoryId: '3',
+        title: 'Text & RichText',
+        description: 'Display and style text in your app',
+        difficulty: 'beginner',
+        content: '''
+# Text & RichText Widgets
+
+Display styled text in Flutter applications.
+
+## Text Widget
+
+Basic text display:
+```dart
+Text(
+  'Hello Flutter',
+  style: TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Colors.blue,
+  ),
+)
+```
+
+## Text Styling
+
+```dart
+TextStyle(
+  fontSize: 20,
+  fontWeight: FontWeight.w600,
+  fontStyle: FontStyle.italic,
+  color: Colors.red,
+  backgroundColor: Colors.yellow,
+  letterSpacing: 2.0,
+  wordSpacing: 5.0,
+  decoration: TextDecoration.underline,
+  decorationColor: Colors.red,
+  decorationStyle: TextDecorationStyle.dashed,
+)
+```
+
+## Text Overflow
+
+Handle long text:
+```dart
+Text(
+  'Very long text...',
+  overflow: TextOverflow.ellipsis,
+  maxLines: 2,
+)
+```
+
+## RichText
+
+Multiple styles in one text:
+```dart
+RichText(
+  text: TextSpan(
+    text: 'Hello ',
+    style: TextStyle(color: Colors.black),
+    children: [
+      TextSpan(
+        text: 'Flutter',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.blue,
+        ),
+      ),
+    ],
+  ),
+)
+```
+
+## Text.rich
+
+Simpler alternative:
+```dart
+Text.rich(
+  TextSpan(
+    children: [
+      TextSpan(text: 'Normal '),
+      TextSpan(
+        text: 'Bold',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ],
+  ),
+)
+```
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Text Styling Examples',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class TextDemo extends StatelessWidget {
+  const TextDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Text Widgets')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Basic text
+            const Text(
+              'Basic Text',
+              style: TextStyle(fontSize: 24),
+            ),
+            const SizedBox(height: 20),
+            
+            // Styled text
+            const Text(
+              'Styled Text',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Text with overflow
+            const Text(
+              'This is a very long text that will overflow and show ellipsis',
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+            const SizedBox(height: 20),
+            
+            // RichText
+            RichText(
+              text: const TextSpan(
+                text: 'Regular ',
+                style: TextStyle(color: Colors.black, fontSize: 18),
+                children: [
+                  TextSpan(
+                    text: 'Bold ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: 'Italic',
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}''',
+            explanation: 'Various text styling and RichText examples',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'widget_2',
+        categoryId: '3',
+        title: 'Button Widgets',
+        description: 'ElevatedButton, TextButton, IconButton, etc.',
+        difficulty: 'beginner',
+        content: '''
+# Button Widgets
+
+Flutter provides various button types for user interactions.
+
+## ElevatedButton
+
+Material Design raised button:
+```dart
+ElevatedButton(
+  onPressed: () {
+    print('Pressed');
+  },
+  child: const Text('Click Me'),
+)
+```
+
+## TextButton
+
+Flat button without elevation:
+```dart
+TextButton(
+  onPressed: () {},
+  child: const Text('Text Button'),
+)
+```
+
+## OutlinedButton
+
+Button with an outline:
+```dart
+OutlinedButton(
+  onPressed: () {},
+  child: const Text('Outlined'),
+)
+```
+
+## IconButton
+
+Button with an icon:
+```dart
+IconButton(
+  icon: const Icon(Icons.favorite),
+  onPressed: () {},
+)
+```
+
+## FloatingActionButton
+
+Circular button:
+```dart
+FloatingActionButton(
+  onPressed: () {},
+  child: const Icon(Icons.add),
+)
+```
+
+## Button Styling
+
+```dart
+ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.blue,
+    foregroundColor: Colors.white,
+    padding: const EdgeInsets.symmetric(
+      horizontal: 32,
+      vertical: 16,
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+  ),
+  onPressed: () {},
+  child: const Text('Styled Button'),
+)
+```
+
+## Button with Icon
+
+```dart
+ElevatedButton.icon(
+  onPressed: () {},
+  icon: const Icon(Icons.send),
+  label: const Text('Send'),
+)
+```
+
+## Disabled State
+
+Set onPressed to null:
+```dart
+ElevatedButton(
+  onPressed: null,  // Disabled
+  child: const Text('Disabled'),
+)
+```
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Button Types',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class ButtonDemo extends StatelessWidget {
+  const ButtonDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Button Widgets')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // ElevatedButton
+              ElevatedButton(
+                onPressed: () {},
+                child: const Text('Elevated Button'),
+              ),
+              const SizedBox(height: 10),
+              
+              // TextButton
+              TextButton(
+                onPressed: () {},
+                child: const Text('Text Button'),
+              ),
+              const SizedBox(height: 10),
+              
+              // OutlinedButton
+              OutlinedButton(
+                onPressed: () {},
+                child: const Text('Outlined Button'),
+              ),
+              const SizedBox(height: 10),
+              
+              // Styled button
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 20,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                onPressed: () {},
+                child: const Text('Styled Button'),
+              ),
+              const SizedBox(height: 10),
+              
+              // Button with icon
+              ElevatedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.send),
+                label: const Text('Send Message'),
+              ),
+              const SizedBox(height: 10),
+              
+              // IconButton
+              IconButton(
+                icon: const Icon(Icons.favorite),
+                color: Colors.red,
+                iconSize: 40,
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}''',
+            explanation: 'Demonstrates all button types with styling',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'widget_3',
+        categoryId: '3',
+        title: 'Image Widget',
+        description: 'Display images from various sources',
+        difficulty: 'beginner',
+        content: '''
+# Image Widget
+
+Display images in your Flutter app.
+
+## Image Sources
+
+### From Assets
+```dart
+Image.asset('assets/images/logo.png')
+```
+
+### From Network
+```dart
+Image.network('https://example.com/image.jpg')
+```
+
+### From File
+```dart
+Image.file(File('/path/to/image.jpg'))
+```
+
+### From Memory
+```dart
+Image.memory(bytes)
+```
+
+## Image Properties
+
+```dart
+Image.network(
+  'https://example.com/image.jpg',
+  width: 200,
+  height: 200,
+  fit: BoxFit.cover,
+  alignment: Alignment.center,
+  loadingBuilder: (context, child, loadingProgress) {
+    if (loadingProgress == null) return child;
+    return CircularProgressIndicator();
+  },
+  errorBuilder: (context, error, stackTrace) {
+    return Icon(Icons.error);
+  },
+)
+```
+
+## BoxFit Options
+
+- `fill`: Stretch to fill
+- `contain`: Fit within bounds
+- `cover`: Fill bounds, may crop
+- `fitWidth`: Fit width, may overflow height
+- `fitHeight`: Fit height, may overflow width
+- `none`: No scaling
+- `scaleDown`: Same as contain but won't scale up
+
+## CircleAvatar
+
+Display circular images:
+```dart
+CircleAvatar(
+  radius: 50,
+  backgroundImage: NetworkImage('https://...'),
+)
+```
+
+## ClipRRect
+
+Rounded corners:
+```dart
+ClipRRect(
+  borderRadius: BorderRadius.circular(12),
+  child: Image.network('https://...'),
+)
+```
+
+## FadeInImage
+
+Placeholder while loading:
+```dart
+FadeInImage.assetNetwork(
+  placeholder: 'assets/loading.gif',
+  image: 'https://...',
+)
+```
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Image Examples',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class ImageDemo extends StatelessWidget {
+  const ImageDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Image Widget')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // Network image with loading
+            Image.network(
+              'https://picsum.photos/400/300',
+              width: 300,
+              height: 200,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return SizedBox(
+                  width: 300,
+                  height: 200,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            
+            // Rounded image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.network(
+                'https://picsum.photos/400/300?random=1',
+                width: 300,
+                height: 200,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Circle avatar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  backgroundImage: NetworkImage(
+                    'https://i.pravatar.cc/150?img=1',
+                  ),
+                ),
+                CircleAvatar(
+                  radius: 40,
+                  backgroundImage: NetworkImage(
+                    'https://i.pravatar.cc/150?img=2',
+                  ),
+                ),
+                CircleAvatar(
+                  radius: 40,
+                  backgroundImage: NetworkImage(
+                    'https://i.pravatar.cc/150?img=3',
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}''',
+            explanation: 'Shows network images, loading states, and circular avatars',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'widget_4',
+        categoryId: '3',
+        title: 'TextField & Form Widgets',
+        description: 'Input fields and form validation',
+        difficulty: 'intermediate',
+        content: '''
+# TextField & Form Widgets
+
+Collect user input with text fields and forms.
+
+## TextField
+
+Basic text input:
+```dart
+TextField(
+  decoration: InputDecoration(
+    labelText: 'Name',
+    hintText: 'Enter your name',
+    prefixIcon: Icon(Icons.person),
+    border: OutlineInputBorder(),
+  ),
+  onChanged: (value) {
+    print(value);
+  },
+)
+```
+
+## TextFormField
+
+TextField with validation:
+```dart
+TextFormField(
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter some text';
+    }
+    return null;
+  },
+)
+```
+
+## Form Widget
+
+Wrap fields for validation:
+```dart
+Form(
+  key: _formKey,
+  child: Column(
+    children: [
+      TextFormField(...),
+      ElevatedButton(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            // Process data
+          }
+        },
+        child: Text('Submit'),
+      ),
+    ],
+  ),
+)
+```
+
+## Input Decoration
+
+Style text fields:
+```dart
+InputDecoration(
+  labelText: 'Email',
+  hintText: 'your@email.com',
+  helperText: 'Enter a valid email',
+  errorText: 'Invalid email',
+  prefixIcon: Icon(Icons.email),
+  suffixIcon: Icon(Icons.check),
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
+  filled: true,
+  fillColor: Colors.grey[200],
+)
+```
+
+## TextEditingController
+
+Control text field:
+```dart
+final controller = TextEditingController();
+
+TextField(
+  controller: controller,
+)
+
+// Get value
+print(controller.text);
+
+// Set value
+controller.text = 'New value';
+
+// Dispose
+controller.dispose();
+```
+
+## Keyboard Types
+
+```dart
+TextField(
+  keyboardType: TextInputType.emailAddress,
+  // Other types: number, phone, url, multiline
+)
+```
+
+## Input Actions
+
+```dart
+TextField(
+  textInputAction: TextInputAction.next,
+  onSubmitted: (value) {
+    // Handle submission
+  },
+)
+```
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Form Example',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class FormDemo extends StatefulWidget {
+  const FormDemo({super.key});
+
+  @override
+  State<FormDemo> createState() => _FormDemoState();
+}
+
+class _FormDemoState extends State<FormDemo> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Form Widgets')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  hintText: 'Enter your name',
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  hintText: 'your@email.com',
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Please enter a valid email';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Processing Data')),
+                    );
+                  }
+                },
+                child: const Text('Submit'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}''',
+            explanation: 'Complete form with validation and controllers',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'widget_5',
+        categoryId: '3',
+        title: 'Card & ListTile',
+        description: 'Material design cards and list items',
+        difficulty: 'beginner',
+        content: '''
+# Card & ListTile Widgets
+
+Create material design cards and list items.
+
+## Card
+
+Material design card:
+```dart
+Card(
+  elevation: 4,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: Padding(
+    padding: EdgeInsets.all(16),
+    child: Text('Card Content'),
+  ),
+)
+```
+
+## Card Properties
+
+```dart
+Card(
+  elevation: 8,
+  shadowColor: Colors.blue,
+  color: Colors.white,
+  margin: EdgeInsets.all(10),
+  clipBehavior: Clip.antiAlias,
+  child: ...,
+)
+```
+
+## ListTile
+
+Pre-built list item:
+```dart
+ListTile(
+  leading: Icon(Icons.person),
+  title: Text('John Doe'),
+  subtitle: Text('Developer'),
+  trailing: Icon(Icons.arrow_forward),
+  onTap: () {},
+)
+```
+
+## ListTile Properties
+
+```dart
+ListTile(
+  leading: CircleAvatar(
+    backgroundImage: NetworkImage('...'),
+  ),
+  title: Text('Title'),
+  subtitle: Text('Subtitle'),
+  trailing: Icon(Icons.more_vert),
+  isThreeLine: true,
+  dense: true,
+  enabled: true,
+  selected: false,
+  onTap: () {},
+  onLongPress: () {},
+)
+```
+
+## Card with ListTile
+
+Common pattern:
+```dart
+Card(
+  child: ListTile(
+    leading: Icon(Icons.album),
+    title: Text('Song Name'),
+    subtitle: Text('Artist Name'),
+    trailing: Icon(Icons.play_arrow),
+    onTap: () {},
+  ),
+)
+```
+
+## Styled Card
+
+```dart
+Card(
+  elevation: 4,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(15),
+    side: BorderSide(
+      color: Colors.blue,
+      width: 2,
+    ),
+  ),
+  child: ...,
+)
+```
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Card & ListTile Examples',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class CardDemo extends StatelessWidget {
+  const CardDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Card & ListTile')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Simple card
+          Card(
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Simple Card',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('This is a simple card with some content.'),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Card with ListTile
+          Card(
+            child: ListTile(
+              leading: const CircleAvatar(
+                child: Icon(Icons.person),
+              ),
+              title: const Text('John Doe'),
+              subtitle: const Text('Flutter Developer'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {},
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Styled card
+          Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            color: Colors.blue[50],
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Icon(Icons.info, size: 40, color: Colors.blue[700]),
+                  const SizedBox(width: 16),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Information',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text('This is an informational card.'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}''',
+            explanation: 'Shows various card and list tile styles',
+          ),
+        ],
+      ),
+    ];
+  }
+
+  // UI Examples Topics
+  static List<Topic> getUIExamplesTopics() {
+    return [
+      Topic(
+        id: 'ui_1',
+        categoryId: '4',
+        title: 'Login Screen UI',
+        description: 'Beautiful login screen with form validation',
+        difficulty: 'beginner',
+        content: '''
+# Login Screen UI
+
+Create a modern login screen with form validation.
+
+## Features
+
+- Email and password fields
+- Form validation
+- Password visibility toggle
+- Responsive layout
+- Loading state
+- Error handling
+
+## Key Components
+
+### TextField with Validation
+```dart
+TextFormField(
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter email';
+    }
+    if (!value.contains('@')) {
+      return 'Please enter valid email';
+    }
+    return null;
+  },
+)
+```
+
+### Password Field
+```dart
+TextFormField(
+  obscureText: !_passwordVisible,
+  decoration: InputDecoration(
+    suffixIcon: IconButton(
+      icon: Icon(
+        _passwordVisible
+            ? Icons.visibility
+            : Icons.visibility_off,
+      ),
+      onPressed: () {
+        setState(() {
+          _passwordVisible = !_passwordVisible;
+        });
+      },
+    ),
+  ),
+)
+```
+
+### Submit Button with Loading
+```dart
+ElevatedButton(
+  onPressed: _isLoading ? null : _handleLogin,
+  child: _isLoading
+      ? CircularProgressIndicator()
+      : Text('Login'),
+)
+```
+
+## Design Tips
+
+- Use consistent spacing
+- Add subtle shadows
+- Consider dark mode
+- Make buttons full-width on mobile
+- Add social login options
+- Include "Forgot Password?" link
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Complete Login Screen',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _passwordVisible = false;
+  bool _isLoading = false;
+
+  Future<void> _handleLogin() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      
+      // Simulate API call
+      await Future.delayed(const Duration(seconds: 2));
+      
+      setState(() => _isLoading = false);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login successful!')),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo
+                  Icon(
+                    Icons.flutter_dash,
+                    size: 80,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(height: 48),
+                  
+                  // Title
+                  Text(
+                    'Welcome Back',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Login to your account',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 48),
+                  
+                  // Email Field
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email_outlined),
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Password Field
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: !_passwordVisible,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outlined),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _passwordVisible = !_passwordVisible;
+                          });
+                        },
+                      ),
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  
+                  // Forgot Password
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {},
+                      child: const Text('Forgot Password?'),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Login Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleLogin,
+                      child: _isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text('Login'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Sign Up Link
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account?"),
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text('Sign Up'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}''',
+            explanation: 'Complete login screen with validation and loading states',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'ui_2',
+        categoryId: '4',
+        title: 'Profile Screen',
+        description: 'User profile with editable fields and avatar',
+        difficulty: 'intermediate',
+        content: '''
+# Profile Screen UI
+
+Create a user profile screen with editable information.
+
+## Features
+
+- Profile avatar
+- User information display
+- Editable fields
+- Statistics cards
+- Action buttons
+- Settings options
+
+## Layout Structure
+
+```
+SafeArea
+└── SingleChildScrollView
+    ├── Profile Header (Avatar + Name)
+    ├── Statistics Row
+    ├── Info Cards
+    └── Action Buttons
+```
+
+## Profile Header
+
+```dart
+Column(
+  children: [
+    CircleAvatar(
+      radius: 50,
+      backgroundImage: NetworkImage(userImage),
+    ),
+    SizedBox(height: 16),
+    Text(userName, style: titleStyle),
+    Text(userEmail, style: subtitleStyle),
+  ],
+)
+```
+
+## Statistics Cards
+
+```dart
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  children: [
+    _StatCard(title: 'Posts', value: '42'),
+    _StatCard(title: 'Followers', value: '1.2K'),
+    _StatCard(title: 'Following', value: '456'),
+  ],
+)
+```
+
+## Design Considerations
+
+- Use Cards for grouped information
+- Add proper spacing between sections
+- Consider tablet/desktop layouts
+- Add pull-to-refresh
+- Implement edit mode
+- Show loading states
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Profile Screen Example',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header with Avatar
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+              ),
+              child: Column(
+                children: [
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage(
+                          'https://i.pravatar.cc/200',
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Theme.of(context).primaryColor,
+                          child: IconButton(
+                            icon: const Icon(Icons.camera_alt, size: 18),
+                            color: Colors.white,
+                            padding: EdgeInsets.zero,
+                            onPressed: () {},
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'John Doe',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'john.doe@example.com',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            
+            // Statistics
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildStatColumn('Posts', '42'),
+                  _buildStatColumn('Followers', '1.2K'),
+                  _buildStatColumn('Following', '456'),
+                ],
+              ),
+            ),
+            
+            // Info Cards
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildInfoCard(
+                    icon: Icons.phone,
+                    title: 'Phone',
+                    value: '+1 234 567 8900',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoCard(
+                    icon: Icons.location_on,
+                    title: 'Location',
+                    value: 'San Francisco, CA',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoCard(
+                    icon: Icons.cake,
+                    title: 'Birthday',
+                    value: 'January 1, 1990',
+                  ),
+                ],
+              ),
+            ),
+            
+            // Action Button
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('Edit Profile'),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatColumn(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Card(
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(title),
+        subtitle: Text(value),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {},
+      ),
+    );
+  }
+}''',
+            explanation: 'Complete profile screen with avatar, stats, and editable info',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'ui_3',
+        categoryId: '4',
+        title: 'Product Card Grid',
+        description: 'E-commerce product listing with grid layout',
+        difficulty: 'intermediate',
+        content: '''
+# Product Card Grid
+
+Create an e-commerce product listing screen.
+
+## Features
+
+- Grid layout
+- Product cards
+- Images with placeholders
+- Price and ratings
+- Add to cart button
+- Favorites toggle
+- Search and filters
+
+## GridView Setup
+
+```dart
+GridView.builder(
+  padding: const EdgeInsets.all(16),
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    childAspectRatio: 0.7,
+    crossAxisSpacing: 16,
+    mainAxisSpacing: 16,
+  ),
+  itemCount: products.length,
+  itemBuilder: (context, index) {
+    return ProductCard(product: products[index]);
+  },
+)
+```
+
+## Product Card Design
+
+```dart
+Card(
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Image
+      AspectRatio(
+        aspectRatio: 1,
+        child: Image.network(product.image, fit: BoxFit.cover),
+      ),
+      // Details
+      Padding(
+        child: Column(
+          children: [
+            Text(product.name),
+            Row(
+              children: [
+                Text('\$\${product.price}'),
+                Spacer(),
+                Icon(Icons.star),
+                Text(product.rating),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+)
+```
+
+## Best Practices
+
+- Use cached images
+- Implement lazy loading
+- Add shimmer loading effect
+- Handle empty states
+- Optimize for different screen sizes
+- Add pull-to-refresh
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Product Grid Example',
+            language: 'dart',
+            code: '''import 'package:flutter/material.dart';
+
+class ProductGridScreen extends StatelessWidget {
+  const ProductGridScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final products = List.generate(
+      20,
+      (i) => {
+        'id': i,
+        'name': 'Product \${i + 1}',
+        'price': (20 + i * 5).toString(),
+        'rating': '4.\${i % 10}',
+        'image': 'https://picsum.photos/200?random=\$i',
+      },
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Products'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.7,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return _ProductCard(product: product);
+        },
+      ),
+    );
+  }
+}
+
+class _ProductCard extends StatefulWidget {
+  final Map<String, dynamic> product;
+
+  const _ProductCard({required this.product});
+
+  @override
+  State<_ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<_ProductCard> {
+  bool isFavorite = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      elevation: 2,
+      child: InkWell(
+        onTap: () {},
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image with favorite button
+            Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: Image.network(
+                    widget.product['image'],
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image),
+                      );
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    radius: 18,
+                    child: IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: Colors.red,
+                        size: 18,
+                      ),
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        setState(() {
+                          isFavorite = !isFavorite;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
+            // Product details
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.product['name'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Text(
+                          '\\\$\${widget.product['price']}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.green,
+                          ),
+                        ),
+                        const Spacer(),
+                        const Icon(Icons.star, size: 16, color: Colors.amber),
+                        Text(widget.product['rating']),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}''',
+            explanation: 'Product grid with images, ratings, and favorite toggle',
+          ),
+        ],
+      ),
+    ];
+  }
 }
