@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/services/data_service.dart';
+import '../challenges/challenges_screen.dart';
 import '../dart_basics/dart_basics_screen.dart';
 import '../flutter_basics/flutter_basics_screen.dart';
+import '../interview/interview_screen.dart';
+import '../learning_path/learning_path_screen.dart';
 import '../settings/settings_screen.dart';
 import '../ui_examples/ui_examples_screen.dart';
 import '../widgets/widget_reference_screen.dart';
@@ -107,25 +110,34 @@ class _CategoryCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         onTap: () {
-          if (category.id == '1') {
-            // Navigate to Dart Basics
-            Get.to(() => const DartBasicsScreen());
-          } else if (category.id == '2') {
-            // Navigate to Flutter Basics
-            Get.to(() => const FlutterBasicsScreen());
-          } else if (category.id == '3') {
-            // Navigate to Widget Reference
-            Get.to(() => const WidgetReferenceScreen());
-          } else if (category.id == '4') {
-            // Navigate to UI Examples
-            Get.to(() => const UIExamplesScreen());
-          } else {
-            // TODO: Implement other categories
-            Get.snackbar(
-              'Coming Soon',
-              '${category.title} will be available soon!',
-              snackPosition: SnackPosition.BOTTOM,
-            );
+          switch (category.id) {
+            case '1':
+              Get.to(() => const DartBasicsScreen());
+              break;
+            case '2':
+              Get.to(() => const FlutterBasicsScreen());
+              break;
+            case '3':
+              Get.to(() => const WidgetReferenceScreen());
+              break;
+            case '4':
+              Get.to(() => const UIExamplesScreen());
+              break;
+            case '5':
+              Get.to(() => const InterviewScreen());
+              break;
+            case '6':
+              Get.to(() => const LearningPathScreen());
+              break;
+            case '7':
+              Get.to(() => const ChallengesScreen());
+              break;
+            default:
+              Get.snackbar(
+                'Coming Soon',
+                '${category.title} will be available soon!',
+                snackPosition: SnackPosition.BOTTOM,
+              );
           }
         },
         borderRadius: BorderRadius.circular(20),

@@ -2407,7 +2407,8 @@ class ImageDemo extends StatelessWidget {
     );
   }
 }''',
-            explanation: 'Shows network images, loading states, and circular avatars',
+            explanation:
+                'Shows network images, loading states, and circular avatars',
           ),
         ],
       ),
@@ -3078,7 +3079,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }''',
-            explanation: 'Complete login screen with validation and loading states',
+            explanation:
+                'Complete login screen with validation and loading states',
           ),
         ],
       ),
@@ -3317,7 +3319,8 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }''',
-            explanation: 'Complete profile screen with avatar, stats, and editable info',
+            explanation:
+                'Complete profile screen with avatar, stats, and editable info',
           ),
         ],
       ),
@@ -3560,10 +3563,1061 @@ class _ProductCardState extends State<_ProductCard> {
     );
   }
 }''',
-            explanation: 'Product grid with images, ratings, and favorite toggle',
+            explanation:
+                'Product grid with images, ratings, and favorite toggle',
           ),
         ],
       ),
     ];
   }
+
+  // Interview Q&A Topics
+  static List<Topic> getInterviewTopics() {
+    return [
+      Topic(
+        id: 'interview_1',
+        categoryId: '5',
+        title: 'What is Flutter and why use it?',
+        description: 'Fundamental understanding of Flutter',
+        difficulty: 'beginner',
+        content: '''
+# What is Flutter and why use it?
+
+## Answer:
+
+Flutter is Google's open-source UI toolkit for building natively compiled applications for mobile, web, and desktop from a single codebase.
+
+### Key Advantages:
+
+**1. Single Codebase**
+- Write once, deploy everywhere (iOS, Android, Web, Desktop)
+- Reduces development time and cost
+
+**2. Hot Reload**
+- See changes instantly without losing app state
+- Dramatically speeds up development
+
+**3. Rich Widget Library**
+- Pre-built Material Design and Cupertino widgets
+- Highly customizable
+
+**4. Native Performance**
+- Compiles to native ARM code
+- No JavaScript bridge (unlike React Native)
+- 60fps/120fps smooth animations
+
+**5. Growing Community**
+- Strong backing from Google
+- Large ecosystem of packages
+- Excellent documentation
+
+### When to Use Flutter:
+
+✅ Cross-platform mobile apps
+✅ MVPs and prototypes
+✅ Apps with custom UI
+✅ Performance-critical apps
+
+❌ Apps requiring heavy native integrations
+❌ Very platform-specific features
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'interview_2',
+        categoryId: '5',
+        title: 'StatelessWidget vs StatefulWidget',
+        description: 'Core difference between widget types',
+        difficulty: 'beginner',
+        content: '''
+# StatelessWidget vs StatefulWidget
+
+## StatelessWidget
+
+Immutable widget that doesn't change after being built.
+
+### When to Use:
+- Static content that doesn't change
+- UI depends only on constructor parameters
+- No user interaction that changes state
+
+### Example Use Cases:
+- Text labels
+- Icons
+- Static images
+- Structural layouts
+
+## StatefulWidget
+
+Mutable widget that can rebuild when state changes.
+
+### When to Use:
+- Interactive UI elements
+- Content that changes over time
+- User input handling
+- Animated widgets
+
+### Example Use Cases:
+- Forms with text fields
+- Checkboxes and switches
+- Counters
+- Lists that update
+
+## Key Interview Points:
+
+1. **Performance**: Stateless widgets are slightly more efficient
+2. **State Management**: Stateful widgets maintain State object
+3. **Lifecycle**: Stateful widgets have initState, dispose, etc.
+4. **Rebuilding**: Stateful widgets can call setState() to rebuild
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'StatelessWidget Example',
+            language: 'dart',
+            code: '''class Greeting extends StatelessWidget {
+  final String name;
+  
+  const Greeting({Key? key, required this.name}) : super(key: key);
+  
+  @override
+  Widget build(BuildContext context) {
+    return Text('Hello, \$name!');
+  }
+}''',
+            explanation: 'Simple immutable widget',
+          ),
+          CodeExample(
+            title: 'StatefulWidget Example',
+            language: 'dart',
+            code: '''class Counter extends StatefulWidget {
+  const Counter({Key? key}) : super(key: key);
+  
+  @override
+  State<Counter> createState() => _CounterState();
 }
+
+class _CounterState extends State<Counter> {
+  int count = 0;
+  
+  void _increment() {
+    setState(() {
+      count++;
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('Count: \$count'),
+        ElevatedButton(
+          onPressed: _increment,
+          child: Text('Increment'),
+        ),
+      ],
+    );
+  }
+}''',
+            explanation: 'Interactive widget with mutable state',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'interview_3',
+        categoryId: '5',
+        title: 'Explain Flutter Widget Tree',
+        description: 'Understanding the widget hierarchy',
+        difficulty: 'intermediate',
+        content: '''
+# Flutter Widget Tree
+
+Flutter uses three trees to manage UI:
+
+## 1. Widget Tree (Configuration)
+
+- Immutable descriptions of UI
+- Lightweight objects
+- Rebuilt frequently
+- Defines WHAT to display
+
+## 2. Element Tree (Lifecycle)
+
+- Manages widget lifecycle
+- Links Widget and RenderObject trees
+- Handles state
+- Represents WHERE widgets are in the tree
+
+## 3. RenderObject Tree (Rendering)
+
+- Handles layout and painting
+- Mutable and expensive
+- Updated only when necessary
+- Defines HOW to display
+
+## Widget Build Process:
+
+1. Widget created (immutable configuration)
+2. Element created (links widget to render object)
+3. RenderObject created (handles rendering)
+4. setState() called
+5. Widget rebuilt
+6. Element compares old/new widgets
+7. RenderObject updated if needed
+
+## Interview Points:
+
+- **Why three trees?** Separation of concerns - immutable config, mutable rendering
+- **Performance**: Element tree reuses RenderObjects when possible
+- **Keys**: Help Flutter identify which widgets changed
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'interview_4',
+        categoryId: '5',
+        title: 'What are Keys in Flutter?',
+        description: 'When and why to use keys',
+        difficulty: 'intermediate',
+        content: '''
+# Keys in Flutter
+
+Keys help Flutter identify which widgets in a list have changed, been added, or removed.
+
+## When to Use Keys:
+
+1. **Reorderable Lists**
+   - Drag-and-drop lists
+   - Animated list reordering
+
+2. **Preserving State**
+   - When widget order changes
+   - When removing/adding items
+
+3. **Form Fields**
+   - To preserve input state
+   - When rebuilding forms
+
+## Types of Keys:
+
+### ValueKey
+Based on a value (like ID):
+```dart
+ValueKey<int>(item.id)
+```
+
+### ObjectKey
+Based on object identity:
+```dart
+ObjectKey(item)
+```
+
+### UniqueKey
+Always unique (use sparingly):
+```dart
+UniqueKey()
+```
+
+### GlobalKey
+Access state across the tree:
+```dart
+final key = GlobalKey<FormState>();
+```
+
+## Common Interview Questions:
+
+**Q: When do you need keys?**
+A: When widgets of the same type need to be distinguished, especially in lists
+
+**Q: Local vs Global keys?**
+A: Local keys (ValueKey, ObjectKey) for list items. Global keys for accessing state from anywhere.
+
+**Q: Performance impact?**
+A: Minimal overhead, but don't overuse GlobalKey
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'List with Keys',
+            language: 'dart',
+            code: '''class TodoList extends StatefulWidget {
+  @override
+  _TodoListState createState() => _TodoListState();
+}
+
+class _TodoListState extends State<TodoList> {
+  List<Todo> todos = [
+    Todo(id: 1, title: 'Task 1'),
+    Todo(id: 2, title: 'Task 2'),
+  ];
+  
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: todos.length,
+      itemBuilder: (context, index) {
+        return TodoItem(
+          key: ValueKey(todos[index].id),
+          todo: todos[index],
+        );
+      },
+    );
+  }
+}''',
+            explanation: 'Using ValueKey to preserve widget state in lists',
+          ),
+        ],
+      ),
+      Topic(
+        id: 'interview_5',
+        categoryId: '5',
+        title: 'Explain setState() and when to use it',
+        description: 'State management fundamentals',
+        difficulty: 'beginner',
+        content: '''
+# setState() in Flutter
+
+Method to notify Flutter that internal state has changed and widget needs to rebuild.
+
+## How It Works:
+
+```dart
+setState(() {
+  _counter++;
+});
+```
+
+1. Marks widget as "dirty"
+2. Schedules rebuild
+3. build() method called again
+4. New widget tree created
+5. Flutter efficiently updates UI
+
+## Best Practices:
+
+### ✅ DO:
+- Keep setState() callbacks fast
+- Only update variables inside setState()
+- Use for simple local state
+
+### ❌ DON'T:
+- Call expensive operations inside setState()
+- Update state outside setState()
+- Use for complex app-wide state
+
+## Common Mistakes:
+
+**Mistake 1**: Updating without setState
+```dart
+// ❌ Wrong - won't rebuild
+_counter++;
+
+// ✅ Correct
+setState(() {
+  _counter++;
+});
+```
+
+**Mistake 2**: Async operations in setState
+```dart
+// ❌ Wrong
+setState(() async {
+  await fetchData(); // Don't await here
+});
+
+// ✅ Correct
+await fetchData();
+setState(() {
+  // Update state here
+});
+```
+
+## Interview Points:
+
+- **Purpose**: Triggers rebuild
+- **Scope**: Only rebuilds current widget
+- **Performance**: Flutter is smart about minimal rebuilds
+- **Alternatives**: Provider, Riverpod, BLoC for complex state
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'interview_6',
+        categoryId: '5',
+        title: 'Hot Reload vs Hot Restart',
+        description: 'Development workflow understanding',
+        difficulty: 'beginner',
+        content: '''
+# Hot Reload vs Hot Restart
+
+## Hot Reload (r key)
+
+Injects updated code into running Dart VM.
+
+### Characteristics:
+- ⚡ Fast (~1 second)
+- 🔄 Preserves app state
+- 🎯 Updates build() methods
+- ✅ Works with most code changes
+
+### When to Use:
+- UI changes
+- Widget modifications
+- Logic updates in build methods
+- Styling changes
+
+### Limitations:
+- Can't update: global variables, static fields, main() method
+- Can't change: app initialization, const values
+- May cause issues with: changed class constructors, state initialization
+
+## Hot Restart (R key or ⟳)
+
+Restarts app completely.
+
+### Characteristics:
+- ⏱️ Slower (~3-5 seconds)
+- 🔄 Resets all state
+- 🎯 Reinitializes everything
+- ✅ Guaranteed fresh start
+
+### When to Use:
+- Global state changes
+- Enum modifications
+- Adding/removing libraries
+- Changing app configuration
+- When hot reload doesn't work
+
+## Interview Quick Points:
+
+- **Hot Reload**: Fast, keeps state, UI changes
+- **Hot Restart**: Slower, resets everything, structural changes
+- **When to restart**: Global changes, initialization issues
+- **Productivity**: Hot reload makes Flutter development incredibly fast
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'interview_7',
+        categoryId: '5',
+        title: 'BuildContext - What is it?',
+        description: 'Understanding context in Flutter',
+        difficulty: 'intermediate',
+        content: '''
+# BuildContext in Flutter
+
+BuildContext is a reference to the location of a widget in the widget tree.
+
+## Key Points:
+
+### What is BuildContext?
+
+- Handle to the location of a widget
+- Access to ancestor widgets
+- Used for navigation, themes, media queries
+- Every widget has its own BuildContext
+
+### Common Uses:
+
+**1. Theme Access**
+```dart
+Theme.of(context)
+```
+
+**2. MediaQuery**
+```dart
+MediaQuery.of(context).size.width
+```
+
+**3. Navigator**
+```dart
+Navigator.of(context).push(...)
+```
+
+**4. Scaffold**
+```dart
+ScaffoldMessenger.of(context).showSnackBar(...)
+```
+
+## Common Pitfalls:
+
+### Async Gap
+
+```dart
+// ❌ Wrong - context might be invalid
+onPressed: () async {
+  await fetchData();
+  Navigator.of(context).push(...); // Context may be unmounted
+}
+
+// ✅ Correct - check mounted
+onPressed: () async {
+  await fetchData();
+  if (!mounted) return;
+  Navigator.of(context).push(...);
+}
+```
+
+### Wrong Context
+
+```dart
+// ❌ Wrong - Scaffold not ancestor
+Scaffold(
+  body: Builder(
+    builder: (context) {
+      return ElevatedButton(
+        onPressed: () {
+          Scaffold.of(context).showSnackBar(...); // Works!
+        },
+      );
+    },
+  ),
+);
+```
+
+## Interview Points:
+
+- **BuildContext**: Widget's location in tree
+- **of() methods**: Find ancestor widgets
+- **Context safety**: Check mounted in async operations
+- **Inherited widgets**: Accessed via context
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'interview_8',
+        categoryId: '5',
+        title: 'InheritedWidget explained',
+        description: 'Low-level state propagation',
+        difficulty: 'advanced',
+        content: '''
+# InheritedWidget
+
+Low-level mechanism to efficiently propagate data down the widget tree.
+
+## What is InheritedWidget?
+
+Base class for widgets that efficiently propagate information to descendants.
+
+### Key Features:
+
+- Data flows down the tree
+- Descendants can access data without passing through constructors
+- Automatic rebuild when data changes
+- Foundation for Provider, Theme, MediaQuery
+
+## How It Works:
+
+1. InheritedWidget stores data
+2. Descendants call `context.dependOnInheritedWidgetOfExactType<T>()`
+3. When data changes, only dependent widgets rebuild
+4. Efficient compared to passing data through constructors
+
+## Use Cases:
+
+- Theme data
+- Locale/translations
+- User authentication state
+- App configuration
+- State management libraries (Provider, Riverpod)
+
+## Interview Points:
+
+**Q: What is InheritedWidget?**
+A: Efficient way to pass data down widget tree without constructors
+
+**Q: When to use InheritedWidget?**
+A: When multiple widgets need access to the same data and it changes occasionally
+
+**Q: How does Provider use InheritedWidget?**
+A: Provider wraps InheritedWidget for simpler API and dependency injection
+
+**Q: Performance benefits?**
+A: Only widgets that depend on the data rebuild, not entire tree
+        ''',
+        codeExamples: [
+          CodeExample(
+            title: 'Simple InheritedWidget',
+            language: 'dart',
+            code: '''class AppTheme extends InheritedWidget {
+  final Color primaryColor;
+  
+  const AppTheme({
+    Key? key,
+    required this.primaryColor,
+    required Widget child,
+  }) : super(key: key, child: child);
+  
+  static AppTheme? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<AppTheme>();
+  }
+  
+  @override
+  bool updateShouldNotify(AppTheme oldWidget) {
+    return oldWidget.primaryColor != primaryColor;
+  }
+}
+
+// Usage:
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = AppTheme.of(context);
+    return Container(color: theme?.primaryColor);
+  }
+}''',
+            explanation: 'Basic InheritedWidget for theme data',
+          ),
+        ],
+      ),
+    ];
+  }
+
+  // Learning Path Topics
+  static List<Topic> getLearningPathTopics() {
+    return [
+      Topic(
+        id: 'path_1',
+        categoryId: '6',
+        title: 'Beginner: Foundations (Weeks 1-2)',
+        description: 'Start your Flutter journey',
+        difficulty: 'beginner',
+        content: '''
+# Beginner Phase: Foundations
+
+## Week 1: Dart Fundamentals
+
+### Day 1-2: Variables & Types
+- Dart basics
+- Variables declaration
+- Data types (int, double, String, bool)
+- Type inference with var
+- Null safety basics
+
+### Day 3-4: Functions & Control Flow
+- Function declaration
+- Parameters (positional, named, optional)
+- If-else statements
+- Switch cases
+- Loops (for, while, forEach)
+
+### Day 5-7: OOP Basics
+- Classes and objects
+- Constructors
+- Methods and properties
+- Basic inheritance
+
+## Week 2: Flutter Basics
+
+### Day 1-2: Your First App
+- Setup development environment
+- Create first app
+- Hot reload/restart
+- Understanding main.dart
+
+### Day 3-4: Basic Widgets
+- StatelessWidget
+- StatefulWidget
+- Text, Image, Icon
+- Container, Padding
+- Row, Column
+
+### Day 5-7: Layouts
+- Layout principles
+- Stack widget
+- Expanded and Flexible
+- ListView basics
+- Practice building simple UIs
+
+## Goals:
+✅ Understand Dart syntax
+✅ Build simple Flutter UIs
+✅ Use basic widgets confidently
+✅ Understand state management basics
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'path_2',
+        categoryId: '6',
+        title: 'Intermediate: Core Concepts (Weeks 3-6)',
+        description: 'Build real-world features',
+        difficulty: 'intermediate',
+        content: '''
+# Intermediate Phase: Core Concepts
+
+## Week 3-4: Navigation & State
+
+### Navigation
+- Navigator.push/pop
+- Named routes
+- Passing data between screens
+- Bottom navigation
+- Drawer navigation
+
+### State Management
+- setState() mastery
+- Lifting state up
+- Provider basics
+- State management patterns
+
+## Week 5-6: API & Data
+
+### Networking
+- HTTP requests
+- JSON parsing
+- async/await
+- FutureBuilder
+- Error handling
+
+### Local Storage
+- SharedPreferences
+- SQLite basics
+- File I/O
+- Caching strategies
+
+## Additional Topics:
+
+### Forms & Validation
+- TextField widget
+- Form widget
+- Input validation
+- User feedback
+
+### Lists & Performance
+- ListView.builder
+- GridView
+- Infinite scrolling
+- Performance optimization
+
+## Goals:
+✅ Build multi-screen apps
+✅ Fetch and display API data
+✅ Store data locally
+✅ Handle user input properly
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'path_3',
+        categoryId: '6',
+        title: 'Advanced: Professional Skills (Weeks 7-12)',
+        description: 'Master advanced techniques',
+        difficulty: 'advanced',
+        content: '''
+# Advanced Phase: Professional Skills
+
+## Week 7-8: Architecture & Patterns
+
+- Clean Architecture
+- MVVM pattern
+- Repository pattern
+- Dependency injection
+- Separation of concerns
+
+## Week 9-10: Advanced State Management
+
+- Provider deep dive
+- Riverpod
+- BLoC pattern
+- GetX (if needed)
+- State management comparison
+
+## Week 11-12: Production Ready
+
+### Testing
+- Unit tests
+- Widget tests
+- Integration tests
+- Test-driven development (TDD)
+
+### Deployment
+- App signing
+- Build configurations
+- App store submission (iOS/Android)
+- CI/CD basics
+
+### Performance
+- Profiling tools
+- Memory management
+- Rendering optimization
+- Build size optimization
+
+## Advanced Features:
+
+### Animations
+- Implicit animations
+- Explicit animations
+- Custom animations
+- Hero animations
+
+### Custom Widgets
+- CustomPainter
+- Custom layouts
+- Reusable components
+
+### Platform Integration
+- Platform channels
+- Native code integration
+- Platform-specific UI
+
+## Goals:
+✅ Build production-ready apps
+✅ Write testable code
+✅ Deploy to app stores
+✅ Handle complex state
+✅ Optimize performance
+        ''',
+        codeExamples: [],
+      ),
+    ];
+  }
+
+  // Code Challenges Topics
+  static List<Topic> getChallengesTopics() {
+    return [
+      Topic(
+        id: 'challenge_1',
+        categoryId: '7',
+        title: 'Counter App with Persistence',
+        description: 'Build a counter that saves state',
+        difficulty: 'beginner',
+        content: '''
+# Challenge: Counter App with Persistence
+
+## Objective
+Create a counter app that remembers its value even after app restart.
+
+## Requirements
+
+### Features:
+1. Display current count
+2. Increment button
+3. Decrement button
+4. Reset button
+5. Save count to SharedPreferences
+6. Load count on app start
+
+### Bonus:
+- Add custom increment value
+- Add history of counts
+- Beautiful UI with animations
+
+## Learning Goals:
+- StatefulWidget
+- setState()
+- SharedPreferences
+- async/await
+- initState() lifecycle
+
+## Hints:
+```dart
+// Save count
+final prefs = await SharedPreferences.getInstance();
+await prefs.setInt('counter', count);
+
+// Load count
+final prefs = await SharedPreferences.getInstance();
+final count = prefs.getInt('counter') ?? 0;
+```
+
+## Test Checklist:
+☐ Counter increments correctly
+☐ Counter decrements correctly
+☐ Reset button works
+☐ Count persists after app restart
+☐ No errors in console
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'challenge_2',
+        categoryId: '7',
+        title: 'Todo List with CRUD Operations',
+        description: 'Complete task management app',
+        difficulty: 'intermediate',
+        content: '''
+# Challenge: Todo List App
+
+## Objective
+Build a full-featured todo list application with local storage.
+
+## Requirements
+
+### Core Features:
+1. Add new todos
+2. Mark todos as complete
+3. Edit existing todos
+4. Delete todos
+5. Filter (All/Active/Completed)
+6. Persist data locally
+
+### UI Requirements:
+- List view of todos
+- Add button
+- Swipe to delete
+- Tap to edit
+- Checkbox to mark complete
+- Different styling for completed items
+
+### Bonus:
+- Categories/tags
+- Due dates
+- Search functionality
+- Statistics (total, completed, pending)
+
+## Technical Requirements:
+- State management (Provider or GetX)
+- SQLite or Hive for storage
+- Form validation
+- Confirm dialogs
+- Snackbar notifications
+
+## Test Cases:
+☐ Can add todo
+☐ Can mark as complete
+☐ Can edit todo
+☐ Can delete todo
+☐ Filters work correctly
+☐ Data persists
+☐ No memory leaks
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'challenge_3',
+        categoryId: '7',
+        title: 'Weather App with API Integration',
+        description: 'Fetch and display real-time weather data',
+        difficulty: 'intermediate',
+        content: '''
+# Challenge: Weather App
+
+## Objective
+Create a weather app that fetches real-time weather data from an API.
+
+## Requirements
+
+### Features:
+1. Search by city name
+2. Display current weather
+3. Show 5-day forecast
+4. Temperature unit toggle (C/F)
+5. Refresh functionality
+6. Error handling
+
+### Data to Display:
+- Temperature
+- Weather condition (sunny, rainy, etc.)
+- Humidity
+- Wind speed
+- Weather icon
+- City name
+
+### API Suggestion:
+Use OpenWeatherMap API (free tier)
+- Sign up for API key
+- Read documentation
+- Handle rate limits
+
+## Technical Requirements:
+- HTTP requests (dio or http package)
+- JSON parsing
+- FutureBuilder or StreamBuilder
+- Loading states
+- Error states
+- Offline handling
+
+## Bonus:
+- Location permission
+- Auto-detect location
+- Save favorite cities
+- Beautiful animations
+- Dark mode support
+
+## Test Scenarios:
+☐ Valid city shows weather
+☐ Invalid city shows error
+☐ Loading state visible
+☐ Data updates on refresh
+☐ No app crashes
+☐ Offline message displayed
+        ''',
+        codeExamples: [],
+      ),
+      Topic(
+        id: 'challenge_4',
+        categoryId: '7',
+        title: 'Chat UI Clone',
+        description: 'Replicate a messaging app interface',
+        difficulty: 'advanced',
+        content: '''
+# Challenge: Chat UI Clone
+
+## Objective
+Build a WhatsApp or Telegram-like chat interface (UI only, no backend).
+
+## Requirements
+
+### Screens:
+1. **Chat List Screen**
+   - List of conversations
+   - Profile pictures
+   - Last message preview
+   - Timestamp
+   - Unread badge
+
+2. **Chat Screen**
+   - Message bubbles (sent/received)
+   - Timestamps
+   - Message input field
+   - Send button
+   - Scroll to bottom
+
+### UI Requirements:
+- Different colors for sent/received
+- Rounded bubbles
+- Profile images
+- Time stamps
+- Input field at bottom
+- Smooth animations
+- Keyboard handling
+
+### Bonus Features:
+- Image messages
+- Audio messages
+- Emoji picker
+- Reply functionality
+- Message reactions
+- Swipe gestures
+- Search messages
+
+## Technical Challenges:
+- Reverse ListView
+- Keyboard overlap handling
+- Scroll controller
+- Custom message bubbles
+- Date separators
+- Performance with many messages
+
+## Mock Data:
+Create dummy messages with:
+- Sender
+- Content
+- Timestamp
+- Read status
+- Message type
+
+## Evaluation Criteria:
+☐ Clean, modern UI
+☐ Smooth scrolling
+☐ Responsive layout
+☐ Proper keyboard handling
+☐ No performance issues
+☐ Pixel-perfect design
+        ''',
+        codeExamples: [],
+      ),
+    ];
+  }
+}
+
+
