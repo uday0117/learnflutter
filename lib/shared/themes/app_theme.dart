@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors
-  static const Color primaryColor = Color(0xFF02569B);
-  static const Color secondaryColor = Color(0xFF13B9FD);
-  static const Color accentColor = Color(0xFF54C5F8);
+  // Default Flutter blue
+  static const Color defaultPrimaryColor = Color(0xFF02569B);
 
-  static final ThemeData lightTheme = ThemeData(
+  static ThemeData lightTheme(Color primaryColor) => ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: ColorScheme.fromSeed(
@@ -30,7 +28,7 @@ class AppTheme {
     ),
   );
 
-  static final ThemeData darkTheme = ThemeData(
+  static ThemeData darkTheme(Color primaryColor) => ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: ColorScheme.fromSeed(

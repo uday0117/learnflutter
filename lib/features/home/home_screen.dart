@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../core/services/data_service.dart';
 import '../dart_basics/dart_basics_screen.dart';
+import '../settings/settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -9,7 +11,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categories = AppData.getCategories();
-    
+
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
@@ -27,9 +29,8 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Text(
                         'LearnFlutter',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -57,9 +58,15 @@ class HomeScreen extends StatelessWidget {
                     Get.snackbar('Coming Soon', 'Favorites feature');
                   },
                 ),
+                IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  onPressed: () {
+                    Get.to(() => const SettingsScreen());
+                  },
+                ),
               ],
             ),
-            
+
             // Category Grid
             SliverPadding(
               padding: const EdgeInsets.all(20.0),
@@ -70,13 +77,10 @@ class HomeScreen extends StatelessWidget {
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final category = categories[index];
-                    return _CategoryCard(category: category);
-                  },
-                  childCount: categories.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final category = categories[index];
+                  return _CategoryCard(category: category);
+                }, childCount: categories.length),
               ),
             ),
           ],
@@ -88,18 +92,16 @@ class HomeScreen extends StatelessWidget {
 
 class _CategoryCard extends StatelessWidget {
   final category;
-  
+
   const _CategoryCard({required this.category});
 
   @override
   Widget build(BuildContext context) {
     final color = _parseColor(category.color);
-    
+
     return Card(
       elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         onTap: () {
           if (category.id == '1') {
@@ -122,10 +124,7 @@ class _CategoryCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                color.withOpacity(0.1),
-                color.withOpacity(0.05),
-              ],
+              colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
             ),
           ),
           child: Column(
@@ -147,9 +146,9 @@ class _CategoryCard extends StatelessWidget {
               // Title
               Text(
                 category.title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -157,9 +156,9 @@ class _CategoryCard extends StatelessWidget {
               // Description
               Text(
                 category.description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -169,7 +168,7 @@ class _CategoryCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Color _parseColor(String hex) {
     return Color(int.parse(hex.substring(1, 7), radix: 16) + 0xFF000000);
   }

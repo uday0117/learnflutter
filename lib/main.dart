@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'shared/themes/app_theme.dart';
-import 'features/home/home_screen.dart';
+import 'package:get_storage/get_storage.dart';
 
-void main() {
+import 'core/controllers/theme_controller.dart';
+import 'features/home/home_screen.dart';
+import 'shared/themes/app_theme.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
+  Get.put(ThemeController());
   runApp(const LearnFlutterApp());
 }
 
@@ -12,13 +18,15 @@ class LearnFlutterApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    final themeController = Get.find<ThemeController>();
+    
+    return Obx(() => GetMaterialApp(
       title: 'LearnFlutter',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      theme: AppTheme.lightTheme(themeController.primaryColor.value),
+      darkTheme: AppTheme.darkTheme(themeController.primaryColor.value),
+      themeMode: themeController.themeMode.value,
       home: const HomeScreen(),
-    );
+    ));
   }
 }

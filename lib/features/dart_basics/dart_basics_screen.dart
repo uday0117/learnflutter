@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
 import '../../core/services/data_service.dart';
 
 class DartBasicsScreen extends StatelessWidget {
@@ -9,11 +10,9 @@ class DartBasicsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final topics = AppData.getDartBasicsTopics();
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('🎯 Dart Basics'),
-      ),
+      appBar: AppBar(title: const Text('🎯 Dart Basics')),
       body: ListView.builder(
         padding: const EdgeInsets.all(20),
         itemCount: topics.length,
@@ -28,13 +27,13 @@ class DartBasicsScreen extends StatelessWidget {
 
 class _TopicCard extends StatelessWidget {
   final topic;
-  
+
   const _TopicCard({required this.topic});
 
   @override
   Widget build(BuildContext context) {
     final difficultyColor = _getDifficultyColor(topic.difficulty);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
@@ -58,7 +57,10 @@ class _TopicCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: difficultyColor.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
@@ -77,9 +79,9 @@ class _TopicCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 topic.description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               ),
             ],
           ),
@@ -87,7 +89,7 @@ class _TopicCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Color _getDifficultyColor(String difficulty) {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
@@ -104,7 +106,7 @@ class _TopicCard extends StatelessWidget {
 
 class TopicDetailScreen extends StatelessWidget {
   final topic;
-  
+
   const TopicDetailScreen({super.key, required this.topic});
 
   @override
@@ -130,12 +132,9 @@ class TopicDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Content
-            Text(
-              topic.content,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            Text(topic.content, style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 30),
-            
+
             // Code Examples
             if (topic.codeExamples.isNotEmpty) ...[
               Text(
@@ -145,7 +144,9 @@ class TopicDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              ...topic.codeExamples.map((example) => _CodeExampleCard(example: example)),
+              ...topic.codeExamples.map(
+                (example) => _CodeExampleCard(example: example),
+              ),
             ],
           ],
         ),
@@ -156,7 +157,7 @@ class TopicDetailScreen extends StatelessWidget {
 
 class _CodeExampleCard extends StatelessWidget {
   final example;
-  
+
   const _CodeExampleCard({required this.example});
 
   @override
@@ -222,10 +223,7 @@ class _CodeExampleCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Text(
                 example.explanation!,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
             ),
         ],

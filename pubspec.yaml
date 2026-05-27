@@ -42,6 +42,7 @@ dependencies:
   # UI & Styling
   google_fonts: ^6.1.0
   flutter_syntax_view: ^4.0.0
+  flex_color_picker: ^3.5.2
   
   # Utilities
   flutter_svg: ^2.0.9
