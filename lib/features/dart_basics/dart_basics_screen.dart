@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:get/get.dart';
 
+import '../../core/controllers/favorites_controller.dart';
 import '../../core/services/data_service.dart';
 
 class DartBasicsScreen extends StatelessWidget {
@@ -111,18 +113,24 @@ class TopicDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final FavoritesController favController = Get.find();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(topic.title),
         actions: [
-          IconButton(
-            icon: Icon(
-              topic.isFavorite ? Icons.favorite : Icons.favorite_border,
+          Obx(
+            () => IconButton(
+              icon: Icon(
+                favController.isFavorite(topic.id)
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: favController.isFavorite(topic.id) ? Colors.red : null,
+              ),
+              onPressed: () {
+                favController.toggleFavorite(topic.id);
+              },
             ),
-            onPressed: () {
-              // TODO: Toggle favorite
-              Get.snackbar('Favorite', 'Feature coming soon!');
-            },
           ),
         ],
       ),
@@ -208,13 +216,13 @@ class _CodeExampleCard extends StatelessWidget {
                 bottomRight: Radius.circular(12),
               ),
             ),
-            child: Text(
-              example.code,
-              style: const TextStyle(
-                color: Colors.greenAccent,
-                fontFamily: 'monospace',
-                fontSize: 14,
-              ),
+            child: SyntaxView(
+              code: example.code,
+              syntax: Syntax.DART,
+              syntaxTheme: SyntaxTheme.vscodeDark(),
+              fontSize: 14.0,
+              withZoom: false,
+              withLinesCount: true,
             ),
           ),
           // Explanation

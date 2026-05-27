@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'core/controllers/favorites_controller.dart';
 import 'core/controllers/theme_controller.dart';
 import 'features/home/home_screen.dart';
 import 'shared/themes/app_theme.dart';
@@ -10,6 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   Get.put(ThemeController());
+  Get.put(FavoritesController());
   runApp(const LearnFlutterApp());
 }
 

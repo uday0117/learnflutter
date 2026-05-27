@@ -4,9 +4,11 @@ import 'package:get/get.dart';
 import '../../core/services/data_service.dart';
 import '../challenges/challenges_screen.dart';
 import '../dart_basics/dart_basics_screen.dart';
+import '../favorites/favorites_screen.dart';
 import '../flutter_basics/flutter_basics_screen.dart';
 import '../interview/interview_screen.dart';
 import '../learning_path/learning_path_screen.dart';
+import '../search/search_screen.dart';
 import '../settings/settings_screen.dart';
 import '../ui_examples/ui_examples_screen.dart';
 import '../widgets/widget_reference_screen.dart';
@@ -53,15 +55,13 @@ class HomeScreen extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () {
-                    // TODO: Implement search
-                    Get.snackbar('Coming Soon', 'Search feature');
+                    Get.to(() => const SearchScreen());
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.favorite_outline),
                   onPressed: () {
-                    // TODO: Implement favorites
-                    Get.snackbar('Coming Soon', 'Favorites feature');
+                    Get.to(() => const FavoritesScreen());
                   },
                 ),
                 IconButton(
