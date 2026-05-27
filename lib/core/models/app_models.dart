@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Category {
   final String id;
   final String title;
@@ -49,5 +51,45 @@ class CodeExample {
     required this.code,
     required this.language,
     this.explanation,
+  });
+}
+
+class WidgetParameter {
+  final String name;
+  final String type;
+  final String description;
+  final bool isRequired;
+  final String? defaultValue;
+
+  WidgetParameter({
+    required this.name,
+    required this.type,
+    required this.description,
+    this.isRequired = false,
+    this.defaultValue,
+  });
+}
+
+class WidgetReference {
+  final String id;
+  final String name;
+  final String category; // Layout, Input, Display, etc.
+  final String description;
+  final String syntax;
+  final List<WidgetParameter> parameters;
+  final String codeExample;
+  final Widget Function() previewBuilder;
+  bool isFavorite;
+
+  WidgetReference({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.description,
+    required this.syntax,
+    required this.parameters,
+    required this.codeExample,
+    required this.previewBuilder,
+    this.isFavorite = false,
   });
 }

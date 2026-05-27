@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../models/app_models.dart';
 
 class AppData {
@@ -58,6 +60,646 @@ class AppData {
         icon: '⚡',
         color: '#FF6F00',
         route: '/challenges',
+      ),
+    ];
+  }
+
+  // Widget References - Complete widget documentation with live previews
+  static List<WidgetReference> getWidgetReferences() {
+    return [
+      // Container Widget
+      WidgetReference(
+        id: 'container',
+        name: 'Container',
+        category: 'Layout',
+        description:
+            'A convenience widget that combines common painting, positioning, and sizing widgets. Container is one of the most commonly used widgets in Flutter.',
+        syntax: '''Container(
+  width: double?,
+  height: double?,
+  padding: EdgeInsets?,
+  margin: EdgeInsets?,
+  color: Color?,
+  decoration: BoxDecoration?,
+  child: Widget?,
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'width',
+            type: 'double?',
+            description: 'The width of the container',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'height',
+            type: 'double?',
+            description: 'The height of the container',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'padding',
+            type: 'EdgeInsets?',
+            description: 'Empty space to inscribe inside the decoration',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'margin',
+            type: 'EdgeInsets?',
+            description: 'Empty space to surround the decoration and child',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'color',
+            type: 'Color?',
+            description:
+                'The color to paint behind the child (cannot be used with decoration)',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'decoration',
+            type: 'BoxDecoration?',
+            description:
+                'The decoration to paint behind the child (cannot be used with color)',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'child',
+            type: 'Widget?',
+            description: 'The child contained by the container',
+            isRequired: false,
+          ),
+        ],
+        codeExample: '''Container(
+  width: 100,
+  height: 100,
+  decoration: BoxDecoration(
+    color: Colors.blue,
+    borderRadius: BorderRadius.circular(10),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black26,
+        blurRadius: 8,
+        offset: Offset(2, 2),
+      ),
+    ],
+  ),
+  child: Center(
+    child: Text(
+      'Hello',
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+)''',
+        previewBuilder: () => Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 8,
+                offset: Offset(2, 2),
+              ),
+            ],
+          ),
+          child: const Center(
+            child: Text(
+              'Hello',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+
+      // Text Widget
+      WidgetReference(
+        id: 'text',
+        name: 'Text',
+        category: 'Display',
+        description:
+            'A widget that displays a string of text with a single style. Text is one of the fundamental widgets for displaying content.',
+        syntax: '''Text(
+  String data,
+  {
+    TextStyle? style,
+    TextAlign? textAlign,
+    int? maxLines,
+    TextOverflow? overflow,
+  }
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'data',
+            type: 'String',
+            description: 'The text to display',
+            isRequired: true,
+          ),
+          WidgetParameter(
+            name: 'style',
+            type: 'TextStyle?',
+            description: 'The style to apply to the text',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'textAlign',
+            type: 'TextAlign?',
+            description: 'How the text should be aligned horizontally',
+            isRequired: false,
+            defaultValue: 'TextAlign.start',
+          ),
+          WidgetParameter(
+            name: 'maxLines',
+            type: 'int?',
+            description: 'Maximum number of lines for the text to span',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'overflow',
+            type: 'TextOverflow?',
+            description: 'How visual overflow should be handled',
+            isRequired: false,
+          ),
+        ],
+        codeExample: '''Text(
+  'Hello Flutter!',
+  style: TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Colors.blue,
+  ),
+)''',
+        previewBuilder: () => const Text(
+          'Hello Flutter!',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue,
+          ),
+        ),
+      ),
+
+      // Row Widget
+      WidgetReference(
+        id: 'row',
+        name: 'Row',
+        category: 'Layout',
+        description:
+            'A widget that displays its children in a horizontal array. Row is a flex widget that arranges its children along the main axis (horizontal).',
+        syntax: '''Row(
+  {
+    MainAxisAlignment mainAxisAlignment,
+    CrossAxisAlignment crossAxisAlignment,
+    MainAxisSize mainAxisSize,
+    List<Widget> children,
+  }
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'mainAxisAlignment',
+            type: 'MainAxisAlignment',
+            description: 'How children should be placed along the main axis',
+            isRequired: false,
+            defaultValue: 'MainAxisAlignment.start',
+          ),
+          WidgetParameter(
+            name: 'crossAxisAlignment',
+            type: 'CrossAxisAlignment',
+            description: 'How children should be placed along the cross axis',
+            isRequired: false,
+            defaultValue: 'CrossAxisAlignment.center',
+          ),
+          WidgetParameter(
+            name: 'mainAxisSize',
+            type: 'MainAxisSize',
+            description: 'How much space should be occupied on the main axis',
+            isRequired: false,
+            defaultValue: 'MainAxisSize.max',
+          ),
+          WidgetParameter(
+            name: 'children',
+            type: 'List<Widget>',
+            description: 'The widgets to display in a horizontal array',
+            isRequired: false,
+            defaultValue: '[]',
+          ),
+        ],
+        codeExample: '''Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  children: [
+    Icon(Icons.star, color: Colors.amber, size: 40),
+    Icon(Icons.favorite, color: Colors.red, size: 40),
+    Icon(Icons.thumb_up, color: Colors.blue, size: 40),
+  ],
+)''',
+        previewBuilder: () => const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Icon(Icons.star, color: Colors.amber, size: 40),
+            Icon(Icons.favorite, color: Colors.red, size: 40),
+            Icon(Icons.thumb_up, color: Colors.blue, size: 40),
+          ],
+        ),
+      ),
+
+      // Column Widget
+      WidgetReference(
+        id: 'column',
+        name: 'Column',
+        category: 'Layout',
+        description:
+            'A widget that displays its children in a vertical array. Column is a flex widget that arranges its children along the main axis (vertical).',
+        syntax: '''Column(
+  {
+    MainAxisAlignment mainAxisAlignment,
+    CrossAxisAlignment crossAxisAlignment,
+    MainAxisSize mainAxisSize,
+    List<Widget> children,
+  }
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'mainAxisAlignment',
+            type: 'MainAxisAlignment',
+            description: 'How children should be placed along the main axis',
+            isRequired: false,
+            defaultValue: 'MainAxisAlignment.start',
+          ),
+          WidgetParameter(
+            name: 'crossAxisAlignment',
+            type: 'CrossAxisAlignment',
+            description: 'How children should be placed along the cross axis',
+            isRequired: false,
+            defaultValue: 'CrossAxisAlignment.center',
+          ),
+          WidgetParameter(
+            name: 'children',
+            type: 'List<Widget>',
+            description: 'The widgets to display in a vertical array',
+            isRequired: false,
+            defaultValue: '[]',
+          ),
+        ],
+        codeExample: '''Column(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    Icon(Icons.cloud, size: 50, color: Colors.blue),
+    SizedBox(height: 10),
+    Text('Cloudy', style: TextStyle(fontSize: 18)),
+  ],
+)''',
+        previewBuilder: () => const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.cloud, size: 50, color: Colors.blue),
+            SizedBox(height: 10),
+            Text('Cloudy', style: TextStyle(fontSize: 18)),
+          ],
+        ),
+      ),
+
+      // ElevatedButton Widget
+      WidgetReference(
+        id: 'elevated_button',
+        name: 'ElevatedButton',
+        category: 'Input',
+        description:
+            'A Material Design elevated button. An elevated button has a shadow that increases when pressed.',
+        syntax: '''ElevatedButton(
+  {
+    required VoidCallback? onPressed,
+    ButtonStyle? style,
+    required Widget child,
+  }
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'onPressed',
+            type: 'VoidCallback?',
+            description:
+                'Callback when button is pressed. If null, button is disabled',
+            isRequired: true,
+          ),
+          WidgetParameter(
+            name: 'style',
+            type: 'ButtonStyle?',
+            description: 'Customizes the button appearance',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'child',
+            type: 'Widget',
+            description: 'The button\'s label',
+            isRequired: true,
+          ),
+        ],
+        codeExample: '''ElevatedButton(
+  onPressed: () {
+    print('Button Pressed!');
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.blue,
+    foregroundColor: Colors.white,
+    padding: EdgeInsets.symmetric(
+      horizontal: 24,
+      vertical: 12,
+    ),
+  ),
+  child: Text('Click Me'),
+)''',
+        previewBuilder: () => ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+          child: const Text('Click Me'),
+        ),
+      ),
+
+      // Icon Widget
+      WidgetReference(
+        id: 'icon',
+        name: 'Icon',
+        category: 'Display',
+        description:
+            'A Material Design icon. Icons are not interactive; for an interactive icon, use IconButton.',
+        syntax: '''Icon(
+  IconData icon,
+  {
+    double? size,
+    Color? color,
+  }
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'icon',
+            type: 'IconData',
+            description: 'The icon to display',
+            isRequired: true,
+          ),
+          WidgetParameter(
+            name: 'size',
+            type: 'double?',
+            description: 'The size of the icon in logical pixels',
+            isRequired: false,
+            defaultValue: '24.0',
+          ),
+          WidgetParameter(
+            name: 'color',
+            type: 'Color?',
+            description: 'The color to use when drawing the icon',
+            isRequired: false,
+          ),
+        ],
+        codeExample: '''Icon(
+  Icons.favorite,
+  size: 48,
+  color: Colors.red,
+)''',
+        previewBuilder: () =>
+            const Icon(Icons.favorite, size: 48, color: Colors.red),
+      ),
+
+      // Image Widget
+      WidgetReference(
+        id: 'image',
+        name: 'Image',
+        category: 'Display',
+        description:
+            'A widget that displays an image. Supports network images, asset images, and more.',
+        syntax: '''Image.network(
+  String src,
+  {
+    double? width,
+    double? height,
+    BoxFit? fit,
+  }
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'src',
+            type: 'String',
+            description: 'The URL of the image',
+            isRequired: true,
+          ),
+          WidgetParameter(
+            name: 'width',
+            type: 'double?',
+            description: 'The width of the image',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'height',
+            type: 'double?',
+            description: 'The height of the image',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'fit',
+            type: 'BoxFit?',
+            description: 'How the image should be inscribed into the space',
+            isRequired: false,
+          ),
+        ],
+        codeExample: '''Image.network(
+  'https://picsum.photos/200',
+  width: 150,
+  height: 150,
+  fit: BoxFit.cover,
+)''',
+        previewBuilder: () => Container(
+          width: 150,
+          height: 150,
+          color: Colors.grey[300],
+          child: const Icon(Icons.image, size: 60, color: Colors.grey),
+        ),
+      ),
+
+      // Stack Widget
+      WidgetReference(
+        id: 'stack',
+        name: 'Stack',
+        category: 'Layout',
+        description:
+            'A widget that positions its children relative to the edges of its box. Stack allows you to overlay multiple children.',
+        syntax: '''Stack(
+  {
+    AlignmentGeometry alignment,
+    List<Widget> children,
+  }
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'alignment',
+            type: 'AlignmentGeometry',
+            description: 'How to align non-positioned children',
+            isRequired: false,
+            defaultValue: 'AlignmentDirectional.topStart',
+          ),
+          WidgetParameter(
+            name: 'children',
+            type: 'List<Widget>',
+            description: 'The widgets to display in a stack',
+            isRequired: false,
+            defaultValue: '[]',
+          ),
+        ],
+        codeExample: '''Stack(
+  alignment: Alignment.center,
+  children: [
+    Container(
+      width: 100,
+      height: 100,
+      color: Colors.blue,
+    ),
+    Container(
+      width: 60,
+      height: 60,
+      color: Colors.red,
+    ),
+  ],
+)''',
+        previewBuilder: () => Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(width: 100, height: 100, color: Colors.blue),
+            Container(width: 60, height: 60, color: Colors.red),
+          ],
+        ),
+      ),
+
+      // Card Widget
+      WidgetReference(
+        id: 'card',
+        name: 'Card',
+        category: 'Layout',
+        description:
+            'A Material Design card. A card has slightly rounded corners and a shadow.',
+        syntax: '''Card(
+  {
+    Color? color,
+    double? elevation,
+    EdgeInsetsGeometry? margin,
+    Widget? child,
+  }
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'color',
+            type: 'Color?',
+            description: 'The card\'s background color',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'elevation',
+            type: 'double?',
+            description: 'The z-coordinate of the card',
+            isRequired: false,
+            defaultValue: '1.0',
+          ),
+          WidgetParameter(
+            name: 'margin',
+            type: 'EdgeInsetsGeometry?',
+            description: 'Empty space to surround the card',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'child',
+            type: 'Widget?',
+            description: 'The widget below this card in the tree',
+            isRequired: false,
+          ),
+        ],
+        codeExample: '''Card(
+  elevation: 4,
+  child: Padding(
+    padding: EdgeInsets.all(16),
+    child: Text('Card Content'),
+  ),
+)''',
+        previewBuilder: () => const Card(
+          elevation: 4,
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Card Content'),
+          ),
+        ),
+      ),
+
+      // ListTile Widget
+      WidgetReference(
+        id: 'list_tile',
+        name: 'ListTile',
+        category: 'Display',
+        description:
+            'A single fixed-height row that typically contains some text as well as a leading or trailing icon.',
+        syntax: '''ListTile(
+  {
+    Widget? leading,
+    Widget? title,
+    Widget? subtitle,
+    Widget? trailing,
+    VoidCallback? onTap,
+  }
+)''',
+        parameters: [
+          WidgetParameter(
+            name: 'leading',
+            type: 'Widget?',
+            description: 'A widget to display before the title',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'title',
+            type: 'Widget?',
+            description: 'The primary content of the list tile',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'subtitle',
+            type: 'Widget?',
+            description: 'Additional content displayed below the title',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'trailing',
+            type: 'Widget?',
+            description: 'A widget to display after the title',
+            isRequired: false,
+          ),
+          WidgetParameter(
+            name: 'onTap',
+            type: 'VoidCallback?',
+            description: 'Called when the user taps this list tile',
+            isRequired: false,
+          ),
+        ],
+        codeExample: '''ListTile(
+  leading: Icon(Icons.person),
+  title: Text('John Doe'),
+  subtitle: Text('Software Engineer'),
+  trailing: Icon(Icons.arrow_forward),
+  onTap: () {
+    print('Tile tapped');
+  },
+)''',
+        previewBuilder: () => const ListTile(
+          leading: Icon(Icons.person),
+          title: Text('John Doe'),
+          subtitle: Text('Software Engineer'),
+          trailing: Icon(Icons.arrow_forward),
+        ),
       ),
     ];
   }
