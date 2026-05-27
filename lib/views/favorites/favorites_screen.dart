@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/favorites_controller.dart';
-import '../../data/api_integration_data.dart';
-import '../../data/firebase_data.dart';
 import '../../data/flutter_basics_data.dart';
 import '../../data/projects_data.dart';
-import '../../data/state_management_data.dart';
 import '../../models/tutorial_model.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/empty_state.dart';
@@ -70,9 +67,6 @@ class FavoritesScreen extends StatelessWidget {
         // Collect all tutorials from all data sources
         final allTutorials = <TutorialModel>[
           ...FlutterBasicsData.getAllTutorials(),
-          ...FirebaseData.getAllTutorials(),
-          ...StateManagementData.getAllTutorials(),
-          ...ApiIntegrationData.getAllTutorials(),
           ...ProjectsData.getAllProjects(),
         ];
 

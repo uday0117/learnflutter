@@ -3,9 +3,7 @@ import 'package:get/get.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/onboarding_binding.dart';
 import '../bindings/splash_binding.dart';
-import '../views/api_integration/api_integration_screen.dart';
 import '../views/favorites/favorites_screen.dart';
-import '../views/firebase/firebase_screen.dart';
 import '../views/flutter_basics/flutter_basics_detail_screen.dart';
 import '../views/flutter_basics/flutter_basics_screen.dart';
 import '../views/home/home_screen.dart';
@@ -15,7 +13,6 @@ import '../views/onboarding/onboarding_screen.dart';
 import '../views/projects/projects_screen.dart';
 import '../views/search/search_screen.dart';
 import '../views/splash/splash_screen.dart';
-import '../views/state_management/state_management_screen.dart';
 import '../views/ui_examples/ui_example_detail_screen.dart';
 import '../views/ui_examples/ui_examples_screen.dart';
 import '../views/widgets/widget_detail_screen.dart';
@@ -70,21 +67,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.uiExampleDetail,
       page: () => const UIExampleDetailScreen(),
-      transition: Transition.rightToLeft,
-    ),
-    GetPage(
-      name: AppRoutes.stateManagement,
-      page: () => const StateManagementScreen(),
-      transition: Transition.rightToLeft,
-    ),
-    GetPage(
-      name: AppRoutes.apiIntegration,
-      page: () => const APIIntegrationScreen(),
-      transition: Transition.rightToLeft,
-    ),
-    GetPage(
-      name: AppRoutes.firebase,
-      page: () => const FirebaseScreen(),
       transition: Transition.rightToLeft,
     ),
     GetPage(

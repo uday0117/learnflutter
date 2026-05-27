@@ -26,9 +26,6 @@ class AppStrings {
   static const String flutterBasics = 'Flutter Basics';
   static const String flutterWidgets = 'Flutter Widgets';
   static const String uiExamples = 'UI Examples';
-  static const String stateManagement = 'State Management';
-  static const String apiIntegration = 'API Integration';
-  static const String firebase = 'Firebase';
   static const String projects = 'Projects';
   static const String interviewQuestions = 'Interview Questions';
 
