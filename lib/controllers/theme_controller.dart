@@ -6,20 +6,25 @@ class ThemeController extends GetxController {
   var isDarkMode = false.obs;
 
   // Observable for primary color
-  final Rx<Color> primaryColor = Colors.deepPurple.obs;
+  final Rx<Color> primaryColor = const Color(0xFF1E88E5).obs; // Electric Blue
 
-  // Predefined color options
+  // Predefined color options - Vibrant car-inspired palette
   final List<Color> availableColors = [
-    Colors.deepPurple,
-    Colors.blue,
-    Colors.teal,
-    Colors.green,
-    Colors.orange,
-    Colors.pink,
-    Colors.red,
-    Colors.indigo,
-    Colors.cyan,
-    Colors.amber,
+    const Color(0xFF1E88E5), // Electric Blue
+    const Color(0xFFE53935), // Racing Red
+    const Color(0xFF43A047), // Racing Green
+    const Color(0xFFFF6F00), // Sunset Orange
+    const Color(0xFF8E24AA), // Royal Purple
+    const Color(0xFF00ACC1), // Turquoise
+    const Color(0xFFFFB300), // Gold
+    const Color(0xFFD81B60), // Magenta
+    const Color(0xFF00897B), // Teal
+    const Color(0xFF5E35B1), // Deep Purple
+    const Color(0xFFF4511E), // Flame Red
+    const Color(0xFF039BE5), // Sky Blue
+    const Color(0xFF7CB342), // Lime Green
+    const Color(0xFFFFD600), // Yellow
+    const Color(0xFFE91E63), // Pink
   ];
 
   // Toggle dark mode

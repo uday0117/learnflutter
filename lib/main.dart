@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'controllers/theme_controller.dart';
+
 import 'controllers/favorites_controller.dart';
+import 'controllers/theme_controller.dart';
 import 'screens/splash_screen.dart';
 
 void main() async {
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
 
     return Obx(
       () => GetMaterialApp(
-        title: 'Flutter Widgets',
+        title: 'Learn Flutter',
         debugShowCheckedModeBanner: false,
         theme: themeController.lightTheme,
         darkTheme: themeController.darkTheme,

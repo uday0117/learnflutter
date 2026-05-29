@@ -1,11 +1,11 @@
 {
-    "name": "learnflutter",
-    "short_name": "learnflutter",
+    "name": "Learn Flutter",
+    "short_name": "Learn Flutter",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Learn Flutter widgets with interactive examples and tutorials.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
