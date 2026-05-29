@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../controllers/theme_controller.dart';
+import '../utils/url_launcher_helper.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -116,11 +118,33 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 ListTile(
+                  leading: const Icon(Icons.privacy_tip_outlined),
+                  title: const Text('Privacy Policy'),
+                  subtitle: const Text('View our privacy policy'),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: () {
+                    UrlLauncherHelper.openPrivacyPolicy();
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.gavel_outlined),
+                  title: const Text('Terms & Conditions'),
+                  subtitle: const Text('View terms of service'),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: () {
+                    UrlLauncherHelper.openTermsAndConditions();
+                  },
+                ),
+                const Divider(),
+                ListTile(
                   leading: const Icon(Icons.code),
                   title: const Text('Source Code'),
                   subtitle: const Text('View on GitHub'),
                   trailing: const Icon(Icons.open_in_new),
-                  onTap: () {},
+                  onTap: () {
+                    UrlLauncherHelper.openGitHubRepo();
+                  },
                 ),
                 const Divider(),
                 ListTile(
@@ -128,7 +152,9 @@ class SettingsScreen extends StatelessWidget {
                   title: const Text('Documentation'),
                   subtitle: const Text('Flutter Widget Docs'),
                   trailing: const Icon(Icons.open_in_new),
-                  onTap: () {},
+                  onTap: () {
+                    UrlLauncherHelper.openFlutterDocs();
+                  },
                 ),
                 const Divider(),
                 ListTile(
@@ -136,7 +162,9 @@ class SettingsScreen extends StatelessWidget {
                   title: const Text('Report Bug'),
                   subtitle: const Text('Help us improve'),
                   trailing: const Icon(Icons.open_in_new),
-                  onTap: () {},
+                  onTap: () {
+                    UrlLauncherHelper.openGitHubRepo();
+                  },
                 ),
               ],
             ),
@@ -160,7 +188,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '© 2024 Flutter Widgets',
+                  '© 2026 UK Solutions',
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],

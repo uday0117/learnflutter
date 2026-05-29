@@ -37,15 +37,13 @@ git push origin main
 After a few minutes, your pages will be available at:
 
 ```
-https://YOUR-USERNAME.github.io/learnflutter/
+https://uday0117.github.io/learnflutter/
 ```
-
-Replace `YOUR-USERNAME` with your GitHub username.
 
 ### Direct URLs
 
-- **Privacy Policy**: `https://YOUR-USERNAME.github.io/learnflutter/privacy_policy.html`
-- **Terms & Conditions**: `https://YOUR-USERNAME.github.io/learnflutter/terms_and_conditions.html`
+- **Privacy Policy**: `https://uday0117.github.io/learnflutter/privacy_policy.html`
+- **Terms & Conditions**: `https://uday0117.github.io/learnflutter/terms_and_conditions.html`
 
 ## Usage in App
 
@@ -55,14 +53,14 @@ You can use these URLs in your Flutter app for displaying policies:
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> openPrivacyPolicy() async {
-  final url = Uri.parse('https://YOUR-USERNAME.github.io/learnflutter/privacy_policy.html');
+  final url = Uri.parse('https://uday0117.github.io/learnflutter/privacy_policy.html');
   if (await canLaunchUrl(url)) {
     await launchUrl(url, mode: LaunchMode.inAppWebView);
   }
 }
 
 Future<void> openTermsAndConditions() async {
-  final url = Uri.parse('https://YOUR-USERNAME.github.io/learnflutter/terms_and_conditions.html');
+  final url = Uri.parse('https://uday0117.github.io/learnflutter/terms_and_conditions.html');
   if (await canLaunchUrl(url)) {
     await launchUrl(url, mode: LaunchMode.inAppWebView);
   }
