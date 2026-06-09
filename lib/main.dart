@@ -4,9 +4,13 @@ import 'package:get/get.dart';
 import 'controllers/favorites_controller.dart';
 import 'controllers/theme_controller.dart';
 import 'screens/splash_screen.dart';
+import 'services/ad_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize AdMob
+  await AdService().initialize();
 
   // Initialize controllers
   Get.put(ThemeController());

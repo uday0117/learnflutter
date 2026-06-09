@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
 import '../controllers/favorites_controller.dart';
 import '../models/widget_model.dart';
+import '../services/ad_service.dart';
+import '../widgets/banner_ad_widget.dart';
 
 class WidgetDetailScreen extends StatefulWidget {
   final WidgetModel widgetModel;
@@ -23,6 +26,11 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Show interstitial ad every 3rd screen view
+    Future.delayed(const Duration(milliseconds: 500), () {
+      AdService().incrementDetailScreenCounter();
+    });
   }
 
   @override
@@ -186,6 +194,9 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
               ],
             ),
           ),
+
+          // Banner Ad at bottom
+          const BannerAdWidget(),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

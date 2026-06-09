@@ -5,6 +5,7 @@ import '../controllers/favorites_controller.dart';
 import '../controllers/theme_controller.dart';
 import '../data/widgets_data.dart';
 import '../models/widget_category.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'favorites_screen.dart';
 import 'search_screen.dart';
 import 'settings_screen.dart';
@@ -37,6 +38,19 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // Main content
           _screens[_selectedIndex],
+
+          // Banner Ad above bottom navigation
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 105,
+            child: Center(
+              child: Container(
+                alignment: Alignment.center,
+                child: const BannerAdWidget(),
+              ),
+            ),
+          ),
 
           // Beautiful Custom Bottom Navigation
           Positioned(
