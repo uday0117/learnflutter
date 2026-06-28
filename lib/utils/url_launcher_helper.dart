@@ -60,4 +60,30 @@ class UrlLauncherHelper {
   static Future<void> openFlutterDocs() async {
     await launchURL(flutterDocsUrl, mode: LaunchMode.externalApplication);
   }
+
+  /// Open email to contact support
+  static Future<void> openEmail() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: ' apps.uksolutions@gmail.com',
+      queryParameters: {'subject': 'Learn Flutter App - Feedback'},
+    );
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        Get.snackbar(
+          'Email',
+          ' apps.uksolutions@gmail.com',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (_) {
+      Get.snackbar(
+        'Email',
+        ' apps.uksolutions@gmail.com',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
 }

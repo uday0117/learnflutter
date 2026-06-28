@@ -78,7 +78,7 @@ class _WidgetsListScreenState extends State<WidgetsListScreen> {
                 filled: true,
                 fillColor: Theme.of(
                   context,
-                ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               ),
               onChanged: _filterWidgets,
             ),
@@ -96,14 +96,14 @@ class _WidgetsListScreenState extends State<WidgetsListScreen> {
                   elevation: 0,
                   color: Theme.of(
                     context,
-                  ).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     leading: Container(
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: this.widget.category.color.withOpacity(0.1),
+                        color: this.widget.category.color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(

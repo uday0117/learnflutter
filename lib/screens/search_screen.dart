@@ -78,7 +78,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 filled: true,
                 fillColor: Theme.of(
                   context,
-                ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               ),
               onChanged: _performSearch,
             ),
@@ -158,7 +158,7 @@ class _SearchScreenState extends State<SearchScreen> {
             leading: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: category.color.withOpacity(0.1),
+                color: category.color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(category.icon, color: category.color),

@@ -1,23 +1,29 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class FavoritesController extends GetxController {
-  // Observable set of favorite widget IDs
+  static const _key = 'favorite_ids';
+  final _box = GetStorage();
+
   var favoriteIds = <String>{}.obs;
 
-  // Toggle favorite status
+  @override
+  void onInit() {
+    super.onInit();
+    final saved = _box.read<List>(_key) ?? [];
+    favoriteIds.addAll(saved.map((e) => e.toString()));
+  }
+
   void toggleFavorite(String widgetId) {
     if (favoriteIds.contains(widgetId)) {
       favoriteIds.remove(widgetId);
     } else {
       favoriteIds.add(widgetId);
     }
+    _box.write(_key, favoriteIds.toList());
   }
 
-  // Check if widget is favorite
-  bool isFavorite(String widgetId) {
-    return favoriteIds.contains(widgetId);
-  }
+  bool isFavorite(String widgetId) => favoriteIds.contains(widgetId);
 
-  // Get count of favorites
   int get favoritesCount => favoriteIds.length;
 }

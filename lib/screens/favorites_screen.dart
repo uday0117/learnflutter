@@ -66,14 +66,14 @@ class FavoritesScreen extends StatelessWidget {
               elevation: 0,
               color: Theme.of(
                 context,
-              ).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
                 leading: Container(
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: category.color.withOpacity(0.1),
+                    color: category.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(category.icon, color: category.color, size: 28),
