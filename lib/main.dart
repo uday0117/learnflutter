@@ -57,10 +57,9 @@ class MyApp extends StatelessWidget {
         locale: initialLocale ?? Get.deviceLocale ?? const Locale('en', 'US'),
         fallbackLocale: const Locale('en', 'US'),
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler:
-                TextScaler.linear(themeController.fontScale),
-          ),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(themeController.fontScale)),
           child: child!,
         ),
         home: const SplashScreen(),
