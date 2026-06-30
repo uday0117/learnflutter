@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../controllers/theme_controller.dart';
+import '../services/ad_service.dart';
+import '../widgets/flutter_glow_logo.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -35,6 +37,9 @@ class _SplashScreenState extends State<SplashScreen>
   late final AnimationController _glowController;
   late final Animation<double> _glowRing1;
   late final Animation<double> _glowRing2;
+
+  // Shimmer sweep across the Flutter mark
+  late final AnimationController _shimmerController;
 
   // Text entrance
   late final AnimationController _textController;
@@ -91,6 +96,11 @@ class _SplashScreenState extends State<SplashScreen>
     _glowRing2 = Tween<double>(begin: 1.12, end: 0.88).animate(
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
+
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat();
 
     // Particles — loops
     _particleController = AnimationController(
@@ -184,6 +194,9 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _navigateToHome() async {
     await Future.delayed(const Duration(milliseconds: 2800));
     if (!mounted) return;
+    AdService().showAppOpenAdIfAvailable();
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
     Get.off(
       () => const HomeScreen(),
       transition: Transition.fadeIn,
@@ -197,6 +210,7 @@ class _SplashScreenState extends State<SplashScreen>
     _gradientController.dispose();
     _logoController.dispose();
     _glowController.dispose();
+    _shimmerController.dispose();
     _textController.dispose();
     _progressController.dispose();
     _particleController.dispose();
@@ -221,6 +235,7 @@ class _SplashScreenState extends State<SplashScreen>
               _gradientController,
               _logoController,
               _glowController,
+              _shimmerController,
               _textController,
               _progressController,
               _particleController,
@@ -293,36 +308,48 @@ class _SplashScreenState extends State<SplashScreen>
                         children: [
                           // Glow rings + logo
                           SizedBox(
-                            width: 200,
-                            height: 200,
+                            width: 220,
+                            height: 220,
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
                                 // Outer glow ring 2
                                 Transform.scale(
-                                  scale: _glowRing2.value * 1.4,
+                                  scale: _glowRing2.value * 1.48,
                                   child: Container(
-                                    width: 160,
-                                    height: 160,
+                                    width: 168,
+                                    height: 168,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: primary.withValues(alpha: 0.12),
-                                        width: 1.5,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.08 +
+                                              _glowController.value * 0.04,
+                                        ),
+                                        width: 1,
                                       ),
                                     ),
                                   ),
                                 ),
                                 // Outer glow ring 1
                                 Transform.scale(
-                                  scale: _glowRing1.value * 1.18,
+                                  scale: _glowRing1.value * 1.22,
                                   child: Container(
-                                    width: 140,
-                                    height: 140,
+                                    width: 148,
+                                    height: 148,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          primary.withValues(alpha: 0.28),
+                                          Colors.white.withValues(alpha: 0.12),
+                                          primary.withValues(alpha: 0.18),
+                                        ],
+                                      ),
                                       border: Border.all(
-                                        color: primary.withValues(alpha: 0.22),
+                                        color: primary.withValues(alpha: 0.24),
                                         width: 1.5,
                                       ),
                                     ),
@@ -332,61 +359,36 @@ class _SplashScreenState extends State<SplashScreen>
                                 Transform.scale(
                                   scale: _glowRing1.value,
                                   child: Container(
-                                    width: 118,
-                                    height: 118,
+                                    width: 124,
+                                    height: 124,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       gradient: RadialGradient(
                                         colors: [
-                                          primary.withValues(alpha: 0.35),
+                                          primary.withValues(alpha: 0.42),
+                                          primary.withValues(alpha: 0.12),
                                           primary.withValues(alpha: 0.0),
                                         ],
+                                        stops: const [0.0, 0.55, 1.0],
                                       ),
                                     ),
                                   ),
                                 ),
-                                // Logo tile
+                                // Glowing Flutter mark
                                 FadeTransition(
                                   opacity: _logoFade,
                                   child: Transform.scale(
                                     scale: _logoScale.value,
                                     child: Transform.rotate(
                                       angle: _logoRotate.value,
-                                      child: Container(
-                                        width: 96,
-                                        height: 96,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(28),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              Color.lerp(
-                                                      primary, Colors.white, 0.3)!,
-                                              primary,
-                                            ],
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: primary.withValues(alpha: 0.5),
-                                              blurRadius: 28,
-                                              offset: const Offset(0, 10),
-                                              spreadRadius: 2,
-                                            ),
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 
-                                                  0.25),
-                                              blurRadius: 12,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: const Icon(
-                                          Icons.widgets_rounded,
-                                          size: 52,
-                                          color: Colors.white,
-                                        ),
+                                      child: FlutterGlowLogo(
+                                        size: 128,
+                                        glowPulse: _glowController.value,
+                                        orbitProgress:
+                                            _particleController.value,
+                                        shimmerProgress:
+                                            _shimmerController.value,
+                                        showBackdrop: true,
                                       ),
                                     ),
                                   ),
@@ -402,13 +404,25 @@ class _SplashScreenState extends State<SplashScreen>
                             offset: Offset(0, _titleSlide.value),
                             child: Opacity(
                               opacity: _titleFade.value,
-                              child: Text(
-                                'Learn Flutter',
-                                style: GoogleFonts.inter(
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: -0.5,
+                              child: ShaderMask(
+                                shaderCallback: (bounds) => LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.white,
+                                    Colors.white.withValues(alpha: 0.92),
+                                    primary.withValues(alpha: 0.85),
+                                  ],
+                                ).createShader(bounds),
+                                child: Text(
+                                  'Learn Flutter',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: -0.8,
+                                    height: 1.1,
+                                  ),
                                 ),
                               ),
                             ),
@@ -492,7 +506,7 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Opacity(
                         opacity: _subtitleFade.value * 0.5,
                         child: Text(
-                          'v1.0.2',
+                          'v1.0.4',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             fontSize: 11,

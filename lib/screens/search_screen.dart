@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
 import '../models/widget_model.dart';
+import '../widgets/banner_ad_widget.dart';
+import '../widgets/highlighted_text.dart';
 import 'widget_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -86,6 +88,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
           // Search results
           Expanded(child: _buildSearchContent()),
+
+          const Center(child: BannerAdWidget()),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -142,6 +147,8 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
+    final query = _searchController.text.trim();
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: _searchResults.length,
@@ -163,16 +170,24 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               child: Icon(category.icon, color: category.color),
             ),
-            title: Text(
-              widget.name,
+            title: HighlightedText(
+              text: widget.name,
+              query: query,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 4),
-                Text(
-                  widget.description,
+                HighlightedText(
+                  text: widget.description,
+                  query: query,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

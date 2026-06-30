@@ -8,6 +8,7 @@ import '../controllers/favorites_controller.dart';
 import '../controllers/progress_controller.dart';
 import '../models/widget_model.dart';
 import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
 import '../widgets/banner_ad_widget.dart';
 
 class WidgetDetailScreen extends StatefulWidget {
@@ -36,6 +37,12 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
     Future.delayed(const Duration(milliseconds: 300), () {
       progressController.markAsViewed(widget.widgetModel.id);
       AdService().incrementDetailScreenCounter();
+      AnalyticsService().logWidgetViewed(
+        widgetId: widget.widgetModel.id,
+        widgetName: widget.widgetModel.name,
+        category: widget.widgetModel.categoryId,
+      );
+      AnalyticsService().logScreenView('widget_detail');
     });
   }
 

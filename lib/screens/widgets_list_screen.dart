@@ -5,6 +5,7 @@ import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
 import '../models/widget_category.dart';
 import '../models/widget_model.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'widget_detail_screen.dart';
 
 class WidgetsListScreen extends StatefulWidget {
@@ -154,6 +155,9 @@ class _WidgetsListScreenState extends State<WidgetsListScreen> {
               },
             ),
           ),
+
+          const Center(child: BannerAdWidget()),
+          const SizedBox(height: 8),
         ],
       ),
     );

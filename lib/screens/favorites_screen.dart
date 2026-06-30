@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'widget_detail_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
@@ -18,7 +19,10 @@ class FavoritesScreen extends StatelessWidget {
         title: const Text('Favorites'),
         automaticallyImplyLeading: false,
       ),
-      body: Obx(() {
+      body: Column(
+        children: [
+          Expanded(
+            child: Obx(() {
         if (favoritesController.favoriteIds.isEmpty) {
           return Center(
             child: Column(
@@ -111,6 +115,11 @@ class FavoritesScreen extends StatelessWidget {
           },
         );
       }),
+          ),
+          const Center(child: BannerAdWidget()),
+          const SizedBox(height: 8),
+        ],
+      ),
     );
   }
 }

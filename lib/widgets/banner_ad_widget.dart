@@ -17,10 +17,13 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   @override
   void initState() {
     super.initState();
-    _loadAd();
+    if (!AdService().isAdFree) {
+      _loadAd();
+    }
   }
 
   void _loadAd() {
+    if (AdService().isAdFree) return;
     _bannerAd = BannerAd(
       adUnitId: AdService.bannerAdUnitId,
       size: AdSize.banner,
@@ -55,7 +58,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isAdLoaded || _bannerAd == null) {
+    if (AdService().isAdFree || !_isAdLoaded || _bannerAd == null) {
       return const SizedBox.shrink();
     }
 

@@ -3,6 +3,9 @@ import 'package:get_storage/get_storage.dart';
 
 import '../data/quiz_data.dart';
 import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
+import 'engagement_controller.dart';
+import 'weekly_challenge_controller.dart';
 
 class QuizController extends GetxController {
   static const _totalKey = 'quiz_total_played';
@@ -104,8 +107,8 @@ class QuizController extends GetxController {
       _finishQuiz();
     } else {
       final nextIndex = currentIndex.value + 1;
-      // Show interstitial before every 5th question (Q5→Q6, Q10→Q11, …)
-      if (nextIndex % 5 == 0) {
+      // Show interstitial before every 3rd question transition
+      if (nextIndex % 3 == 0) {
         AdService().showInterstitialAdWithCallback(() {
           currentIndex.value = nextIndex;
           selectedAnswer.value = -1;
@@ -129,6 +132,19 @@ class QuizController extends GetxController {
     }
     _box.write(_totalKey, totalPlayed.value);
     _box.write(_correctKey, totalCorrect.value);
+
+    if (Get.isRegistered<EngagementController>()) {
+      Get.find<EngagementController>().recordQuizComplete();
+    }
+    if (Get.isRegistered<WeeklyChallengeController>()) {
+      Get.find<WeeklyChallengeController>().recordQuizScore(score.value);
+    }
+
+    AnalyticsService().logQuizCompleted(
+      score: score.value,
+      totalQuestions: totalQuestions,
+      lifetimePlayed: totalPlayed.value,
+    );
   }
 
   void restart() {

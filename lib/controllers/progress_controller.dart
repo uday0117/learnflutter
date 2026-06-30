@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:in_app_review/in_app_review.dart';
 
+import '../controllers/engagement_controller.dart';
 import '../data/widgets_data.dart';
 
 class ProgressController extends GetxController {
@@ -49,6 +50,10 @@ class ProgressController extends GetxController {
     final views = (_box.read<int>(_totalDetailViews) ?? 0) + 1;
     _box.write(_totalDetailViews, views);
     _maybeRequestReview(views);
+
+    if (Get.isRegistered<EngagementController>()) {
+      Get.find<EngagementController>().recordWidgetView();
+    }
   }
 
   Future<void> _maybeRequestReview(int views) async {

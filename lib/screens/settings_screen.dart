@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'package:share_plus/share_plus.dart';
 
+import '../controllers/engagement_controller.dart';
 import '../controllers/favorites_controller.dart';
 import '../controllers/interview_review_controller.dart';
 import '../controllers/progress_controller.dart';
@@ -12,6 +12,8 @@ import '../controllers/quiz_controller.dart';
 import '../controllers/streak_controller.dart';
 import '../controllers/theme_controller.dart';
 import '../data/interview_data.dart';
+import '../services/ad_service.dart';
+import '../services/notification_service.dart';
 import '../translations/app_translations.dart';
 import '../utils/url_launcher_helper.dart';
 
@@ -295,12 +297,6 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  void _shareApp() {
-    Share.share(
-      '📱 Learn Flutter — Master every Flutter widget with live previews, examples & interview prep!\n\nhttps://play.google.com/store/apps/details?id=com.uksolutions.learnflutter',
-    );
-  }
-
   void _showClearProgressDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -410,8 +406,22 @@ class SettingsScreen extends StatelessWidget {
                       controller: scrollController,
                       children: [
                         _ChangelogVersion(
-                          version: 'v1.0.2',
+                          version: 'v1.0.4',
                           label: 'whats_new_current'.tr,
+                          primary: primary,
+                          isDark: isDark,
+                          items: const [
+                            ('🎯', 'Daily Goal — learn 3 widgets + quiz each day'),
+                            ('🔔', 'Daily reminder notifications at 9 AM'),
+                            ('📢', 'Share achievements to invite friends'),
+                            ('💰', 'Watch ad for 1-hour ad-free learning'),
+                            ('📚', '52 new widgets — Animation, Cupertino, Slivers & more'),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _ChangelogVersion(
+                          version: 'v1.0.2',
+                          label: null,
                           primary: primary,
                           isDark: isDark,
                           items: const [
@@ -623,6 +633,81 @@ class SettingsScreen extends StatelessWidget {
 
                         const Divider(height: 1, indent: 60, endIndent: 20),
 
+                        // Daily Reminder
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 14),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.orange
+                                      .withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                    Icons.notifications_active_rounded,
+                                    color: Colors.orange),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'daily_reminder'.tr,
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      'daily_reminder_sub'.tr,
+                                      style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Obx(() {
+                                final engagement =
+                                    Get.find<EngagementController>();
+                                return Switch(
+                                  value: engagement
+                                      .dailyReminderEnabled.value,
+                                  onChanged: (v) async {
+                                    if (v) {
+                                      final granted =
+                                          await NotificationService()
+                                              .requestPermission();
+                                      if (!granted) {
+                                        Get.snackbar(
+                                          'daily_reminder'.tr,
+                                          'notification_denied'.tr,
+                                          snackPosition:
+                                              SnackPosition.BOTTOM,
+                                        );
+                                        return;
+                                      }
+                                      await NotificationService()
+                                          .scheduleDailyReminder();
+                                    } else {
+                                      await NotificationService()
+                                          .cancelDailyReminder();
+                                    }
+                                    engagement.setDailyReminder(v);
+                                  },
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+
+                        const Divider(height: 1, indent: 60, endIndent: 20),
+
                         // Font Size
                         _SettingsTile(
                           icon: Icons.text_fields_rounded,
@@ -704,19 +789,63 @@ class SettingsScreen extends StatelessWidget {
                           showDivider: true,
                         ),
                         _SettingsTile(
+                          icon: Icons.share_rounded,
+                          iconColor: Colors.blue,
+                          title: 'share_app'.tr,
+                          subtitle: 'share_app_sub'.tr,
+                          onTap: () => Get.find<EngagementController>().shareApp(),
+                          showDivider: true,
+                        ),
+                        Obx(() {
+                          final adFree = AdService().adFreeUntil.value;
+                          if (adFree == null ||
+                              !DateTime.now().isBefore(adFree)) {
+                            return _SettingsTile(
+                              icon: Icons.play_circle_outline_rounded,
+                              iconColor: Colors.deepPurple,
+                              title: 'watch_ad_adfree'.tr,
+                              subtitle: 'watch_ad_adfree_sub'.tr,
+                              onTap: () {
+                                AdService().showRewardedAd(
+                                  onRewarded: () {
+                                    AdService().grantAdFreePass();
+                                    Get.snackbar(
+                                      'ad_free_active'.tr,
+                                      'ad_free_sub'.tr,
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                  },
+                                  onNotReady: () {
+                                    Get.snackbar(
+                                      'ad_not_ready'.tr,
+                                      'ad_not_ready_sub'.tr,
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                  },
+                                );
+                              },
+                              showDivider: true,
+                            );
+                          }
+                          final remaining = adFree.difference(DateTime.now());
+                          final mins = remaining.inMinutes;
+                          return _SettingsTile(
+                            icon: Icons.block_rounded,
+                            iconColor: Colors.green,
+                            title: 'ad_free_active'.tr,
+                            subtitle: 'ad_free_remaining'.trParams(
+                                {'mins': '$mins'}),
+                            onTap: () {},
+                            showDivider: true,
+                            showArrow: false,
+                          );
+                        }),
+                        _SettingsTile(
                           icon: Icons.star_rounded,
                           iconColor: Colors.amber,
                           title: 'rate_app'.tr,
                           subtitle: 'rate_app_sub'.tr,
                           onTap: _rateApp,
-                          showDivider: true,
-                        ),
-                        _SettingsTile(
-                          icon: Icons.share_rounded,
-                          iconColor: Colors.blue,
-                          title: 'share_app'.tr,
-                          subtitle: 'share_app_sub'.tr,
-                          onTap: _shareApp,
                           showDivider: true,
                         ),
                         _SettingsTile(
@@ -784,7 +913,7 @@ class SettingsScreen extends StatelessWidget {
                           icon: Icons.info_rounded,
                           iconColor: Colors.grey,
                           title: 'version'.tr,
-                          subtitle: '1.0.2',
+                          subtitle: '1.0.4',
                           onTap: () {},
                           showDivider: false,
                           showArrow: false,

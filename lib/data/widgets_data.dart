@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../models/widget_category.dart';
 import '../models/widget_model.dart';
+import 'extra_widgets_data.dart';
 
 class WidgetsData {
-  static List<WidgetCategory> getCategories() {
+  static List<WidgetCategory> _baseCategories() {
     return [
       WidgetCategory(
         id: 'basic',
@@ -55,6 +56,25 @@ class WidgetsData {
         widgetCount: 10,
       ),
     ];
+  }
+
+  static List<WidgetCategory> getCategories() {
+    final categories = [
+      ..._baseCategories(),
+      ...ExtraWidgetsData.getCategories(),
+    ];
+    return categories
+        .map(
+          (c) => WidgetCategory(
+            id: c.id,
+            name: c.name,
+            description: c.description,
+            icon: c.icon,
+            color: c.color,
+            widgetCount: getWidgetsByCategory(c.id).length,
+          ),
+        )
+        .toList();
   }
 
   static List<WidgetModel> getAllWidgets() {
@@ -2850,6 +2870,8 @@ class PopupMenuButtonNavExample extends StatelessWidget {
           WidgetProperty(name: 'onSelected', description: 'Selection callback'),
         ],
       ),
+
+      ...ExtraWidgetsData.getWidgets(),
     ];
   }
 

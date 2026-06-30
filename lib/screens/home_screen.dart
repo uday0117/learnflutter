@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../controllers/engagement_controller.dart';
 import '../controllers/favorites_controller.dart';
 import '../controllers/progress_controller.dart';
 import '../controllers/streak_controller.dart';
 import '../controllers/theme_controller.dart';
+import '../controllers/weekly_challenge_controller.dart';
 import '../data/widgets_data.dart';
 import '../models/widget_category.dart';
 import '../screens/dart_cheatsheet_screen.dart';
@@ -12,6 +14,8 @@ import '../screens/interview_screen.dart';
 import '../screens/quiz_screen.dart';
 import '../screens/widget_detail_screen.dart';
 import '../screens/widgets_list_screen.dart';
+import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
 import '../widgets/banner_ad_widget.dart';
 import 'favorites_screen.dart';
 import 'search_screen.dart';
@@ -124,7 +128,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _selectedIndex = index),
+        onTap: () {
+          if (_selectedIndex == index) return;
+          setState(() => _selectedIndex = index);
+          const tabNames = ['home', 'favorites', 'search', 'settings'];
+          AnalyticsService().logTabSelected(tabNames[index]);
+        },
         child: Container(
           color: Colors.transparent,
           child: Column(
@@ -297,6 +306,16 @@ class CategoriesScreen extends StatelessWidget {
             // ── Widget of the Day ──
             SliverToBoxAdapter(
               child: _WidgetOfTheDay(isDark: isDark),
+            ),
+
+            // ── Daily Goal ──
+            SliverToBoxAdapter(
+              child: _DailyGoalCard(isDark: isDark),
+            ),
+
+            // ── Weekly Challenge ──
+            SliverToBoxAdapter(
+              child: _WeeklyChallengeCard(isDark: isDark),
             ),
 
             // ── Progress card ──
@@ -474,6 +493,423 @@ class _WidgetOfTheDay extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+// ─── Daily Goal Card ───
+class _DailyGoalCard extends StatelessWidget {
+  final bool isDark;
+  const _DailyGoalCard({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final engagement = Get.find<EngagementController>();
+    final theme = Get.find<ThemeController>();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Obx(() {
+        final primary = theme.primaryColor.value;
+        final widgetsDone = engagement.dailyWidgetsViewed.value;
+        final quizDone = engagement.dailyQuizDone.value;
+        final complete = engagement.isDailyGoalComplete;
+        final remaining = engagement.widgetsRemaining;
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: complete
+                  ? Colors.green.withValues(alpha: 0.5)
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.grey.shade200),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    complete ? '✅' : '🎯',
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'daily_goal'.tr,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          complete
+                              ? 'daily_goal_complete'.tr
+                              : 'daily_goal_sub'.tr,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white54 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (complete)
+                    TextButton.icon(
+                      onPressed: () => engagement.shareApp(),
+                      icon: const Icon(Icons.share_rounded, size: 18),
+                      label: Text('share'.tr),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: engagement.dailyProgress,
+                  minHeight: 8,
+                  backgroundColor: primary.withValues(alpha: 0.15),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    complete ? Colors.green : primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  _GoalChip(
+                    done: widgetsDone >= EngagementController.dailyWidgetGoal,
+                    label: '$widgetsDone/${EngagementController.dailyWidgetGoal} ${'widgets'.tr}',
+                    primary: primary,
+                  ),
+                  const SizedBox(width: 8),
+                  _GoalChip(
+                    done: quizDone,
+                    label: 'quiz'.tr,
+                    primary: primary,
+                  ),
+                ],
+              ),
+              if (!complete) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    if (remaining > 0)
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            final all = WidgetsData.getAllWidgets();
+                            final idx = DateTime.now()
+                                    .difference(DateTime(2024, 1, 1))
+                                    .inDays %
+                                all.length;
+                            Get.to(() =>
+                                WidgetDetailScreen(widgetModel: all[idx]));
+                          },
+                          child: Text('learn_widget'.tr),
+                        ),
+                      ),
+                    if (remaining > 0 && !quizDone) const SizedBox(width: 8),
+                    if (!quizDone)
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Get.to(() => const QuizScreen()),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: Text('take_quiz'.tr),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+              if (!AdService().isAdFree) ...[
+                const SizedBox(height: 10),
+                TextButton.icon(
+                  onPressed: () {
+                    AdService().showRewardedAd(
+                      onRewarded: () {
+                        AdService().grantAdFreePass();
+                        Get.snackbar(
+                          'ad_free_active'.tr,
+                          'ad_free_sub'.tr,
+                          snackPosition: SnackPosition.BOTTOM,
+                          duration: const Duration(seconds: 3),
+                        );
+                      },
+                      onNotReady: () {
+                        Get.snackbar(
+                          'ad_not_ready'.tr,
+                          'ad_not_ready_sub'.tr,
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.play_circle_outline, size: 18),
+                  label: Text(
+                    'watch_ad_adfree'.tr,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      }),
+    );
+  }
+}
+
+// ─── Weekly Challenge Card ───
+class _WeeklyChallengeCard extends StatelessWidget {
+  final bool isDark;
+  const _WeeklyChallengeCard({required this.isDark});
+
+  void _showLeaderboard(BuildContext context) {
+    final weekly = Get.find<WeeklyChallengeController>();
+    final theme = Get.find<ThemeController>();
+    final entries = weekly.leaderboard;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'weekly_leaderboard'.tr,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'weekly_leaderboard_sub'.tr,
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 16),
+              if (entries.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      'weekly_to_go'.trParams({
+                        'pts': '${WeeklyChallengeController.weeklyGoal}',
+                      }),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  ),
+                )
+              else
+                ...entries.asMap().entries.map((e) {
+                  final rank = e.key + 1;
+                  final entry = e.value;
+                  final primary = theme.primaryColor.value;
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: rank == 1
+                          ? Colors.amber.withValues(alpha: 0.2)
+                          : primary.withValues(alpha: 0.1),
+                      child: Text(
+                        'weekly_rank'.trParams({'rank': '$rank'}),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: rank == 1 ? Colors.amber.shade800 : primary,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      entry.isCurrent
+                          ? 'weekly_this_week'.tr
+                          : entry.weekId,
+                      style: TextStyle(
+                        fontWeight:
+                            entry.isCurrent ? FontWeight.bold : FontWeight.w500,
+                      ),
+                    ),
+                    trailing: Text(
+                      'weekly_pts'.trParams({'pts': '${entry.points}'}),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  );
+                }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final weekly = Get.find<WeeklyChallengeController>();
+    final theme = Get.find<ThemeController>();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Obx(() {
+        final primary = theme.primaryColor.value;
+        final complete = weekly.isWeeklyGoalComplete;
+        final pts = weekly.weeklyPoints.value;
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: complete
+                  ? Colors.amber.withValues(alpha: 0.5)
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.grey.shade200),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    complete ? '🏆' : '⚡',
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'weekly_challenge'.tr,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          complete
+                              ? 'weekly_challenge_complete'.tr
+                              : 'weekly_challenge_sub'.trParams({
+                                  'goal':
+                                      '${WeeklyChallengeController.weeklyGoal}',
+                                }),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white54 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => _showLeaderboard(context),
+                    child: Text('view_leaderboard'.tr),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: weekly.weeklyProgress,
+                  minHeight: 8,
+                  backgroundColor: primary.withValues(alpha: 0.15),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    complete ? Colors.amber : primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                complete
+                    ? 'weekly_pts'.trParams({'pts': '$pts'})
+                    : 'weekly_to_go'.trParams(
+                        {'pts': '${weekly.pointsToGoal}'},
+                      ),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: complete ? Colors.amber.shade700 : primary,
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _GoalChip extends StatelessWidget {
+  final bool done;
+  final String label;
+  final Color primary;
+
+  const _GoalChip({
+    required this.done,
+    required this.label,
+    required this.primary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: done
+            ? Colors.green.withValues(alpha: 0.12)
+            : primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            done ? Icons.check_circle : Icons.circle_outlined,
+            size: 14,
+            color: done ? Colors.green : primary,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: done ? Colors.green : primary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
