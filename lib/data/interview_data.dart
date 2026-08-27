@@ -705,5 +705,114 @@ class ApiResponse<T> {
       level: QuestionLevel.advanced,
       category: 'Layout',
     ),
+
+    // ─────────────── NEW (v1.0.6) ───────────────
+    InterviewQuestion(
+      id: 'q46',
+      question: 'What is the difference between hot reload and hot restart?',
+      answer:
+          'Hot Reload: Injects updated source code into the running Dart VM and rebuilds the widget tree. Preserves app state. Fast (~1 second).\n\nHot Restart: Restarts the entire Flutter app, losing all state. Required when you change:\n• Global variables / static fields\n• initState() logic\n• Enum definitions\n• Generic type arguments\n\nUse hot reload for UI tweaks; hot restart for structural changes.',
+      level: QuestionLevel.beginner,
+      category: 'Basics',
+    ),
+    InterviewQuestion(
+      id: 'q47',
+      question: 'What is pubspec.yaml and what does it contain?',
+      answer:
+          'pubspec.yaml is Flutter/Dart\'s project manifest. It defines:\n\n• name, description, version\n• environment (SDK constraints)\n• dependencies (packages the app uses)\n• dev_dependencies (test/lint tools)\n• flutter section: assets, fonts, uses-material-design\n\nRun `flutter pub get` after editing to fetch new packages.',
+      level: QuestionLevel.beginner,
+      category: 'Basics',
+    ),
+    InterviewQuestion(
+      id: 'q48',
+      question: 'What is the difference between ListView and SingleChildScrollView?',
+      answer:
+          'SingleChildScrollView: Wraps ONE child and makes it scrollable. All children are built at once — bad for long lists.\n\nListView: Built for lists. ListView.builder only builds visible items (lazy), making it efficient for thousands of items.\n\nRule of thumb: Use ListView.builder for dynamic/long lists; SingleChildScrollView for short forms or a Column that might overflow.',
+      level: QuestionLevel.intermediate,
+      category: 'Layout',
+    ),
+    InterviewQuestion(
+      id: 'q49',
+      question: 'What is the difference between Navigator 1.0 and Navigator 2.0?',
+      answer:
+          'Navigator 1.0 (imperative): Push/pop routes with Navigator.push/pop or Get.to/Get.back. Simple but hard to sync with browser URL or deep links.\n\nNavigator 2.0 (declarative): Uses Router, RouteInformationParser, and RouterDelegate. The app state drives the navigation stack. Required for:\n• Web URL sync\n• Deep linking\n• Complex nested navigation\n\nGetX and go_router abstract over both approaches.',
+      level: QuestionLevel.intermediate,
+      category: 'Navigation',
+    ),
+    InterviewQuestion(
+      id: 'q50',
+      question: 'What is Flutter DevTools and what can you do with it?',
+      answer:
+          'Flutter DevTools is a suite of performance and debugging tools:\n\n• Widget Inspector — visualize widget tree, find layout issues\n• Performance — frame rendering timeline, identify jank\n• Memory — heap snapshots, detect leaks\n• Network — monitor HTTP requests\n• Logging — view app logs\n\nLaunch with `flutter pub global run devtools` or from VS Code/Android Studio.',
+      level: QuestionLevel.intermediate,
+      category: 'Tools',
+    ),
+    InterviewQuestion(
+      id: 'q51',
+      question: 'What is the difference between mainAxisAlignment and crossAxisAlignment?',
+      answer:
+          'In a Row/Column (Flex widgets):\n\n• mainAxisAlignment — aligns children along the main axis (horizontal for Row, vertical for Column): start, end, center, spaceBetween, spaceAround, spaceEvenly\n\n• crossAxisAlignment — aligns children along the cross axis (vertical for Row, horizontal for Column): start, end, center, stretch, baseline',
+      codeExample: '''Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [Icon(Icons.star), Text('Rating'), Text('4.5')],
+)''',
+      level: QuestionLevel.beginner,
+      category: 'Layout',
+    ),
+    InterviewQuestion(
+      id: 'q52',
+      question: 'What is a GlobalKey and when should you use it?',
+      answer:
+          'GlobalKey uniquely identifies a widget across the entire app. Uses:\n\n• Access State of a distant StatefulWidget (e.g., FormState for validation)\n• Preserve widget state when moving in the tree\n• Scroll to a specific widget\n\nAvoid overusing GlobalKeys — they are expensive. Prefer callbacks, Provider, or controllers for most state sharing.',
+      codeExample: '''final _formKey = GlobalKey<FormState>();
+
+Form(
+  key: _formKey,
+  child: TextFormField(validator: (v) => v!.isEmpty ? 'Required' : null),
+)
+
+// Validate from anywhere:
+if (_formKey.currentState!.validate()) { ... }''',
+      level: QuestionLevel.intermediate,
+      category: 'Widgets',
+    ),
+    InterviewQuestion(
+      id: 'q53',
+      question: 'How do you handle deep links in Flutter?',
+      answer:
+          'Deep links open specific app screens from URLs.\n\nApproaches:\n• app_links / uni_links package — listen for incoming URIs\n• Android: intent-filter in AndroidManifest.xml\n• iOS: Associated Domains + URL schemes in Info.plist\n• go_router — built-in deep link support\n\nFlow: App receives URI → parse path/params → navigate to target screen.',
+      level: QuestionLevel.intermediate,
+      category: 'Navigation',
+    ),
+    InterviewQuestion(
+      id: 'q54',
+      question: 'What is the WidgetsBindingObserver mixin used for?',
+      answer:
+          'WidgetsBindingObserver lets a State object listen to app lifecycle events:\n\n• resumed — app visible and interactive\n• inactive — app inactive (e.g., phone call overlay)\n• paused — app not visible\n• detached — app about to be destroyed\n\nCommon uses: pause/resume video, save draft, refresh data on resume, show app open ads.',
+      codeExample: '''class _MyState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) pauseVideo();
+    if (state == AppLifecycleState.resumed) resumeVideo();
+  }
+}''',
+      level: QuestionLevel.intermediate,
+      category: 'State',
+    ),
+    InterviewQuestion(
+      id: 'q55',
+      question: 'What strategies reduce Flutter app size for Play Store?',
+      answer:
+          'Key size reduction techniques:\n\n• flutter build apk --split-per-abi — separate APKs per CPU architecture\n• Use App Bundle (AAB) — Google Play delivers optimized APK\n• Remove unused assets and fonts\n• Use --tree-shake-icons to strip unused Material icons\n• Obfuscate with --obfuscate --split-debug-info\n• Avoid heavy packages; audit with `dart pub deps`\n• Use vector graphics (SVG) over large PNGs\n• Enable R8/ProGuard for Android release builds',
+      level: QuestionLevel.advanced,
+      category: 'Performance',
+    ),
   ];
 }

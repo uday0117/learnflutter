@@ -318,6 +318,11 @@ class CategoriesScreen extends StatelessWidget {
               child: _WeeklyChallengeCard(isDark: isDark),
             ),
 
+            // ── Invite Friends (viral growth) ──
+            SliverToBoxAdapter(
+              child: _InviteFriendsCard(isDark: isDark),
+            ),
+
             // ── Progress card ──
             SliverToBoxAdapter(
               child: Obx(() {
@@ -860,6 +865,100 @@ class _WeeklyChallengeCard extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: complete ? Colors.amber.shade700 : primary,
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+}
+
+// ─── Invite Friends Card ───
+class _InviteFriendsCard extends StatelessWidget {
+  final bool isDark;
+  const _InviteFriendsCard({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final engagement = Get.find<EngagementController>();
+    final theme = Get.find<ThemeController>();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Obx(() {
+        final primary = theme.primaryColor.value;
+        final claimed = engagement.inviteRewardClaimedToday.value;
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF667EEA).withValues(alpha: isDark ? 0.35 : 1),
+                const Color(0xFF764BA2).withValues(alpha: isDark ? 0.35 : 1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF667EEA).withValues(alpha: 0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              const Text('👥', style: TextStyle(fontSize: 32)),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'invite_friends'.tr,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      claimed
+                          ? 'invite_friends_done'.tr
+                          : 'invite_friends_sub'.tr,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: () => engagement.shareForInviteReward(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: primary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.share_rounded, size: 18),
+                label: Text(
+                  'invite_share'.tr,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],

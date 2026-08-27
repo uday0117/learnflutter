@@ -4,6 +4,8 @@ import 'package:in_app_review/in_app_review.dart';
 
 import '../controllers/engagement_controller.dart';
 import '../data/widgets_data.dart';
+import '../services/home_widget_service.dart';
+import 'streak_controller.dart';
 
 class ProgressController extends GetxController {
   static const _viewedKey = 'viewed_widgets';
@@ -54,6 +56,15 @@ class ProgressController extends GetxController {
     if (Get.isRegistered<EngagementController>()) {
       Get.find<EngagementController>().recordWidgetView();
     }
+    _syncHomeWidget();
+  }
+
+  void _syncHomeWidget() {
+    if (!Get.isRegistered<StreakController>()) return;
+    HomeWidgetService().update(
+      streak: Get.find<StreakController>().currentStreak.value,
+      progressPercent: (progressPercent * 100).round(),
+    );
   }
 
   Future<void> _maybeRequestReview(int views) async {

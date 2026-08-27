@@ -406,8 +406,25 @@ class SettingsScreen extends StatelessWidget {
                       controller: scrollController,
                       children: [
                         _ChangelogVersion(
-                          version: 'v1.0.4',
+                          version: 'v1.0.5',
                           label: 'whats_new_current'.tr,
+                          primary: primary,
+                          isDark: isDark,
+                          items: const [
+                            ('🖼️', 'Shareable achievement image cards for social'),
+                            ('🔗', 'HTTPS deep links via ukrsolutions.in — share any widget URL'),
+                            ('📱', 'Android home screen widget — streak & widget of the day'),
+                            ('📚', '50 quiz questions & 55 interview Q&A added'),
+                            ('👋', 'Welcome onboarding for new learners'),
+                            ('👥', 'Invite Friends — share & earn 2hr ad-free'),
+                            ('📢', 'Widget shares now include Play Store link'),
+                            ('💰', 'Quiz completion interstitial for better monetization'),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _ChangelogVersion(
+                          version: 'v1.0.4',
+                          label: null,
                           primary: primary,
                           isDark: isDark,
                           items: const [
@@ -789,6 +806,23 @@ class SettingsScreen extends StatelessWidget {
                           showDivider: true,
                         ),
                         _SettingsTile(
+                          icon: Icons.widgets_rounded,
+                          iconColor: Colors.teal,
+                          title: 'home_widget_title'.tr,
+                          subtitle: 'home_widget_sub'.tr,
+                          onTap: () {
+                            Get.snackbar(
+                              'home_widget_title'.tr,
+                              'home_widget_hint'.tr,
+                              snackPosition: SnackPosition.BOTTOM,
+                              duration: const Duration(seconds: 5),
+                              margin: const EdgeInsets.all(16),
+                              borderRadius: 12,
+                            );
+                          },
+                          showDivider: true,
+                        ),
+                        _SettingsTile(
                           icon: Icons.share_rounded,
                           iconColor: Colors.blue,
                           title: 'share_app'.tr,
@@ -913,7 +947,7 @@ class SettingsScreen extends StatelessWidget {
                           icon: Icons.info_rounded,
                           iconColor: Colors.grey,
                           title: 'version'.tr,
-                          subtitle: '1.0.4',
+                          subtitle: '1.0.5',
                           onTap: () {},
                           showDivider: false,
                           showArrow: false,

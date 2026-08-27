@@ -7,16 +7,22 @@ import 'package:get_storage/get_storage.dart';
 import 'controllers/engagement_controller.dart';
 import 'controllers/favorites_controller.dart';
 import 'controllers/interview_review_controller.dart';
+import 'controllers/onboarding_controller.dart';
 import 'controllers/progress_controller.dart';
 import 'controllers/quiz_controller.dart';
 import 'controllers/streak_controller.dart';
 import 'controllers/theme_controller.dart';
+import 'controllers/update_controller.dart';
 import 'controllers/weekly_challenge_controller.dart';
 import 'screens/splash_screen.dart';
 import 'services/ad_service.dart';
 import 'services/analytics_service.dart';
+import 'services/deep_link_service.dart';
+import 'services/home_widget_service.dart';
+import 'services/in_app_update_service.dart';
 import 'services/notification_service.dart';
 import 'translations/app_translations.dart';
+import 'widgets/in_app_update_banner.dart';
 
 void main() async {
   runZonedGuarded(() async {
@@ -34,15 +40,21 @@ void main() async {
     // Daily learning reminders
     await NotificationService().initialize();
 
+    // Deep links & home screen widget
+    await DeepLinkService().initialize();
+    await HomeWidgetService().initialize();
+
     // Initialize controllers (order matters — ThemeController first for locale)
     final themeController = Get.put(ThemeController());
     Get.put(FavoritesController());
+    Get.put(OnboardingController());
     Get.put(ProgressController());
     Get.put(InterviewReviewController());
     Get.put(StreakController());
     Get.put(QuizController());
     Get.put(EngagementController());
     Get.put(WeeklyChallengeController());
+    Get.put(UpdateController());
 
     // Restore saved locale (or null = system default)
     final savedLocale = themeController.getSavedLocale();
@@ -71,6 +83,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      InAppUpdateService().initialize();
+    });
   }
 
   @override
@@ -85,6 +100,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       AdService().onAppPaused();
     } else if (state == AppLifecycleState.resumed) {
       AdService().onAppResumed();
+      InAppUpdateService().onAppResumed();
     }
   }
 
@@ -113,7 +129,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           data: MediaQuery.of(
             context,
           ).copyWith(textScaler: TextScaler.linear(themeController.fontScale)),
-          child: child!,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              child!,
+              const InAppUpdateBanner(),
+            ],
+          ),
         ),
         home: const SplashScreen(),
       ),

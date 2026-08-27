@@ -6,9 +6,15 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../controllers/theme_controller.dart';
+import '../controllers/onboarding_controller.dart';
+import '../controllers/progress_controller.dart';
+import '../controllers/streak_controller.dart';
 import '../services/ad_service.dart';
+import '../services/deep_link_service.dart';
+import '../services/home_widget_service.dart';
 import '../widgets/flutter_glow_logo.dart';
 import 'home_screen.dart';
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -194,6 +200,17 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _navigateToHome() async {
     await Future.delayed(const Duration(milliseconds: 2800));
     if (!mounted) return;
+
+    final onboarding = Get.find<OnboardingController>();
+    if (!onboarding.isComplete) {
+      Get.off(
+        () => const OnboardingScreen(),
+        transition: Transition.fadeIn,
+        duration: const Duration(milliseconds: 500),
+      );
+      return;
+    }
+
     AdService().showAppOpenAdIfAvailable();
     await Future.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
@@ -201,6 +218,21 @@ class _SplashScreenState extends State<SplashScreen>
       () => const HomeScreen(),
       transition: Transition.fadeIn,
       duration: const Duration(milliseconds: 500),
+    );
+    DeepLinkService().handlePendingLink();
+    _syncHomeWidget();
+  }
+
+  void _syncHomeWidget() {
+    if (!Get.isRegistered<StreakController>() ||
+        !Get.isRegistered<ProgressController>()) {
+      return;
+    }
+    final streak = Get.find<StreakController>();
+    final progress = Get.find<ProgressController>();
+    HomeWidgetService().update(
+      streak: streak.currentStreak.value,
+      progressPercent: (progress.progressPercent * 100).round(),
     );
   }
 
@@ -506,7 +538,7 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Opacity(
                         opacity: _subtitleFade.value * 0.5,
                         child: Text(
-                          'v1.0.4',
+                          'v1.0.5',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             fontSize: 11,

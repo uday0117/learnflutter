@@ -12,6 +12,7 @@ class NotificationService {
 
   static const _channelId = 'daily_learning';
   static const _notifId = 1001;
+  static const _streakNotifId = 1002;
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
@@ -66,6 +67,7 @@ class NotificationService {
     if (!_initialized) await initialize();
 
     await _plugin.cancel(_notifId);
+    await _plugin.cancel(_streakNotifId);
 
     final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime(
@@ -103,9 +105,48 @@ class NotificationService {
     } catch (e) {
       debugPrint('[NotificationService] Schedule failed: $e');
     }
+
+    // Evening streak reminder at 8 PM
+    var streakScheduled = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      20,
+      0,
+    );
+    if (streakScheduled.isBefore(now)) {
+      streakScheduled = streakScheduled.add(const Duration(days: 1));
+    }
+
+    const streakAndroid = AndroidNotificationDetails(
+      _channelId,
+      'Daily Learning',
+      channelDescription: 'Reminds you to learn Flutter widgets each day',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+    );
+
+    try {
+      await _plugin.zonedSchedule(
+        _streakNotifId,
+        'Don\'t lose your streak! 🔥',
+        'Open Learn Flutter today to keep your learning streak alive.',
+        streakScheduled,
+        const NotificationDetails(
+          android: streakAndroid,
+          iOS: iosDetails,
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (e) {
+      debugPrint('[NotificationService] Streak reminder failed: $e');
+    }
   }
 
   Future<void> cancelDailyReminder() async {
     await _plugin.cancel(_notifId);
+    await _plugin.cancel(_streakNotifId);
   }
 }

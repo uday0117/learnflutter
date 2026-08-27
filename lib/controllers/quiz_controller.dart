@@ -123,6 +123,12 @@ class QuizController extends GetxController {
   }
 
   void _finishQuiz() {
+    AdService().showInterstitialAdWithCallback(() {
+      _applyQuizResults();
+    });
+  }
+
+  void _applyQuizResults() {
     isFinished.value = true;
     totalPlayed.value++;
     totalCorrect.value += score.value;

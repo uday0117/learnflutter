@@ -45,6 +45,15 @@ class ShareMilestoneDialog {
                     color: Colors.grey.shade600,
                   ),
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  'share_achievement_sub'.tr,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -54,7 +63,7 @@ class ShareMilestoneDialog {
                       engagement.shareAchievement(type);
                     },
                     icon: const Icon(Icons.share_rounded),
-                    label: Text('share_achievement'.tr),
+                    label: Text('share_as_image'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primary,
                       foregroundColor: Colors.white,

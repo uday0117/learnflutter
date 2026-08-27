@@ -9,6 +9,7 @@ import '../controllers/progress_controller.dart';
 import '../models/widget_model.dart';
 import '../services/ad_service.dart';
 import '../services/analytics_service.dart';
+import '../services/deep_link_service.dart';
 import '../widgets/banner_ad_widget.dart';
 
 class WidgetDetailScreen extends StatefulWidget {
@@ -63,11 +64,16 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
   }
 
   void _shareCode(String code) {
-    final text = '📱 Flutter Widget — ${widget.widgetModel.name}\n\n'
-        '${widget.widgetModel.description}\n\n'
-        '```dart\n$code\n```'
-        '\n\n— Learn Flutter App';
+    final text = '${DeepLinkService.widgetShareText(
+      name: widget.widgetModel.name,
+      description: widget.widgetModel.description,
+      widgetId: widget.widgetModel.id,
+    )}\n\n```dart\n$code\n```';
     Share.share(text);
+    AnalyticsService().logEvent('widget_shared', parameters: {
+      'widget_id': widget.widgetModel.id,
+      'widget_name': widget.widgetModel.name,
+    });
   }
 
   @override

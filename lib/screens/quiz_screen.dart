@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../controllers/quiz_controller.dart';
 import '../controllers/theme_controller.dart';
 import '../data/quiz_data.dart';
 import '../services/ad_service.dart';
+import '../services/share_card_service.dart';
 import '../widgets/banner_ad_widget.dart';
 
 class QuizScreen extends StatelessWidget {
@@ -711,8 +711,9 @@ class _ResultView extends StatelessWidget {
                             const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: () {
-                        Share.share(
-                          '🎯 I scored ${quiz.score.value}/${quiz.totalQuestions} on the Flutter Quiz in Learn Flutter app!\n\nTest your Flutter knowledge too: https://play.google.com/store/apps/details?id=com.uksolutions.learnflutter',
+                        ShareCardService().shareQuizResult(
+                          quiz.score.value,
+                          quiz.totalQuestions,
                         );
                       },
                       icon: Icon(Icons.share_rounded, color: primary),

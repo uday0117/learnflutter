@@ -33,7 +33,7 @@ class AppTranslations extends Translations {
     'categories': 'Categories',
     'learn_more': 'Learn More',
     'interview_qa': 'Interview Q&A',
-    'interview_qa_subtitle': '45 Flutter interview questions',
+    'interview_qa_subtitle': '55 Flutter interview questions',
     'dart_cheatsheet': 'Dart Cheatsheet',
     'dart_cheatsheet_subtitle': 'Quick reference for Dart',
     'view_all': 'View All',
@@ -70,6 +70,12 @@ class AppTranslations extends Translations {
     'privacy_policy': 'Privacy Policy',
     'terms_conditions': 'Terms & Conditions',
     'version': 'Version',
+    'update_available_title': 'Updating Learn Flutter',
+    'update_downloading': 'Downloading update in the background…',
+    'update_downloading_sub': 'Keep using the app — we\'ll install automatically.',
+    'update_ready': 'Update ready — installing now…',
+    'update_installing_title': 'Installing update',
+    'update_installing': 'Restarting with the latest version…',
     'rate_app': 'Rate App',
     'rate_app_sub': 'Love the app? Leave a review!',
     'share_app': 'Share App',
@@ -139,6 +145,8 @@ class AppTranslations extends Translations {
     'daily_reminder_sub': 'Get notified at 9 AM to keep learning',
     'notification_denied': 'Enable notifications in system settings',
     'share_achievement': 'Share Achievement',
+    'share_achievement_sub': 'Share a branded image card to social media',
+    'share_as_image': 'Share as Image',
     'maybe_later': 'Maybe Later',
     'milestone_streak_3_title': '3-Day Streak!',
     'milestone_streak_7_title': '7-Day Streak — On Fire!',
@@ -208,6 +216,33 @@ class AppTranslations extends Translations {
     'quiz_bonus_confirm':
         'Watch a short rewarded ad to unlock 5 bonus questions. This is completely optional.',
     'ad_not_ready': 'Ad not ready yet. Please try again in a moment.',
+    // Onboarding
+    'onboarding_skip': 'Skip',
+    'onboarding_next': 'Next',
+    'onboarding_get_started': 'Get Started',
+    'onboarding_enable_reminder': 'Enable Daily Reminder',
+    'onboarding_title_1': '125+ Flutter Widgets',
+    'onboarding_body_1':
+        'Explore every widget with live previews, syntax, properties, and copy-ready code examples.',
+    'onboarding_title_2': 'Quiz & Interview Prep',
+    'onboarding_body_2':
+        'Test your knowledge with 50+ quiz questions and master 55+ real Flutter interview questions.',
+    'onboarding_title_3': 'Build Daily Habits',
+    'onboarding_body_3':
+        'Track streaks, hit daily goals, and get reminders so you never stop learning.',
+    // Invite friends
+    'invite_friends': 'Invite Friends',
+    'invite_friends_sub': 'Share the app & get 2hr ad-free today',
+    'invite_friends_done': 'Thanks for sharing! Reward claimed today',
+    'invite_share': 'Share',
+    'invite_reward_title': 'Thanks for sharing! 🎉',
+    'invite_reward_sub': 'You earned 2 hours of ad-free learning.',
+    // Home screen widget
+    'home_widget_title': 'Home Screen Widget',
+    'home_widget_sub': 'Add a widget for daily streak & widget-of-the-day',
+    'home_widget_hint': 'Long-press your home screen → Widgets → Learn Flutter',
+    // Deep links
+    'widget_shared': 'Widget shared with deep link',
   };
 
   // ──────────────── SPANISH ────────────────

@@ -318,5 +318,194 @@ class QuizData {
           'Navigator.pop() removes the current route from the stack, returning to the previous screen.',
       category: QuizCategory.navigation,
     ),
+
+    // ── More Widgets ──
+    QuizQuestion(
+      question: 'Which widget wraps its child in Material Design ink splash effects?',
+      options: ['GestureDetector', 'InkWell', 'MaterialButton', 'SplashBox'],
+      correctIndex: 1,
+      explanation:
+          'InkWell shows Material ink splash and highlight effects on tap.',
+      category: QuizCategory.widgets,
+    ),
+    QuizQuestion(
+      question: 'What widget is used to clip its child to a specific shape?',
+      options: ['ClipRRect', 'ShapeClip', 'BorderClip', 'MaskWidget'],
+      correctIndex: 0,
+      explanation:
+          'ClipRRect clips its child using rounded rectangle borders.',
+      category: QuizCategory.widgets,
+    ),
+    QuizQuestion(
+      question: 'Which widget provides a dropdown menu of items?',
+      options: ['DropdownMenu', 'SelectBox', 'MenuButton', 'PopupMenu'],
+      correctIndex: 0,
+      explanation:
+          'DropdownMenu (Material 3) provides a dropdown selection menu.',
+      category: QuizCategory.widgets,
+    ),
+    QuizQuestion(
+      question: 'What widget displays a circular progress indicator?',
+      options: [
+        'ProgressBar',
+        'CircularProgressIndicator',
+        'LoadingSpinner',
+        'ActivityIndicator'
+      ],
+      correctIndex: 1,
+      explanation:
+          'CircularProgressIndicator shows Material Design circular loading progress.',
+      category: QuizCategory.widgets,
+    ),
+    QuizQuestion(
+      question: 'Which widget is used for swipe-to-dismiss behavior?',
+      options: ['SwipeAction', 'Dismissible', 'SlideToDelete', 'SwipeBox'],
+      correctIndex: 1,
+      explanation:
+          'Dismissible wraps a child that can be dismissed by swiping.',
+      category: QuizCategory.widgets,
+    ),
+
+    // ── More Layout ──
+    QuizQuestion(
+      question: 'Which widget creates a grid of equally sized children?',
+      options: ['GridView', 'TableView', 'GridLayout', 'MatrixView'],
+      correctIndex: 0,
+      explanation:
+          'GridView displays items in a scrollable 2D grid layout.',
+      category: QuizCategory.layout,
+    ),
+    QuizQuestion(
+      question: 'What does `Expanded` do inside a Row or Column?',
+      options: [
+        'Adds padding',
+        'Fills remaining space along the main axis',
+        'Centers the child',
+        'Wraps content size'
+      ],
+      correctIndex: 1,
+      explanation:
+          'Expanded forces its child to fill available space in a Flex layout.',
+      category: QuizCategory.layout,
+    ),
+    QuizQuestion(
+      question: 'Which widget stacks children on top of each other?',
+      options: ['Layer', 'Stack', 'Overlay', 'ZIndex'],
+      correctIndex: 1,
+      explanation:
+          'Stack positions children relative to the edges of the stack box.',
+      category: QuizCategory.layout,
+    ),
+    QuizQuestion(
+      question: 'What widget provides a fixed header while content scrolls?',
+      options: ['StickyHeader', 'SliverAppBar', 'FixedBar', 'HeaderView'],
+      correctIndex: 1,
+      explanation:
+          'SliverAppBar is a sliver that can pin or float while scrolling.',
+      category: QuizCategory.layout,
+    ),
+
+    // ── More State ──
+    QuizQuestion(
+      question: 'What is the purpose of `initState()` in a StatefulWidget?',
+      options: [
+        'Build the UI',
+        'One-time initialization before first build',
+        'Dispose resources',
+        'Update state on every rebuild'
+      ],
+      correctIndex: 1,
+      explanation:
+          'initState() is called once when the State object is created, ideal for setup.',
+      category: QuizCategory.state,
+    ),
+    QuizQuestion(
+      question: 'Which method is called when a StatefulWidget is removed from the tree?',
+      options: ['onDestroy', 'dispose', 'deinit', 'cleanup'],
+      correctIndex: 1,
+      explanation:
+          'dispose() is called when the State object is permanently removed.',
+      category: QuizCategory.state,
+    ),
+    QuizQuestion(
+      question: 'What does `setState()` do?',
+      options: [
+        'Rebuilds the entire app',
+        'Notifies framework that state changed and triggers rebuild',
+        'Saves state to disk',
+        'Resets all variables'
+      ],
+      correctIndex: 1,
+      explanation:
+          'setState() marks the widget dirty so Flutter rebuilds it with new state.',
+      category: QuizCategory.state,
+    ),
+
+    // ── More Dart ──
+    QuizQuestion(
+      question: 'What is a `mixin` in Dart?',
+      options: [
+        'A type of widget',
+        'A way to reuse code across class hierarchies',
+        'A database query',
+        'An async function'
+      ],
+      correctIndex: 1,
+      explanation:
+          'Mixins let you reuse methods across multiple classes without inheritance.',
+      category: QuizCategory.dart,
+    ),
+    QuizQuestion(
+      question: 'What does the `late` keyword do in Dart?',
+      options: [
+        'Makes a variable final',
+        'Defers initialization but enforces it before use',
+        'Creates a lazy widget',
+        'Marks a variable as nullable'
+      ],
+      correctIndex: 1,
+      explanation:
+          'late allows non-nullable variables to be initialized later, with runtime check.',
+      category: QuizCategory.dart,
+    ),
+    QuizQuestion(
+      question: 'Which collection type stores unique values in Dart?',
+      options: ['List', 'Map', 'Set', 'Queue'],
+      correctIndex: 2,
+      explanation:
+          'Set stores unique elements with no duplicates.',
+      category: QuizCategory.dart,
+    ),
+    QuizQuestion(
+      question: 'What is the output type of an async function in Dart?',
+      options: ['Stream', 'Future', 'Promise', 'AsyncResult'],
+      correctIndex: 1,
+      explanation:
+          'Async functions always return a Future (or Future<T> for typed returns).',
+      category: QuizCategory.dart,
+    ),
+
+    // ── More Navigation ──
+    QuizQuestion(
+      question: 'What does `Get.back()` do in GetX?',
+      options: [
+        'Go to home screen',
+        'Pop the current route off the navigation stack',
+        'Close the app',
+        'Show a snackbar'
+      ],
+      correctIndex: 1,
+      explanation:
+          'Get.back() pops the current screen, equivalent to Navigator.pop().',
+      category: QuizCategory.navigation,
+    ),
+    QuizQuestion(
+      question: 'Which widget is used for named route navigation in MaterialApp?',
+      options: ['RouteManager', 'Navigator', 'ScreenRouter', 'PageStack'],
+      correctIndex: 1,
+      explanation:
+          'Navigator manages a stack of Route objects for screen transitions.',
+      category: QuizCategory.navigation,
+    ),
   ];
 }

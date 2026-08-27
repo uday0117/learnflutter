@@ -1,8 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
+import '../services/share_card_service.dart';
 import '../widgets/share_milestone_dialog.dart';
 import 'progress_controller.dart';
 import 'streak_controller.dart';
@@ -17,6 +21,7 @@ class EngagementController extends GetxController {
   static const _milestonesKey = 'eng_milestones';
   static const _sessionsKey = 'eng_sessions';
   static const _reminderKey = 'eng_daily_reminder';
+  static const _inviteShareDateKey = 'eng_invite_share_date';
 
   static const playStoreUrl =
       'https://play.google.com/store/apps/details?id=com.uksolutions.learnflutter';
@@ -28,6 +33,7 @@ class EngagementController extends GetxController {
   var dailyQuizDone = false.obs;
   var dailyReminderEnabled = false.obs;
   var totalSessions = 0.obs;
+  var inviteRewardClaimedToday = false.obs;
 
   @override
   void onInit() {
@@ -36,6 +42,12 @@ class EngagementController extends GetxController {
     dailyReminderEnabled.value = _box.read<bool>(_reminderKey) ?? false;
     totalSessions.value = (_box.read<int>(_sessionsKey) ?? 0) + 1;
     _box.write(_sessionsKey, totalSessions.value);
+    _loadInviteRewardState();
+  }
+
+  void _loadInviteRewardState() {
+    inviteRewardClaimedToday.value =
+        _box.read<String>(_inviteShareDateKey) == _todayStr();
   }
 
   void _loadDailyState() {
@@ -176,26 +188,40 @@ class EngagementController extends GetxController {
     Share.share(message);
   }
 
-  void shareAchievement(ShareMilestoneType type) {
+  /// Share the app and grant a one-time daily ad-free bonus (2 hours).
+  Future<void> shareForInviteReward() async {
     final streak = Get.find<StreakController>();
     final progress = Get.find<ProgressController>();
     final pct = (progress.progressPercent * 100).toStringAsFixed(0);
 
-    final text = switch (type) {
-      ShareMilestoneType.streak3 =>
-        '💪 3-day Flutter learning streak! Join me on Learn Flutter:\n$playStoreUrl',
-      ShareMilestoneType.streak7 =>
-        '🔥 7-day streak learning Flutter! Try Learn Flutter:\n$playStoreUrl',
-      ShareMilestoneType.streak30 =>
-        '🏆 30-day Flutter streak! Master widgets with Learn Flutter:\n$playStoreUrl',
-      ShareMilestoneType.progress50 =>
-        '📈 $pct% through all Flutter widgets on Learn Flutter!\n$playStoreUrl',
-      ShareMilestoneType.progress100 =>
-        '🎓 I completed ALL Flutter widgets on Learn Flutter!\n$playStoreUrl',
-      ShareMilestoneType.dailyGoal =>
-        '✅ Daily Flutter goal crushed! ${streak.currentStreak.value}-day streak 🔥\n$playStoreUrl',
-    };
-    Share.share(text);
+    final message =
+        '🚀 I\'m learning Flutter with Learn Flutter — $pct% through 125+ widgets!\n\n'
+        '✅ Daily quizzes & interview prep\n'
+        '🔥 ${streak.currentStreak.value}-day streak\n\n'
+        'Download free: $playStoreUrl';
+
+    await Share.share(message);
+    AnalyticsService().logEvent('invite_share');
+
+    if (inviteRewardClaimedToday.value) return;
+
+    _box.write(_inviteShareDateKey, _todayStr());
+    inviteRewardClaimedToday.value = true;
+    AdService().grantAdFreePass(duration: const Duration(hours: 2));
+    AnalyticsService().logEvent('invite_reward_granted');
+
+    Get.snackbar(
+      'invite_reward_title'.tr,
+      'invite_reward_sub'.tr,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 4),
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+    );
+  }
+
+  void shareAchievement(ShareMilestoneType type) {
+    ShareCardService().shareAchievement(type);
   }
 }
 
