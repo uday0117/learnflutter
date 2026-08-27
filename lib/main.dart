@@ -123,7 +123,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         locale: widget.initialLocale ?? Get.deviceLocale ?? const Locale('en', 'US'),
         fallbackLocale: const Locale('en', 'US'),
         navigatorObservers: [
-          if (analyticsObserver != null) analyticsObserver,
+          ?analyticsObserver,
         ],
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(

@@ -128,7 +128,7 @@ class AnalyticsService {
       'app_error',
       parameters: {
         'error_type': exception.runtimeType.toString(),
-        if (reason != null) 'reason': reason,
+        'reason': ?reason,
         'fatal': fatal ? 1 : 0,
         ...?context,
       },
@@ -145,7 +145,7 @@ class AnalyticsService {
       parameters: {
         'widget_id': widgetId,
         'widget_name': widgetName,
-        if (category != null) 'category': category,
+        'category': ?category,
       },
     );
   }
@@ -178,12 +178,15 @@ class AnalyticsService {
         'error_message': errorMessage,
       },
     );
-    await recordError(
-      Exception('Ad failure: $adType'),
-      StackTrace.current,
-      reason: '$errorCode — $errorMessage',
-      context: {'ad_type': adType, 'error_code': errorCode},
-    );
+    // Don't record transient ad failures (Network error: '2', No fill: '3') to Crashlytics to keep console/dashboards clean.
+    if (errorCode != '2' && errorCode != '3') {
+      await recordError(
+        Exception('Ad failure: $adType'),
+        StackTrace.current,
+        reason: '$errorCode — $errorMessage',
+        context: {'ad_type': adType, 'error_code': errorCode},
+      );
+    }
   }
 
   Future<void> logFavoriteToggled({

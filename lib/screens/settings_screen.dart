@@ -290,10 +290,17 @@ class SettingsScreen extends StatelessWidget {
 
   Future<void> _rateApp() async {
     final inAppReview = InAppReview.instance;
-    if (await inAppReview.isAvailable()) {
-      inAppReview.requestReview();
-    } else {
-      inAppReview.openStoreListing(appStoreId: '6745765178');
+    try {
+      await inAppReview.openStoreListing();
+    } catch (e) {
+      debugPrint('[SettingsScreen] Store listing redirect error: $e');
+      Get.snackbar(
+        'rate_app'.tr,
+        'Could not open store listing: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange.withValues(alpha: 0.9),
+        colorText: Colors.white,
+      );
     }
   }
 

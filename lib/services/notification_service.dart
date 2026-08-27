@@ -1,8 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
+
+import '../data/widgets_data.dart';
+import '../screens/quiz_screen.dart';
+import '../screens/widget_detail_screen.dart';
 
 /// Schedules a daily learning reminder to bring users back.
 class NotificationService {
@@ -32,6 +37,20 @@ class NotificationService {
 
     await _plugin.initialize(
       const InitializationSettings(android: android, iOS: ios),
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        final payload = response.payload;
+        if (payload != null && payload.isNotEmpty) {
+          if (payload == 'quiz') {
+            Get.to(() => const QuizScreen());
+          } else if (payload.startsWith('widget:')) {
+            final widgetId = payload.substring('widget:'.length);
+            final widget = WidgetsData.getWidgetById(widgetId);
+            if (widget != null) {
+              Get.to(() => WidgetDetailScreen(widgetModel: widget));
+            }
+          }
+        }
+      },
     );
 
     _initialized = true;
@@ -92,15 +111,24 @@ class NotificationService {
 
     const iosDetails = DarwinNotificationDetails();
 
+    final allWidgets = WidgetsData.getAllWidgets();
+    final dayIndex = DateTime.now().difference(DateTime(2024, 1, 1)).inDays %
+        (allWidgets.isEmpty ? 1 : allWidgets.length);
+    final wotd = allWidgets.isNotEmpty ? allWidgets[dayIndex] : null;
+    final widgetPayload = wotd != null ? 'widget:${wotd.id}' : '';
+
     try {
       await _plugin.zonedSchedule(
         _notifId,
         'Time to learn Flutter! 🚀',
-        'Complete today\'s goal — explore a widget or take the quiz.',
+        wotd != null
+            ? 'Today\'s featured widget: ${wotd.name}. Tap to learn!'
+            : 'Complete today\'s goal — explore a widget or take the quiz.',
         scheduled,
         const NotificationDetails(android: androidDetails, iOS: iosDetails),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
+        payload: widgetPayload,
       );
     } catch (e) {
       debugPrint('[NotificationService] Schedule failed: $e');
@@ -139,6 +167,7 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
+        payload: 'quiz',
       );
     } catch (e) {
       debugPrint('[NotificationService] Streak reminder failed: $e');

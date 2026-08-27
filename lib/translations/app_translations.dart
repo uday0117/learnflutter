@@ -243,6 +243,35 @@ class AppTranslations extends Translations {
     'home_widget_hint': 'Long-press your home screen → Widgets → Learn Flutter',
     // Deep links
     'widget_shared': 'Widget shared with deep link',
+    'playground': 'Playground',
+    'sponsored_ad': 'Sponsored Ad',
+    'customize_widget': 'Customize Widget',
+    'generated_code': 'Generated Code',
+    
+    // IAP & Premium Upgrade
+    'purchase_error_title': 'Purchase Error',
+    'product_not_found': 'Premium product details could not be found.',
+    'restore_title': 'Restore Purchases',
+    'restore_not_supported': 'Restoring purchases is not supported on this device.',
+    'purchase_success_title': 'Success!',
+    'purchase_success_msg': 'Thank you! Premium version unlocked.',
+    'billing_sandbox_title': 'Play Billing Sandboxed',
+    'billing_sandbox_msg': 'Store not available on this device. Would you like to mock-unlock Premium for testing?',
+    'premium_unlocked_title': 'Premium Active',
+    'premium_unlocked_msg': 'Premium features have been mock-unlocked successfully!',
+    'unlock_mock': 'Unlock Mock',
+    'upgrade_to_premium': 'Upgrade to Premium',
+    'go_premium': 'Unlock Pro Version',
+    'premium_sub': 'Master Flutter with a premium ad-free experience',
+    'premium_benefit_ads': 'Permanently Remove All Ads',
+    'premium_benefit_offline': 'Offline Mode Enabled',
+    'premium_benefit_projects': 'Unlock Premium Practice Projects',
+    'premium_benefit_support': 'Support Continuous Development',
+    'premium_watch_ad_btn': 'Get 2hr Free Pass (Watch Ad)',
+    'premium_buy_btn': 'Buy Lifetime Premium — \$4.99',
+    'restore_purchases_btn': 'Restore Purchases',
+    'premium_active_title': 'You are a PRO User!',
+    'premium_active_sub': 'Enjoy your ad-free, premium experience.',
   };
 
   // ──────────────── SPANISH ────────────────
@@ -381,6 +410,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': '¡Mira un anuncio para desbloquear 5 preguntas extra!',
     'quiz_bonus_confirm': 'Mira un breve anuncio para desbloquear 5 preguntas extra. Esto es completamente opcional.',
     'ad_not_ready': 'El anuncio aún no está listo. Por favor inténtalo en un momento.',
+    'playground': 'Zona de pruebas',
+    'sponsored_ad': 'Anuncio patrocinado',
+    'customize_widget': 'Personalizar widget',
+    'generated_code': 'Código generado',
   };
 
   // ──────────────── PORTUGUESE (BRAZIL) ────────────────
@@ -519,6 +552,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': 'Assista a um anúncio para desbloquear 5 perguntas extras!',
     'quiz_bonus_confirm': 'Assista a um breve anúncio para desbloquear 5 perguntas bônus. Completamente opcional.',
     'ad_not_ready': 'Anúncio não disponível. Tente novamente em um momento.',
+    'playground': 'Área de testes',
+    'sponsored_ad': 'Anúncio patrocinado',
+    'customize_widget': 'Personalizar widget',
+    'generated_code': 'Código gerado',
   };
 
   // ──────────────── ARABIC ────────────────
@@ -657,6 +694,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': 'شاهد إعلانًا لفتح 5 أسئلة إضافية!',
     'quiz_bonus_confirm': 'شاهد إعلانًا قصيرًا لفتح 5 أسئلة إضافية. هذا اختياري تمامًا.',
     'ad_not_ready': 'الإعلان غير جاهز بعد. يرجى المحاولة بعد لحظة.',
+    'playground': 'بيئة التجربة',
+    'sponsored_ad': 'إعلان ممول',
+    'customize_widget': 'تخصيص الودجت',
+    'generated_code': 'الرمز البرمجي المولد',
   };
 
   // ──────────────── HINDI ────────────────
@@ -795,6 +836,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': '5 और प्रश्न अनलॉक करने के लिए विज्ञापन देखें!',
     'quiz_bonus_confirm': '5 बोनस प्रश्न अनलॉक करने के लिए एक छोटा विज्ञापन देखें। यह पूरी तरह वैकल्पिक है।',
     'ad_not_ready': 'विज्ञापन अभी तैयार नहीं है। कृपया एक पल में पुनः प्रयास करें।',
+    'playground': 'प्लेग्राउंड',
+    'sponsored_ad': 'प्रायोजित विज्ञापन',
+    'customize_widget': 'विजेट कस्टमाइज़ करें',
+    'generated_code': 'जेनरेट किया गया कोड',
   };
 
   // ──────────────── FRENCH ────────────────
@@ -933,6 +978,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': 'Regardez une pub pour débloquer 5 questions supplémentaires !',
     'quiz_bonus_confirm': 'Regardez une courte pub pour débloquer 5 questions bonus. Ceci est totalement optionnel.',
     'ad_not_ready': 'La pub n\'est pas encore prête. Veuillez réessayer dans un instant.',
+    'playground': 'Espace d\'essai',
+    'sponsored_ad': 'Annonce sponsorisée',
+    'customize_widget': 'Personnaliser le widget',
+    'generated_code': 'Code généré',
   };
 
   // ──────────────── GERMAN ────────────────
@@ -1071,6 +1120,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': 'Werbung ansehen, um 5 weitere Fragen freizuschalten!',
     'quiz_bonus_confirm': 'Sieh dir eine kurze Werbung an, um 5 Bonusfragen freizuschalten. Vollständig optional.',
     'ad_not_ready': 'Werbung noch nicht bereit. Bitte versuche es gleich erneut.',
+    'playground': 'Testbereich',
+    'sponsored_ad': 'Gesponserte Anzeige',
+    'customize_widget': 'Widget anpassen',
+    'generated_code': 'Generierter Code',
   };
 
   // ──────────────── CHINESE SIMPLIFIED ────────────────
@@ -1209,6 +1262,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': '观看广告解锁 5 道额外题目！',
     'quiz_bonus_confirm': '观看简短广告以解锁 5 道附加题目。完全可选。',
     'ad_not_ready': '广告暂未准备好，请稍后再试。',
+    'playground': '演练场',
+    'sponsored_ad': '赞助广告',
+    'customize_widget': '自定义组件',
+    'generated_code': '生成的代码',
   };
 
   // ──────────────── JAPANESE ────────────────
@@ -1347,6 +1404,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': '広告を見て追加5問をアンロック！',
     'quiz_bonus_confirm': '短い広告を視聴してボーナス5問をアンロックします。完全に任意です。',
     'ad_not_ready': '広告はまだ準備できていません。少し待ってからお試しください。',
+    'playground': 'プレイグラウンド',
+    'sponsored_ad': 'スポンサー広告',
+    'customize_widget': 'ウィジェットのカスタマイズ',
+    'generated_code': '生成されたコード',
   };
 
   // ──────────────── KOREAN ────────────────
@@ -1485,6 +1546,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': '광고를 시청하여 5개의 추가 문제를 잠금 해제하세요!',
     'quiz_bonus_confirm': '짧은 광고를 시청하면 보너스 5문제가 잠금 해제됩니다. 완전히 선택 사항입니다.',
     'ad_not_ready': '광고가 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.',
+    'playground': '플레이그라운드',
+    'sponsored_ad': '스폰서 광고',
+    'customize_widget': '위젯 맞춤설정',
+    'generated_code': '생성된 코드',
   };
 
   // ──────────────── INDONESIAN ────────────────
@@ -1623,6 +1688,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': 'Tonton iklan untuk membuka 5 pertanyaan tambahan!',
     'quiz_bonus_confirm': 'Tonton iklan singkat untuk membuka 5 pertanyaan bonus. Ini sepenuhnya opsional.',
     'ad_not_ready': 'Iklan belum siap. Silakan coba lagi sebentar lagi.',
+    'playground': 'Area Uji Coba',
+    'sponsored_ad': 'Iklan Sponsor',
+    'customize_widget': 'Sesuaikan Widget',
+    'generated_code': 'Kode yang Dihasilkan',
   };
 
   // ──────────────── TURKISH ────────────────
@@ -1761,6 +1830,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': '5 ek soru açmak için reklam izleyin!',
     'quiz_bonus_confirm': '5 bonus soru açmak için kısa bir reklam izleyin. Bu tamamen isteğe bağlıdır.',
     'ad_not_ready': 'Reklam henüz hazır değil. Lütfen biraz sonra tekrar deneyin.',
+    'playground': 'Test Alanı',
+    'sponsored_ad': 'Sponsorlu Reklam',
+    'customize_widget': 'Widget\'ı Özelleştir',
+    'generated_code': 'Üretilen Kod',
   };
 
   // ──────────────── RUSSIAN ────────────────
@@ -1899,6 +1972,10 @@ class AppTranslations extends Translations {
     'quiz_bonus_desc': 'Посмотрите рекламу, чтобы разблокировать 5 дополнительных вопросов!',
     'quiz_bonus_confirm': 'Посмотрите короткую рекламу для разблокировки 5 бонусных вопросов. Это полностью необязательно.',
     'ad_not_ready': 'Реклама ещё не загружена. Пожалуйста, попробуйте чуть позже.',
+    'playground': 'Песочница',
+    'sponsored_ad': 'Реклама',
+    'customize_widget': 'Настроить виджет',
+    'generated_code': 'Сгенерированный код',
   };
 }
 

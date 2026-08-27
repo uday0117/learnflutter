@@ -18,8 +18,10 @@ import '../services/ad_service.dart';
 import '../services/analytics_service.dart';
 import '../widgets/banner_ad_widget.dart';
 import 'favorites_screen.dart';
+import 'projects_list_screen.dart';
 import 'search_screen.dart';
 import 'settings_screen.dart';
+import 'widget_customizer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -47,14 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           _screens[_selectedIndex],
-
-          // Banner Ad above bottom navigation
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 105,
-            child: Center(child: const BannerAdWidget()),
-          ),
 
           // Custom bottom navigation
           Positioned(
@@ -316,6 +310,11 @@ class CategoriesScreen extends StatelessWidget {
             // ── Weekly Challenge ──
             SliverToBoxAdapter(
               child: _WeeklyChallengeCard(isDark: isDark),
+            ),
+
+            // ── Sponsored Ad Card ──
+            SliverToBoxAdapter(
+              child: _HomeAdCard(isDark: isDark),
             ),
 
             // ── Invite Friends (viral growth) ──
@@ -1279,6 +1278,39 @@ class _LearnMoreSection extends StatelessWidget {
             ),
           ),
         ),
+        // UI Customizer & App Projects row
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: _LearnCard(
+                  emoji: '🎨',
+                  title: 'UI Customizer',
+                  subtitle: 'Visual widget generator',
+                  gradient: const [Color(0xFFFF9966), Color(0xFFFF5E62)],
+                  onTap: () => Get.to(
+                    () => const WidgetCustomizerScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _LearnCard(
+                  emoji: '📦',
+                  title: 'App Projects',
+                  subtitle: 'Complete source codes',
+                  gradient: const [Color(0xFF8A2387), Color(0xFFE94057)],
+                  onTap: () => Get.to(
+                    () => const ProjectsListScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -1870,3 +1902,87 @@ class ModernCategoryCard extends StatelessWidget {
     });
   }
 }
+
+class _HomeAdCard extends StatelessWidget {
+  final bool isDark;
+  const _HomeAdCard({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    if (AdService().isAdFree) return const SizedBox.shrink();
+
+    final ThemeController themeController = Get.find<ThemeController>();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      child: Obx(() {
+        final primaryColor = themeController.primaryColor.value;
+        return Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.grey.shade300,
+            ),
+          ),
+          color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.campaign_rounded,
+                          color: primaryColor,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'sponsored_ad'.tr,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: isDark ? Colors.white30 : Colors.black26,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'AD',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Center(child: BannerAdWidget()),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+

@@ -13,26 +13,40 @@ class BannerAdWidget extends StatefulWidget {
 class _BannerAdWidgetState extends State<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+  bool _isAdLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    if (!AdService().isAdFree) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_bannerAd == null && !_isAdLoading && !AdService().isAdFree) {
       _loadAd();
     }
   }
 
-  void _loadAd() {
-    if (AdService().isAdFree) return;
+  Future<void> _loadAd() async {
+    if (AdService().isAdFree || _isAdLoading) return;
+    
+    _isAdLoading = true;
+    final width = MediaQuery.of(context).size.width.truncate();
+    final AnchoredAdaptiveBannerAdSize? size =
+        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width);
+
+    if (size == null) {
+      debugPrint('[BannerAdWidget] Unable to get height of anchored banner.');
+      _isAdLoading = false;
+      return;
+    }
+
     _bannerAd = BannerAd(
       adUnitId: AdService.bannerAdUnitId,
-      size: AdSize.banner,
+      size: size,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
           if (mounted) {
             setState(() {
               _isAdLoaded = true;
+              _isAdLoading = false;
             });
           }
         },
@@ -41,6 +55,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
           if (mounted) {
             setState(() {
               _isAdLoaded = false;
+              _isAdLoading = false;
             });
           }
         },

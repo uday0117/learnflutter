@@ -29,10 +29,26 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
   final ProgressController progressController =
       Get.find<ProgressController>();
 
+  Map<String, dynamic> _playgroundParams = {};
+
+  final List<Color> _playgroundColors = const [
+    Colors.blue,
+    Colors.red,
+    Colors.green,
+    Colors.amber,
+    Colors.purple,
+    Colors.orange,
+    Colors.teal,
+    Colors.pink,
+    Colors.deepPurple,
+    Colors.brown,
+  ];
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
+    _initPlaygroundParams();
 
     // Track progress & trigger interstitial
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -166,7 +182,7 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
                     ),
                   ),
                   child:
-                      Center(child: _buildPreview(widget.widgetModel.id)),
+                      Center(child: _buildDynamicPreview(widget.widgetModel.id)),
                 ),
               ],
             ),
@@ -177,6 +193,7 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
             controller: _tabController,
             tabs: [
               Tab(text: 'syntax'.tr),
+              Tab(text: 'playground'.tr),
               Tab(text: 'properties'.tr),
               Tab(text: 'usage'.tr),
             ],
@@ -189,6 +206,9 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
               children: [
                 // Syntax tab — flutter_syntax_view
                 _buildSyntaxTab(widget.widgetModel.syntax, isDark),
+
+                // Playground tab
+                _buildPlaygroundTab(isDark),
 
                 // Properties tab
                 ListView.builder(
@@ -339,6 +359,738 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // INTERACTIVE PLAYGROUND HELPER METHODS
+  // ─────────────────────────────────────────────────────────────
+
+  void _initPlaygroundParams() {
+    final id = widget.widgetModel.id.toLowerCase();
+    if (id == 'text') {
+      _playgroundParams = {
+        'text': 'Hello, Flutter! 👋',
+        'fontSize': 22.0,
+        'isBold': true,
+        'isItalic': false,
+        'color': Colors.blue,
+      };
+    } else if (id == 'container') {
+      _playgroundParams = {
+        'width': 120.0,
+        'height': 80.0,
+        'borderRadius': 16.0,
+        'color': Colors.deepPurple,
+        'elevation': 6.0,
+      };
+    } else if (id == 'icon') {
+      _playgroundParams = {
+        'size': 48.0,
+        'color': Colors.red,
+        'icon': 'favorite',
+      };
+    } else if (id == 'row' || id == 'column') {
+      _playgroundParams = {
+        'mainAxisAlignment': MainAxisAlignment.center,
+        'crossAxisAlignment': CrossAxisAlignment.center,
+      };
+    } else if (id == 'elevatedbutton') {
+      _playgroundParams = {
+        'label': 'Click Me',
+        'color': Colors.blue,
+        'elevation': 2.0,
+        'borderRadius': 8.0,
+      };
+    } else if (id == 'card') {
+      _playgroundParams = {
+        'elevation': 4.0,
+        'color': Colors.amber,
+        'margin': 8.0,
+      };
+    } else if (id == 'textfield') {
+      _playgroundParams = {
+        'filled': false,
+        'outlineBorder': true,
+        'hintText': 'Type here...',
+      };
+    }
+  }
+
+  bool get _hasPlayground {
+    final id = widget.widgetModel.id.toLowerCase();
+    return [
+      'text',
+      'container',
+      'icon',
+      'row',
+      'column',
+      'elevatedbutton',
+      'card',
+      'textfield'
+    ].contains(id);
+  }
+
+  Widget _buildDynamicPreview(String widgetId) {
+    final id = widgetId.toLowerCase();
+    if (!_hasPlayground) {
+      return _buildPreview(widgetId);
+    }
+    switch (id) {
+      case 'text':
+        final text = _playgroundParams['text'] as String? ?? 'Hello, Flutter! 👋';
+        final fontSize = _playgroundParams['fontSize'] as double? ?? 22.0;
+        final isBold = _playgroundParams['isBold'] as bool? ?? true;
+        final isItalic = _playgroundParams['isItalic'] as bool? ?? false;
+        final color = _playgroundParams['color'] as Color? ?? Colors.blue;
+        return Text(
+          text,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+            color: color,
+          ),
+        );
+
+      case 'container':
+        final width = _playgroundParams['width'] as double? ?? 120.0;
+        final height = _playgroundParams['height'] as double? ?? 80.0;
+        final borderRadius = _playgroundParams['borderRadius'] as double? ?? 16.0;
+        final color = _playgroundParams['color'] as Color? ?? Colors.deepPurple;
+        final elevation = _playgroundParams['elevation'] as double? ?? 6.0;
+        return Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: elevation > 0
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.4),
+                      blurRadius: elevation * 2,
+                      offset: Offset(0, elevation),
+                    ),
+                  ]
+                : null,
+          ),
+          child: const Center(
+            child: Text('Container',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        );
+
+      case 'icon':
+        final size = _playgroundParams['size'] as double? ?? 48.0;
+        final color = _playgroundParams['color'] as Color? ?? Colors.red;
+        final iconStr = _playgroundParams['icon'] as String? ?? 'favorite';
+        IconData iconData = Icons.favorite;
+        if (iconStr == 'star') iconData = Icons.star;
+        if (iconStr == 'thumb_up') iconData = Icons.thumb_up;
+        if (iconStr == 'home') iconData = Icons.home;
+        if (iconStr == 'settings') iconData = Icons.settings;
+        return Icon(iconData, color: color, size: size);
+
+      case 'row':
+        final mainAlign = _playgroundParams['mainAxisAlignment'] as MainAxisAlignment? ?? MainAxisAlignment.center;
+        final crossAlign = _playgroundParams['crossAxisAlignment'] as CrossAxisAlignment? ?? CrossAxisAlignment.center;
+        return Row(
+          mainAxisAlignment: mainAlign,
+          crossAxisAlignment: crossAlign,
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.star, color: Colors.amber, size: 36),
+            Icon(Icons.favorite, color: Colors.red, size: 36),
+            Icon(Icons.thumb_up, color: Colors.blue, size: 36),
+          ],
+        );
+
+      case 'column':
+        final mainAlign = _playgroundParams['mainAxisAlignment'] as MainAxisAlignment? ?? MainAxisAlignment.center;
+        final crossAlign = _playgroundParams['crossAxisAlignment'] as CrossAxisAlignment? ?? CrossAxisAlignment.center;
+        return Column(
+          mainAxisAlignment: mainAlign,
+          crossAxisAlignment: crossAlign,
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.star, color: Colors.amber, size: 30),
+            Icon(Icons.favorite, color: Colors.red, size: 30),
+            Icon(Icons.thumb_up, color: Colors.blue, size: 30),
+          ],
+        );
+
+      case 'elevatedbutton':
+        final label = _playgroundParams['label'] as String? ?? 'Click Me';
+        final color = _playgroundParams['color'] as Color? ?? Colors.blue;
+        final elevation = _playgroundParams['elevation'] as double? ?? 2.0;
+        final borderRadius = _playgroundParams['borderRadius'] as double? ?? 8.0;
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            foregroundColor: Colors.white,
+            elevation: elevation,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+          ),
+          onPressed: () {},
+          child: Text(label),
+        );
+
+      case 'card':
+        final elevation = _playgroundParams['elevation'] as double? ?? 4.0;
+        final color = _playgroundParams['color'] as Color? ?? Colors.amber;
+        final margin = _playgroundParams['margin'] as double? ?? 8.0;
+        return Card(
+          elevation: elevation,
+          color: color,
+          margin: EdgeInsets.all(margin),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: Text('Card Widget',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        );
+
+      case 'textfield':
+        final filled = _playgroundParams['filled'] as bool? ?? false;
+        final outlineBorder = _playgroundParams['outlineBorder'] as bool? ?? true;
+        final hintText = _playgroundParams['hintText'] as String? ?? 'Type here...';
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: TextField(
+            decoration: InputDecoration(
+              filled: filled,
+              hintText: hintText,
+              border: outlineBorder
+                  ? const OutlineInputBorder()
+                  : const UnderlineInputBorder(),
+            ),
+          ),
+        );
+
+      default:
+        return _buildPreview(widgetId);
+    }
+  }
+
+  Widget _buildPlaygroundTab(bool isDark) {
+    if (!_hasPlayground) {
+      return _buildPlaygroundPlaceholder(isDark);
+    }
+
+    final id = widget.widgetModel.id.toLowerCase();
+    List<Widget> controls = [];
+
+    if (id == 'text') {
+      controls = [
+        _buildTextFieldInput(label: 'Text Value', key: 'text'),
+        _buildSlider(label: 'Font Size', key: 'fontSize', min: 12, max: 36),
+        _buildSwitch(label: 'Bold', key: 'isBold'),
+        _buildSwitch(label: 'Italic', key: 'isItalic'),
+        _buildColorSelector('color'),
+      ];
+    } else if (id == 'container') {
+      controls = [
+        _buildSlider(label: 'Width', key: 'width', min: 50, max: 200),
+        _buildSlider(label: 'Height', key: 'height', min: 40, max: 150),
+        _buildSlider(label: 'Border Radius', key: 'borderRadius', min: 0, max: 40),
+        _buildSlider(label: 'Elevation / Shadow', key: 'elevation', min: 0, max: 15),
+        _buildColorSelector('color'),
+      ];
+    } else if (id == 'icon') {
+      controls = [
+        _buildSlider(label: 'Icon Size', key: 'size', min: 20, max: 80),
+        _buildDropdown<String>(
+          label: 'Icon Symbol',
+          key: 'icon',
+          items: const ['favorite', 'star', 'thumb_up', 'home', 'settings'],
+          itemNames: const ['Favorite', 'Star', 'Thumb Up', 'Home', 'Settings'],
+        ),
+        _buildColorSelector('color'),
+      ];
+    } else if (id == 'row' || id == 'column') {
+      controls = [
+        _buildDropdown<MainAxisAlignment>(
+          label: 'Main Axis Alignment',
+          key: 'mainAxisAlignment',
+          items: MainAxisAlignment.values,
+          itemNames: MainAxisAlignment.values.map((v) => v.toString().split('.').last).toList(),
+        ),
+        _buildDropdown<CrossAxisAlignment>(
+          label: 'Cross Axis Alignment',
+          key: 'crossAxisAlignment',
+          items: const [CrossAxisAlignment.start, CrossAxisAlignment.center, CrossAxisAlignment.end],
+          itemNames: const ['start', 'center', 'end'],
+        ),
+      ];
+    } else if (id == 'elevatedbutton') {
+      controls = [
+        _buildTextFieldInput(label: 'Button Label', key: 'label'),
+        _buildSlider(label: 'Elevation', key: 'elevation', min: 0, max: 10),
+        _buildSlider(label: 'Border Radius', key: 'borderRadius', min: 0, max: 30),
+        _buildColorSelector('color'),
+      ];
+    } else if (id == 'card') {
+      controls = [
+        _buildSlider(label: 'Elevation', key: 'elevation', min: 0, max: 20),
+        _buildSlider(label: 'Margin', key: 'margin', min: 0, max: 24),
+        _buildColorSelector('color'),
+      ];
+    } else if (id == 'textfield') {
+      controls = [
+        _buildTextFieldInput(label: 'Hint Text', key: 'hintText'),
+        _buildSwitch(label: 'Filled Background', key: 'filled'),
+        _buildSwitch(label: 'Outline Border Style', key: 'outlineBorder'),
+      ];
+    }
+
+    final generatedCode = _buildGeneratedCode(id);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(bottom: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              'customize_widget'.tr,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ...controls,
+          const Divider(height: 32),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Text(
+              'generated_code'.tr,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            height: 180,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Stack(
+                children: [
+                  SyntaxView(
+                    code: generatedCode,
+                    syntax: Syntax.DART,
+                    syntaxTheme: isDark
+                        ? SyntaxTheme.vscodeDark()
+                        : SyntaxTheme.vscodeLight(),
+                    fontSize: 12.5,
+                    withZoom: false,
+                    withLinesCount: false,
+                    expanded: true,
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _CodeActionBtn(
+                          icon: Icons.share_rounded,
+                          tooltip: 'share'.tr,
+                          onTap: () => _shareCode(generatedCode),
+                        ),
+                        const SizedBox(width: 4),
+                        _CodeActionBtn(
+                          icon: Icons.copy_rounded,
+                          tooltip: 'copy'.tr,
+                          onTap: () => _copyToClipboard(generatedCode),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlaygroundPlaceholder(bool isDark) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.auto_awesome_outlined,
+              size: 64,
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'playground'.tr,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Interactive playground is not yet available for this widget.',
+              textAlign: TextAlign.center,
+              style: TextStyle(height: 1.5, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            Card(
+              elevation: 0,
+              color: isDark ? const Color(0xFF1E1E2E) : Colors.grey.shade50,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: isDark ? Colors.white10 : Colors.grey.shade200,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Try basic widgets like:'.tr,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        'Text', 'Container', 'Icon', 'Row', 'Column', 
+                        'Card', 'ElevatedButton', 'TextField'
+                      ].map((w) => Chip(
+                        label: Text(w),
+                        visualDensity: VisualDensity.compact,
+                      )).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _buildGeneratedCode(String widgetId) {
+    final id = widgetId.toLowerCase();
+    switch (id) {
+      case 'text':
+        final text = _playgroundParams['text'] ?? 'Hello, Flutter! 👋';
+        final fontSize = _playgroundParams['fontSize'] ?? 22.0;
+        final isBold = _playgroundParams['isBold'] ?? true;
+        final isItalic = _playgroundParams['isItalic'] ?? false;
+        final color = _playgroundParams['color'] ?? Colors.blue;
+        
+        String style = '';
+        if (fontSize != 14.0 || isBold || isItalic || color != Colors.black) {
+          style = ',\n  style: TextStyle(\n';
+          style += '    fontSize: $fontSize,\n';
+          if (isBold) style += '    fontWeight: FontWeight.bold,\n';
+          if (isItalic) style += '    fontStyle: FontStyle.italic,\n';
+          style += "    color: Color(0xFF${color.value.toRadixString(16).substring(2).toUpperCase()}),\n";
+          style += '  )';
+        }
+        return "Text(\n  '$text'$style\n)";
+
+      case 'container':
+        final width = _playgroundParams['width'] ?? 120.0;
+        final height = _playgroundParams['height'] ?? 80.0;
+        final borderRadius = _playgroundParams['borderRadius'] ?? 16.0;
+        final color = _playgroundParams['color'] ?? Colors.deepPurple;
+        final elevation = _playgroundParams['elevation'] ?? 6.0;
+        return """Container(
+  width: $width,
+  height: $height,
+  decoration: BoxDecoration(
+    color: Color(0xFF${color.value.toRadixString(16).substring(2).toUpperCase()}),
+    borderRadius: BorderRadius.circular($borderRadius),
+    boxShadow: [
+      BoxShadow(
+        color: Color(0xFF${color.value.toRadixString(16).substring(2).toUpperCase()}).withValues(alpha: 0.4),
+        blurRadius: ${elevation * 2},
+        offset: Offset(0, $elevation),
+      ),
+    ],
+  ),
+  child: Center(
+    child: Text('Container', style: TextStyle(color: Colors.white)),
+  ),
+)""";
+
+      case 'icon':
+        final size = _playgroundParams['size'] ?? 48.0;
+        final color = _playgroundParams['color'] ?? Colors.red;
+        final iconStr = _playgroundParams['icon'] ?? 'favorite';
+        return "Icon(\n  Icons.$iconStr,\n  color: Color(0xFF${color.value.toRadixString(16).substring(2).toUpperCase()}),\n  size: $size,\n)";
+
+      case 'row':
+        final mainAlign = _playgroundParams['mainAxisAlignment'] ?? MainAxisAlignment.center;
+        final crossAlign = _playgroundParams['crossAxisAlignment'] ?? CrossAxisAlignment.center;
+        final mainAlignStr = mainAlign.toString().split('.').last;
+        final crossAlignStr = crossAlign.toString().split('.').last;
+        return """Row(
+  mainAxisAlignment: MainAxisAlignment.$mainAlignStr,
+  crossAxisAlignment: CrossAxisAlignment.$crossAlignStr,
+  children: const [
+    Icon(Icons.star, color: Colors.amber, size: 36),
+    Icon(Icons.favorite, color: Colors.red, size: 36),
+    Icon(Icons.thumb_up, color: Colors.blue, size: 36),
+  ],
+)""";
+
+      case 'column':
+        final mainAlign = _playgroundParams['mainAxisAlignment'] ?? MainAxisAlignment.center;
+        final crossAlign = _playgroundParams['crossAxisAlignment'] ?? CrossAxisAlignment.center;
+        final mainAlignStr = mainAlign.toString().split('.').last;
+        final crossAlignStr = crossAlign.toString().split('.').last;
+        return """Column(
+  mainAxisAlignment: MainAxisAlignment.$mainAlignStr,
+  crossAxisAlignment: CrossAxisAlignment.$crossAlignStr,
+  children: const [
+    Icon(Icons.star, color: Colors.amber, size: 30),
+    Icon(Icons.favorite, color: Colors.red, size: 30),
+    Icon(Icons.thumb_up, color: Colors.blue, size: 30),
+  ],
+)""";
+
+      case 'elevatedbutton':
+        final label = _playgroundParams['label'] ?? 'Click Me';
+        final color = _playgroundParams['color'] ?? Colors.blue;
+        final elevation = _playgroundParams['elevation'] ?? 2.0;
+        final borderRadius = _playgroundParams['borderRadius'] ?? 8.0;
+        return """ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Color(0xFF${color.value.toRadixString(16).substring(2).toUpperCase()}),
+    foregroundColor: Colors.white,
+    elevation: $elevation,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular($borderRadius),
+    ),
+  ),
+  onPressed: () {},
+  child: Text('$label'),
+)""";
+
+      case 'card':
+        final elevation = _playgroundParams['elevation'] ?? 4.0;
+        final color = _playgroundParams['color'] ?? Colors.amber;
+        final margin = _playgroundParams['margin'] ?? 8.0;
+        return """Card(
+  elevation: $elevation,
+  color: Color(0xFF${color.value.toRadixString(16).substring(2).toUpperCase()}),
+  margin: EdgeInsets.all($margin),
+  child: Padding(
+    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+    child: Text('Card Widget'),
+  ),
+)""";
+
+      case 'textfield':
+        final filled = _playgroundParams['filled'] ?? false;
+        final outlineBorder = _playgroundParams['outlineBorder'] ?? true;
+        final hintText = _playgroundParams['hintText'] ?? 'Type here...';
+        final borderStr = outlineBorder ? 'OutlineInputBorder()' : 'UnderlineInputBorder()';
+        return """TextField(
+  decoration: InputDecoration(
+    filled: $filled,
+    hintText: '$hintText',
+    border: $borderStr,
+  ),
+)""";
+
+      default:
+        return "";
+    }
+  }
+
+  Widget _buildColorSelector(String key) {
+    final activeColor = _playgroundParams[key] as Color? ?? Colors.blue;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            'theme_color'.tr,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+        ),
+        SizedBox(
+          height: 50,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: _playgroundColors.length,
+            itemBuilder: (context, index) {
+              final color = _playgroundColors[index];
+              final isSelected = activeColor == color;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _playgroundParams[key] = color;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: isSelected
+                        ? Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 3.5,
+                          )
+                        : null,
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSlider({
+    required String label,
+    required String key,
+    required double min,
+    required double max,
+    int? divisions,
+  }) {
+    final val = (_playgroundParams[key] as num? ?? min).toDouble();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              Text(val.toStringAsFixed(1), style: const TextStyle(fontFamily: 'monospace')),
+            ],
+          ),
+          Slider(
+            value: val,
+            min: min,
+            max: max,
+            divisions: divisions,
+            onChanged: (newVal) {
+              setState(() {
+                _playgroundParams[key] = newVal;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwitch({required String label, required String key}) {
+    final val = _playgroundParams[key] as bool? ?? false;
+    return SwitchListTile(
+      title: Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+      value: val,
+      onChanged: (newVal) {
+        setState(() {
+          _playgroundParams[key] = newVal;
+        });
+      },
+    );
+  }
+
+  Widget _buildDropdown<T>({
+    required String label,
+    required String key,
+    required List<T> items,
+    required List<String> itemNames,
+  }) {
+    final activeVal = _playgroundParams[key] as T;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade400),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<T>(
+                isExpanded: true,
+                value: activeVal,
+                items: List.generate(items.length, (index) {
+                  return DropdownMenuItem<T>(
+                    value: items[index],
+                    child: Text(itemNames[index]),
+                  );
+                }),
+                onChanged: (newVal) {
+                  if (newVal != null) {
+                    setState(() {
+                      _playgroundParams[key] = newVal;
+                    });
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextFieldInput({required String label, required String key}) {
+    final textVal = _playgroundParams[key] as String? ?? '';
+    final controller = TextEditingController(text: textVal);
+    controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: controller.text.length),
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        ),
+        onChanged: (val) {
+          setState(() {
+            _playgroundParams[key] = val;
+          });
+        },
       ),
     );
   }

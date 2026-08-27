@@ -10,6 +10,7 @@ import '../data/interview_data.dart';
 import '../models/interview_question.dart';
 import '../services/ad_service.dart';
 import '../widgets/banner_ad_widget.dart';
+import 'interview_swipe_screen.dart';
 
 class InterviewScreen extends StatefulWidget {
   const InterviewScreen({super.key});
@@ -69,6 +70,16 @@ class _InterviewScreenState extends State<InterviewScreen>
             SliverAppBar(
               expandedHeight: 140,
               pinned: true,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.style_rounded, color: Colors.white),
+                  tooltip: 'Flashcards Swipe Deck',
+                  onPressed: () => Get.to(
+                    () => const InterviewSwipeScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ],
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(
                   'interview_title'.tr,
