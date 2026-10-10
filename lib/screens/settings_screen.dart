@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:in_app_review/in_app_review.dart';
 
+import '../controllers/auth_controller.dart';
 import '../controllers/engagement_controller.dart';
 import '../controllers/favorites_controller.dart';
 import '../controllers/interview_review_controller.dart';
@@ -13,6 +14,7 @@ import '../controllers/streak_controller.dart';
 import '../controllers/theme_controller.dart';
 import '../data/interview_data.dart';
 import '../services/ad_service.dart';
+import '../services/in_app_update_service.dart';
 import '../services/notification_service.dart';
 import '../translations/app_translations.dart';
 import '../utils/url_launcher_helper.dart';
@@ -125,6 +127,59 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(
+      BuildContext context, AuthController authController) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.logout_rounded, color: Colors.red, size: 22),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'sign_out'.tr.isNotEmpty ? 'sign_out'.tr : 'Sign Out',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Text(
+          'sign_out_confirm_msg'.tr.isNotEmpty
+              ? 'sign_out_confirm_msg'.tr
+              : 'Are you sure you want to sign out?',
+          style: const TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text('cancel'.tr.isNotEmpty ? 'cancel'.tr : 'Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              authController.signOut();
+            },
+            child: Text('sign_out'.tr.isNotEmpty ? 'sign_out'.tr : 'Sign Out'),
+          ),
+        ],
       ),
     );
   }
@@ -288,20 +343,13 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _rateApp() async {
-    final inAppReview = InAppReview.instance;
-    try {
-      await inAppReview.openStoreListing();
-    } catch (e) {
-      debugPrint('[SettingsScreen] Store listing redirect error: $e');
-      Get.snackbar(
-        'rate_app'.tr,
-        'Could not open store listing: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange.withValues(alpha: 0.9),
-        colorText: Colors.white,
-      );
-    }
+  void _showRatingSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _InAppRatingSheet(),
+    );
   }
 
   void _showClearProgressDialog(BuildContext context) {
@@ -413,8 +461,23 @@ class SettingsScreen extends StatelessWidget {
                       controller: scrollController,
                       children: [
                         _ChangelogVersion(
-                          version: 'v1.0.5',
+                          version: 'v1.0.7',
                           label: 'whats_new_current'.tr,
+                          primary: primary,
+                          isDark: isDark,
+                          items: const [
+                            ('🚀', 'In-App Updates: check & install latest updates directly in Settings'),
+                            ('✨', 'Ultra-smooth scrolling: zero ad layout jumps / Cumulative Layout Shift'),
+                            ('⏱️', 'Smart ad cooldown: protection against rapid-fire full-screen interruptions'),
+                            ('🎁', 'Invite Friends reward in Settings: share to unlock 2 hours ad-free'),
+                            ('📤', 'Direct Share Flutter Widget tips & Interview Q&A with deep links'),
+                            ('⚡', 'Performance optimizations & smoother 60fps animations'),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _ChangelogVersion(
+                          version: 'v1.0.5',
+                          label: null,
                           primary: primary,
                           isDark: isDark,
                           items: const [
@@ -502,16 +565,19 @@ class SettingsScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 100,
             floating: false,
             pinned: true,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             automaticallyImplyLeading: false,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'settings'.tr,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+            title: Text(
+              'settings'.tr,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF1E293B),
               ),
-              centerTitle: true,
             ),
           ),
           SliverToBoxAdapter(
@@ -520,8 +586,16 @@ class SettingsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Streak Card ──
-                  _StreakCard(isDark: isDark),
+                  // ── Account Section ──
+                  _SectionHeader(title: 'account'.tr, isDark: isDark),
+                  const SizedBox(height: 12),
+                  _AccountSection(
+                    isDark: isDark,
+                    onLogout: () => _showLogoutDialog(
+                      context,
+                      Get.find<AuthController>(),
+                    ),
+                  ),
                   const SizedBox(height: 28),
 
                   // ── Personalization Section ──
@@ -837,6 +911,30 @@ class SettingsScreen extends StatelessWidget {
                           onTap: () => Get.find<EngagementController>().shareApp(),
                           showDivider: true,
                         ),
+                        _SettingsTile(
+                          icon: Icons.card_giftcard_rounded,
+                          iconColor: Colors.amber[800] ?? Colors.amber,
+                          title: 'invite_friends'.tr,
+                          subtitle: 'invite_friends_sub'.tr,
+                          trailing: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'free_pass_badge'.tr,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber,
+                              ),
+                            ),
+                          ),
+                          onTap: () => Get.find<EngagementController>().shareForInviteReward(),
+                          showDivider: true,
+                        ),
                         Obx(() {
                           final adFree = AdService().adFreeUntil.value;
                           if (adFree == null ||
@@ -886,7 +984,7 @@ class SettingsScreen extends StatelessWidget {
                           iconColor: Colors.amber,
                           title: 'rate_app'.tr,
                           subtitle: 'rate_app_sub'.tr,
-                          onTap: _rateApp,
+                          onTap: () => _showRatingSheet(context),
                           showDivider: true,
                         ),
                         _SettingsTile(
@@ -951,17 +1049,27 @@ class SettingsScreen extends StatelessWidget {
                           showDivider: true,
                         ),
                         _SettingsTile(
+                          icon: Icons.system_update_rounded,
+                          iconColor: Colors.blueAccent,
+                          title: 'check_for_updates'.tr,
+                          subtitle: 'check_for_updates_sub'.tr,
+                          onTap: () => InAppUpdateService().checkManually(context: context),
+                          showDivider: true,
+                        ),
+                        _SettingsTile(
                           icon: Icons.info_rounded,
                           iconColor: Colors.grey,
                           title: 'version'.tr,
-                          subtitle: '1.0.5',
-                          onTap: () {},
+                          subtitle: '1.0.7 (Build 8)',
+                          onTap: () => InAppUpdateService().checkManually(context: context),
                           showDivider: false,
                           showArrow: false,
                         ),
                       ],
                     ),
                   ),
+
+
 
                   const SizedBox(height: 40),
 
@@ -1412,65 +1520,475 @@ class _ChangelogVersion extends StatelessWidget {
   }
 }
 
-// ─── Streak Card ─────────────────────────────────────────────
-class _StreakCard extends StatelessWidget {
+// ─── Account Section (Clean Grouped Settings Container) ───────
+class _AccountSection extends StatelessWidget {
   final bool isDark;
-  const _StreakCard({required this.isDark});
+  final VoidCallback onLogout;
+
+  const _AccountSection({
+    required this.isDark,
+    required this.onLogout,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final streak = Get.find<StreakController>();
+    final auth = Get.find<AuthController>();
     final theme = Get.find<ThemeController>();
 
     return Obx(() {
       final primary = theme.primaryColor.value;
+      final isLoggedIn = auth.isLoggedIn;
+      final isLoading = auth.isLoading.value;
+
       return Container(
-        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [primary, primary.withValues(alpha: 0.75)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: primary.withValues(alpha: 0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
+          color: isDark ? Colors.grey[850] : Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Row(
-          children: [
-            Text(streak.streakEmoji,
-                style: const TextStyle(fontSize: 40)),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${'day_streak'.tr}: ${streak.currentStreak.value}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+        child: isLoggedIn
+            ? Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    ClipOval(
+                      child: auth.photoURL != null && auth.photoURL!.isNotEmpty
+                          ? Image.network(
+                              auth.photoURL!,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                              errorBuilder: (ctx, err, stack) =>
+                                  _buildAvatarFallback(
+                                      auth.displayName, primary),
+                            )
+                          : _buildAvatarFallback(auth.displayName, primary),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${'best'.tr}: ${streak.longestStreak.value} • ${'total_days'.tr}: ${streak.totalDays.value}',
-                    style: const TextStyle(
-                        color: Colors.white70, fontSize: 12),
-                  ),
-                ],
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  auth.displayName,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  'Google',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            auth.email,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.logout_rounded,
+                          color: Colors.redAccent, size: 22),
+                      tooltip: 'sign_out'.tr,
+                      onPressed: onLogout,
+                    ),
+                  ],
+                ),
+              )
+            : Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey[800] : Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(
+                        child: _GoogleBrandIcon(size: 22),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'sign_in_google'.tr,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            'sign_in_google_sub'.tr,
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed:
+                          isLoading ? null : () => auth.signInWithGoogle(),
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text('sign_in'.tr,
+                              style: const TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
       );
     });
+  }
+
+  Widget _buildAvatarFallback(String name, Color primary) {
+    final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : 'F';
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.15),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: primary,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Google Brand Icon (Clean Canvas Drawing) ───────────────────
+class _GoogleBrandIcon extends StatelessWidget {
+  final double size;
+  const _GoogleBrandIcon({this.size = 24});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _GoogleLogoPainter(),
+      ),
+    );
+  }
+}
+
+class _GoogleLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final center = Offset(w / 2, h / 2);
+    final radius = w / 2;
+
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final strokeWidth = radius * 0.38;
+
+    final redPaint = Paint()
+      ..color = const Color(0xFFEA4335)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    final yellowPaint = Paint()
+      ..color = const Color(0xFFFBBC05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    final greenPaint = Paint()
+      ..color = const Color(0xFF34A853)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    final bluePaint = Paint()
+      ..color = const Color(0xFF4285F4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    final blueBarPaint = Paint()
+      ..color = const Color(0xFF4285F4)
+      ..style = PaintingStyle.fill;
+
+    // Draw Google 4-color arcs
+    canvas.drawArc(rect, 3.4, 1.9, false, redPaint);
+    canvas.drawArc(rect, 2.2, 1.2, false, yellowPaint);
+    canvas.drawArc(rect, 0.7, 1.5, false, greenPaint);
+    canvas.drawArc(rect, -0.2, 0.9, false, bluePaint);
+
+    final barRect = Rect.fromLTWH(
+      center.dx - radius * 0.05,
+      center.dy - strokeWidth / 2,
+      radius * 0.95,
+      strokeWidth,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(barRect, Radius.circular(strokeWidth / 4)),
+      blueBarPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ─── In-App Rating Bottom Sheet ──────────────────────────────
+class _InAppRatingSheet extends StatefulWidget {
+  const _InAppRatingSheet();
+
+  @override
+  State<_InAppRatingSheet> createState() => _InAppRatingSheetState();
+}
+
+class _InAppRatingSheetState extends State<_InAppRatingSheet> {
+  int _selectedRating = 5;
+  bool _isSubmitting = false;
+
+  final List<String> _starLabels = [
+    'Needs improvement',
+    'Could be better',
+    'Good app',
+    'Very good & helpful!',
+    'Outstanding! Loved it! ⭐',
+  ];
+
+  Future<void> _submitReview() async {
+    setState(() => _isSubmitting = true);
+    final inAppReview = InAppReview.instance;
+
+    Navigator.of(context).pop();
+
+    if (_selectedRating >= 4) {
+      try {
+        if (await inAppReview.isAvailable()) {
+          await inAppReview.requestReview();
+        } else {
+          await inAppReview.openStoreListing();
+        }
+      } catch (e) {
+        debugPrint('[SettingsScreen] Rating error: $e');
+        UrlLauncherHelper.openPlayStore();
+      }
+
+      Get.snackbar(
+        'rate_app'.tr,
+        'Thank you for your rating & support on Google Play! ⭐',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        backgroundColor: Colors.green.withValues(alpha: 0.9),
+        colorText: Colors.white,
+      );
+    } else {
+      UrlLauncherHelper.openEmail();
+      Get.snackbar(
+        'Feedback',
+        'Thank you! Tell us how we can improve Learn Flutter.',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeController = Get.find<ThemeController>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = themeController.primaryColor.value;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white24 : Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Icon(Icons.star_rounded, color: Colors.amber, size: 40),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'rate_app'.tr,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'How is your experience with Learn Flutter?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: isDark ? Colors.white70 : Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(5, (index) {
+              final starIndex = index + 1;
+              final isFilled = starIndex <= _selectedRating;
+              return GestureDetector(
+                onTap: () {
+                  setState(() => _selectedRating = starIndex);
+                  themeController.triggerHaptic();
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: AnimatedScale(
+                    scale: isFilled ? 1.15 : 1.0,
+                    duration: const Duration(milliseconds: 150),
+                    child: Icon(
+                      isFilled
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      color: isFilled
+                          ? Colors.amber
+                          : (isDark ? Colors.white30 : Colors.grey.shade400),
+                      size: 42,
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 12),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: Text(
+              _starLabels[_selectedRating - 1],
+              key: ValueKey(_selectedRating),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: _selectedRating >= 4
+                    ? Colors.amber.shade700
+                    : Colors.grey,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: _isSubmitting ? null : _submitReview,
+              icon: Icon(
+                _selectedRating >= 4
+                    ? Icons.rate_review_rounded
+                    : Icons.mail_rounded,
+                size: 20,
+              ),
+              label: Text(
+                _selectedRating >= 4
+                    ? 'Rate on Google Play Store'
+                    : 'Send Us Feedback',
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              UrlLauncherHelper.openPlayStore();
+            },
+            child: Text(
+              'Open Play Store listing directly',
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark ? Colors.white54 : Colors.grey.shade600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -16,8 +16,39 @@ class FavoritesScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favorites'),
         automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            Text(
+              'nav_favorites'.tr,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+            ),
+            const SizedBox(width: 10),
+            Obx(() {
+              final count = favoritesController.favoritesCount;
+              if (count == 0) return const SizedBox.shrink();
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
       ),
       body: Column(
         children: [

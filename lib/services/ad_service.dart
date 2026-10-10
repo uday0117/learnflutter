@@ -48,6 +48,14 @@ class AdService {
   // ── Interstitial state ──────────────────────────────────────────────
   InterstitialAd? _interstitialAd;
   bool _isInterstitialAdReady = false;
+  DateTime? _lastInterstitialTime;
+  static const Duration minInterstitialInterval = Duration(seconds: 60);
+
+  bool get canShowInterstitial {
+    if (_lastInterstitialTime == null) return true;
+    return DateTime.now().difference(_lastInterstitialTime!) >=
+        minInterstitialInterval;
+  }
 
   // ── Rewarded state ──────────────────────────────────────────────────
   RewardedAd? _rewardedAd;
@@ -204,7 +212,12 @@ class AdService {
 
   void showInterstitialAd() {
     if (isAdFree) return;
+    if (!canShowInterstitial) {
+      debugPrint('[AdService] Interstitial deferred to protect user experience (60s cooldown).');
+      return;
+    }
     if (_isInterstitialAdReady && _interstitialAd != null) {
+      _lastInterstitialTime = DateTime.now();
       _interstitialAd!.show();
     } else {
       loadInterstitialAd();
@@ -218,7 +231,12 @@ class AdService {
       onComplete();
       return;
     }
+    if (!canShowInterstitial) {
+      onComplete();
+      return;
+    }
     if (_isInterstitialAdReady && _interstitialAd != null) {
+      _lastInterstitialTime = DateTime.now();
       _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
         onAdShowedFullScreenContent: (ad) {},
         onAdDismissedFullScreenContent: (ad) {

@@ -245,10 +245,10 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
               ],
             ),
           ),
-
-          // Banner Ad at bottom
-          const BannerAdWidget(),
         ],
+      ),
+      bottomNavigationBar: const SafeArea(
+        child: BannerAdWidget(),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showSourceCode(context, isDark),

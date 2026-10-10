@@ -205,4 +205,24 @@ class AnalyticsService {
   Future<void> logTabSelected(String tabName) async {
     await logEvent('tab_selected', parameters: {'tab_name': tabName});
   }
+
+  Future<void> setUserId(String? userId) async {
+    if (!_initialized) return;
+    await _analytics?.setUserId(id: userId);
+    if (userId != null && userId.isNotEmpty) {
+      await _crashlytics?.setUserIdentifier(userId);
+    } else {
+      await _crashlytics?.setUserIdentifier('');
+    }
+  }
+
+  Future<void> logLogin({required String method}) async {
+    if (!_initialized) return;
+    await _analytics?.logLogin(loginMethod: method);
+  }
+
+  Future<void> logLogout() async {
+    if (!_initialized) return;
+    await logEvent('logout');
+  }
 }

@@ -15,9 +15,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'Add an iOS app in Firebase Console and run `flutterfire configure`.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError('macOS is not configured for Firebase.');
       case TargetPlatform.windows:
@@ -36,15 +34,17 @@ class DefaultFirebaseOptions {
     projectId: 'learn-flutter-8f6d1',
     storageBucket: 'learn-flutter-8f6d1.firebasestorage.app',
   );
-
   // Reserved for `flutterfire configure` after iOS app registration.
   // ignore: unused_field
+
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCR1zqFmGbQhgl7JXbVKI3HqTxywQMo6zs',
-    appId: '1:746629996575:ios:0000000000000000000000',
+    apiKey: 'AIzaSyD2J3ggNzLvSYe3uY_dEwhoks_vuPoUkK0',
+    appId: '1:746629996575:ios:0aaaf7e954c7cc645b752a',
     messagingSenderId: '746629996575',
     projectId: 'learn-flutter-8f6d1',
     storageBucket: 'learn-flutter-8f6d1.firebasestorage.app',
+    androidClientId: '746629996575-j5penqbj37bar4eiu9tnit0ge95jn72j.apps.googleusercontent.com',
+    iosClientId: '746629996575-b42o0ejhqecj1q7mf0r8350oadddvvae.apps.googleusercontent.com',
     iosBundleId: 'com.uksolutions.learnflutter',
   );
 }

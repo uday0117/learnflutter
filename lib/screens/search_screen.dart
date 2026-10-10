@@ -51,8 +51,11 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Search'),
+        automaticallyImplyLeading: Navigator.canPop(context),
+        title: Text(
+          'nav_search'.tr,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+        ),
       ),
       body: Column(
         children: [

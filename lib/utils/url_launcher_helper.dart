@@ -10,7 +10,14 @@ class UrlLauncherHelper {
       'https://uday0117.github.io/learnflutter/terms_and_conditions.html';
   static const String githubRepoUrl =
       'https://github.com/uday0117/learnflutter';
+  static const String playStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.uksolutions.learnflutter';
   static const String flutterDocsUrl = 'https://docs.flutter.dev/ui/widgets';
+
+  /// Open Google Play Store page
+  static Future<void> openPlayStore() async {
+    await launchURL(playStoreUrl, mode: LaunchMode.externalApplication);
+  }
 
   /// Launch URL with error handling
   static Future<void> launchURL(
@@ -65,7 +72,7 @@ class UrlLauncherHelper {
   static Future<void> openEmail() async {
     final uri = Uri(
       scheme: 'mailto',
-      path: ' apps.uksolutions@gmail.com',
+      path: 'apps.uksolutions@gmail.com',
       queryParameters: {'subject': 'Learn Flutter App - Feedback'},
     );
     try {
@@ -74,14 +81,14 @@ class UrlLauncherHelper {
       } else {
         Get.snackbar(
           'Email',
-          ' apps.uksolutions@gmail.com',
+          'apps.uksolutions@gmail.com',
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (_) {
       Get.snackbar(
         'Email',
-        ' apps.uksolutions@gmail.com',
+        'apps.uksolutions@gmail.com',
         snackPosition: SnackPosition.BOTTOM,
       );
     }

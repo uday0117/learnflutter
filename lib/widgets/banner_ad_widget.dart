@@ -4,7 +4,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ad_service.dart';
 
 class BannerAdWidget extends StatefulWidget {
-  const BannerAdWidget({super.key});
+  final VoidCallback? onAdLoaded;
+  const BannerAdWidget({super.key, this.onAdLoaded});
 
   @override
   State<BannerAdWidget> createState() => _BannerAdWidgetState();
@@ -48,6 +49,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
               _isAdLoaded = true;
               _isAdLoading = false;
             });
+            widget.onAdLoaded?.call();
           }
         },
         onAdFailedToLoad: (ad, error) {
@@ -73,15 +75,26 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (AdService().isAdFree || !_isAdLoaded || _bannerAd == null) {
+    if (AdService().isAdFree) {
       return const SizedBox.shrink();
     }
 
-    return Container(
-      alignment: Alignment.center,
-      width: _bannerAd!.size.width.toDouble(),
-      height: _bannerAd!.size.height.toDouble(),
-      child: AdWidget(ad: _bannerAd!),
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOutCubic,
+      child: _isAdLoaded && _bannerAd != null
+          ? AnimatedOpacity(
+              opacity: _isAdLoaded ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeIn,
+              child: Container(
+                alignment: Alignment.center,
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
+            )
+          : const SizedBox(width: double.infinity, height: 0),
     );
   }
 }

@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:in_app_update/in_app_update.dart';
 
 import '../controllers/update_controller.dart';
+import '../utils/url_launcher_helper.dart';
 import 'analytics_service.dart';
 
 class InAppUpdateService {
@@ -29,6 +31,269 @@ class InAppUpdateService {
   Future<void> onAppResumed() async {
     if (!_isSupported || _isChecking) return;
     await checkForUpdate(autoStart: true);
+  }
+
+  /// Manually checks for updates with complete user feedback (dialogs/snackbars).
+  Future<void> checkManually({BuildContext? context}) async {
+    if (_isChecking) return;
+
+    Get.snackbar(
+      'checking_updates'.tr,
+      'checking_updates_sub'.tr,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+    );
+
+    if (!Platform.isAndroid) {
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        _showUpToDateDialog('1.0.7');
+      });
+      return;
+    }
+
+    _isChecking = true;
+    try {
+      final info = await InAppUpdate.checkForUpdate();
+
+      if (info.updateAvailability ==
+          UpdateAvailability.developerTriggeredUpdateInProgress) {
+        _handleInProgressUpdate(info.installStatus, autoStart: true);
+        return;
+      }
+
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        AnalyticsService().logEvent('manual_update_found', parameters: {
+          'flexible': info.flexibleUpdateAllowed.toString(),
+          'immediate': info.immediateUpdateAllowed.toString(),
+        });
+
+        if (info.flexibleUpdateAllowed) {
+          await _startFlexibleUpdate();
+        } else if (info.immediateUpdateAllowed) {
+          await InAppUpdate.performImmediateUpdate();
+        } else {
+          _showUpdateAvailableDialog();
+        }
+      } else {
+        _showUpToDateDialog('1.0.7');
+      }
+    } catch (e, stack) {
+      debugPrint('[InAppUpdate] manual check error: $e');
+      AnalyticsService().recordError(e, stack, reason: 'Manual update check');
+      _showStoreFallbackDialog();
+    } finally {
+      _isChecking = false;
+    }
+  }
+
+  void _showUpToDateDialog(String version) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.green,
+                  size: 38,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'app_up_to_date_title'.tr,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'app_up_to_date_msg'.trParams({'version': version}),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () => Get.back(),
+                  child: Text('ok'.tr),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showStoreFallbackDialog() {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.store_rounded,
+                  color: Colors.blue,
+                  size: 38,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'google_play_updates'.tr,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'google_play_updates_msg'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () => Get.back(),
+                      child: Text('close'.tr),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () {
+                        Get.back();
+                        UrlLauncherHelper.openPlayStore();
+                      },
+                      child: Text('view_on_store'.tr),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showUpdateAvailableDialog() {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.system_update_rounded,
+                  color: Colors.orange,
+                  size: 38,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'update_available'.tr,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'new_version_available_msg'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () {
+                    Get.back();
+                    UrlLauncherHelper.openPlayStore();
+                  },
+                  child: Text('update_now'.tr),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> checkForUpdate({required bool autoStart}) async {

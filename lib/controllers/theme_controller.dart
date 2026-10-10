@@ -115,8 +115,17 @@ class ThemeController extends GetxController {
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
-        backgroundColor: primaryColor.value,
-        foregroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: const Color(0xFF1E293B),
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF1E293B),
+        ),
+        iconTheme: const IconThemeData(color: Color(0xFF1E293B)),
+        actionsIconTheme: const IconThemeData(color: Color(0xFF1E293B)),
       ),
       cardTheme: CardThemeData(
         elevation: 2,
@@ -140,8 +149,17 @@ class ThemeController extends GetxController {
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
-        backgroundColor: Colors.grey[900],
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        actionsIconTheme: const IconThemeData(color: Colors.white),
       ),
       cardTheme: CardThemeData(
         elevation: 2,

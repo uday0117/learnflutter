@@ -9,6 +9,7 @@ import '../controllers/theme_controller.dart';
 import '../data/interview_data.dart';
 import '../models/interview_question.dart';
 import '../services/ad_service.dart';
+import '../services/deep_link_service.dart';
 import '../widgets/banner_ad_widget.dart';
 import 'interview_swipe_screen.dart';
 
@@ -590,7 +591,7 @@ class _InterviewDetailScreenState extends State<InterviewDetailScreen> {
         'Q: ${widget.question.question}\n\n'
         'A: ${widget.question.answer}'
         '${widget.question.codeExample != null ? '\n\n```dart\n${widget.question.codeExample}\n```' : ''}'
-        '\n\n— Learn Flutter App';
+        '\n\n👉 Learn 55+ Flutter Interview Questions Free:\n${DeepLinkService.playStoreUrl}';
     Share.share(text);
   }
 

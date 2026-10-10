@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'controllers/auth_controller.dart';
 import 'controllers/engagement_controller.dart';
 import 'controllers/favorites_controller.dart';
 import 'controllers/interview_review_controller.dart';
@@ -55,6 +56,7 @@ void main() async {
     Get.put(EngagementController());
     Get.put(WeeklyChallengeController());
     Get.put(UpdateController());
+    Get.put(AuthController());
 
     // Restore saved locale (or null = system default)
     final savedLocale = themeController.getSavedLocale();
