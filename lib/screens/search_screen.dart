@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
 import '../models/widget_model.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/highlighted_text.dart';
 import 'widget_detail_screen.dart';
 
@@ -49,9 +48,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final canPop = Navigator.canPop(context);
+
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: Navigator.canPop(context),
+        automaticallyImplyLeading: canPop,
         title: Text(
           'nav_search'.tr,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
@@ -90,62 +91,67 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
 
           // Search results
-          Expanded(child: _buildSearchContent()),
-
-          const Center(child: BannerAdWidget()),
-          const SizedBox(height: 8),
+          Expanded(child: _buildSearchContent(canPop)),
         ],
       ),
     );
   }
 
-  Widget _buildSearchContent() {
+  Widget _buildSearchContent(bool canPop) {
+    final bottomOffset = canPop ? 0.0 : 60.0;
+
     if (!_isSearching) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search, size: 100, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'Search for Flutter widgets',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
+        child: Padding(
+          padding: EdgeInsets.only(bottom: bottomOffset),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.search, size: 100, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              Text(
+                'Search for Flutter widgets',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[600],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Type widget name to search',
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                'Type widget name to search',
+                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (_searchResults.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off, size: 100, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'No results found',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
+        child: Padding(
+          padding: EdgeInsets.only(bottom: bottomOffset),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.search_off, size: 100, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              Text(
+                'no_results'.tr,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[600],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Try a different search term',
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                'no_results_sub'.tr,
+                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -153,7 +159,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final query = _searchController.text.trim();
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, canPop ? 16 : 110),
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
         final widget = _searchResults[index];

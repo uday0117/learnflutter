@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
-import '../widgets/banner_ad_widget.dart';
 import 'widget_detail_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
@@ -50,35 +49,35 @@ class FavoritesScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Obx(() {
+      body: Obx(() {
         if (favoritesController.favoriteIds.isEmpty) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.favorite_outline,
-                  size: 100,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No favorites yet',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[600],
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 60),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.favorite_outline,
+                    size: 100,
+                    color: Colors.grey[400],
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Save your favorite widgets',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Text(
+                    'no_favorites'.tr,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'no_favorites_sub'.tr,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -88,7 +87,7 @@ class FavoritesScreen extends StatelessWidget {
             .toList();
 
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
           itemCount: favoriteWidgets.length,
           itemBuilder: (context, index) {
             final widget = favoriteWidgets[index];
@@ -146,11 +145,6 @@ class FavoritesScreen extends StatelessWidget {
           },
         );
       }),
-          ),
-          const Center(child: BannerAdWidget()),
-          const SizedBox(height: 8),
-        ],
-      ),
     );
   }
 }

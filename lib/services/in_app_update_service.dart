@@ -51,7 +51,7 @@ class InAppUpdateService {
         Get.closeCurrentSnackbar();
         Get.snackbar(
           'app_up_to_date_title'.tr,
-          'app_up_to_date_msg'.trParams({'version': '1.0.8'}),
+          'app_up_to_date_msg'.trParams({'version': _controller.appVersion.value}),
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 3),
           margin: const EdgeInsets.all(16),
@@ -90,7 +90,7 @@ class InAppUpdateService {
         Get.closeCurrentSnackbar();
         Get.snackbar(
           'app_up_to_date_title'.tr,
-          'app_up_to_date_msg'.trParams({'version': '1.0.8'}),
+          'app_up_to_date_msg'.trParams({'version': _controller.appVersion.value}),
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 3),
           margin: const EdgeInsets.all(16),
@@ -113,7 +113,7 @@ class InAppUpdateService {
         // App is sideloaded or running locally via flutter run / debug APK
         Get.snackbar(
           'app_up_to_date_title'.tr,
-          'app_up_to_date_msg'.trParams({'version': '1.0.8'}),
+          'app_up_to_date_msg'.trParams({'version': _controller.appVersion.value}),
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 3),
           margin: const EdgeInsets.all(16),

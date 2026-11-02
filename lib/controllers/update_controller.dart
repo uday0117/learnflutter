@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 enum UpdateUiPhase {
   hidden,
@@ -14,6 +15,24 @@ class UpdateController extends GetxController {
   final phase = UpdateUiPhase.hidden.obs;
   final progress = 0.0.obs;
   final statusMessage = ''.obs;
+  final appVersion = '1.0.9+10'.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadAppVersion();
+  }
+
+  Future<void> _loadAppVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (info.version.isNotEmpty) {
+        appVersion.value = '${info.version}+${info.buildNumber}';
+      }
+    } catch (_) {
+      // Keep fallback
+    }
+  }
 
   bool get isVisible =>
       phase.value != UpdateUiPhase.hidden &&

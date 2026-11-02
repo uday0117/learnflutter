@@ -12,6 +12,7 @@ import '../controllers/progress_controller.dart';
 import '../controllers/quiz_controller.dart';
 import '../controllers/streak_controller.dart';
 import '../controllers/theme_controller.dart';
+import '../controllers/update_controller.dart';
 import '../data/interview_data.dart';
 import '../services/ad_service.dart';
 import '../services/in_app_update_service.dart';
@@ -687,15 +688,18 @@ class SettingsScreen extends StatelessWidget {
                               UrlLauncherHelper.openTermsAndConditions(),
                           showDivider: true,
                         ),
-                        _SettingsTile(
-                          icon: Icons.info_rounded,
-                          iconColor: Colors.blueAccent,
-                          title: 'version'.tr,
-                          subtitle: '1.0.8 (Build 9) • ${'check_for_updates'.tr}',
-                          onTap: () => InAppUpdateService().checkManually(context: context),
-                          showDivider: false,
-                          showArrow: true,
-                        ),
+                        Obx(() {
+                          final version = Get.find<UpdateController>().appVersion.value;
+                          return _SettingsTile(
+                            icon: Icons.info_rounded,
+                            iconColor: Colors.blueAccent,
+                            title: 'version'.tr,
+                            subtitle: '$version • ${'check_for_updates'.tr}',
+                            onTap: () => InAppUpdateService().checkManually(context: context),
+                            showDivider: false,
+                            showArrow: true,
+                          );
+                        }),
                       ],
                     ),
                   ),
