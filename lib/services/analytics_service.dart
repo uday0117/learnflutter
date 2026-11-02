@@ -90,6 +90,8 @@ class AnalyticsService {
     await _analytics!.logScreenView(screenName: screenName);
   }
 
+  Future<void> logScreen(String screenName) => logScreenView(screenName);
+
   Future<void> logEvent(
     String name, {
     Map<String, Object>? parameters,

@@ -35,6 +35,10 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
 
   bool _isUnlocked() {
     if (AdService().isAdFree) return true;
+    final allExpiry = GetStorage().read<int>('all_projects_unlocked_expiry');
+    if (allExpiry != null && DateTime.now().millisecondsSinceEpoch < allExpiry) {
+      return true;
+    }
     final expiry = GetStorage().read<int>('project_unlocked_${widget.project.id}');
     if (expiry == null) return false;
     return DateTime.now().millisecondsSinceEpoch < expiry;
@@ -42,6 +46,11 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
 
   String _getRemainingTime() {
     if (AdService().isAdFree) return 'Unlocked (Ad-free Active)';
+    final allExpiry = GetStorage().read<int>('all_projects_unlocked_expiry');
+    if (allExpiry != null && DateTime.now().millisecondsSinceEpoch < allExpiry) {
+      final rem = DateTime.fromMillisecondsSinceEpoch(allExpiry).difference(DateTime.now());
+      return 'All Projects Pass: ${rem.inHours}h ${rem.inMinutes % 60}m left';
+    }
     final expiry = GetStorage().read<int>('project_unlocked_${widget.project.id}');
     if (expiry == null) return '';
     final remaining = DateTime.fromMillisecondsSinceEpoch(expiry).difference(DateTime.now());

@@ -62,6 +62,15 @@ class ShareCardService {
     });
   }
 
+  /// Captures and shares an arbitrary custom widget (such as a Certificate or Roadmap card)
+  Future<void> shareCustomWidget({
+    required Widget card,
+    required String text,
+    required String filePrefix,
+  }) async {
+    await _captureAndShare(card, text, filePrefix);
+  }
+
   String _achievementText(ShareMilestoneType type, int streak, int pct) {
     return switch (type) {
       ShareMilestoneType.streak3 =>

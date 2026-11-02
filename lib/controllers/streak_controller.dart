@@ -6,16 +6,19 @@ class StreakController extends GetxController {
   static const _streakKey = 'streak_count';
   static const _longestKey = 'streak_longest';
   static const _totalDaysKey = 'streak_total_days';
+  static const _shieldsKey = 'streak_shields';
 
   final _box = GetStorage();
 
   var currentStreak = 0.obs;
   var longestStreak = 0.obs;
   var totalDays = 0.obs;
+  var streakShields = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
+    streakShields.value = _box.read<int>(_shieldsKey) ?? 0;
     _checkAndUpdateStreak();
   }
 
@@ -49,8 +52,17 @@ class StreakController extends GetxController {
         newStreak = savedStreak + 1;
         newTotal = total + 1;
       } else {
-        newStreak = 1;
-        newTotal = total + 1;
+        final shields = _box.read<int>(_shieldsKey) ?? 0;
+        if (shields > 0) {
+          // Shield saved the streak!
+          newStreak = savedStreak + 1;
+          newTotal = total + 1;
+          streakShields.value = shields - 1;
+          _box.write(_shieldsKey, streakShields.value);
+        } else {
+          newStreak = 1;
+          newTotal = total + 1;
+        }
       }
     }
 
@@ -62,6 +74,11 @@ class StreakController extends GetxController {
     _box.write(_streakKey, newStreak);
     _box.write(_longestKey, longestStreak.value);
     _box.write(_totalDaysKey, newTotal);
+  }
+
+  void addShield() {
+    streakShields.value++;
+    _box.write(_shieldsKey, streakShields.value);
   }
 
   String _dateString(DateTime dt) => '${dt.year}-${dt.month}-${dt.day}';

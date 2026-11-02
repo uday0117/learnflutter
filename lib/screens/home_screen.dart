@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../controllers/engagement_controller.dart';
 import '../controllers/favorites_controller.dart';
@@ -17,10 +18,16 @@ import '../screens/widgets_list_screen.dart';
 import '../services/ad_service.dart';
 import '../services/analytics_service.dart';
 import '../widgets/banner_ad_widget.dart';
+import 'animation_lab_screen.dart';
+import 'certificate_screen.dart';
 import 'favorites_screen.dart';
+import 'packages_guide_screen.dart';
 import 'projects_list_screen.dart';
+import 'rewards_hub_screen.dart';
+import 'roadmap_screen.dart';
 import 'search_screen.dart';
 import 'settings_screen.dart';
+import 'ui_cookbook_screen.dart';
 import 'widget_customizer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -45,18 +52,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           _screens[_selectedIndex],
 
           // Custom bottom navigation
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 20,
-            child: Obx(
-              () => Container(
+          if (!isKeyboardOpen)
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 20,
+              child: Obx(
+                () => Container(
                 height: 70,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -256,13 +267,17 @@ class CategoriesScreen extends StatelessWidget {
                                     size: 22,
                                   ),
                                   const SizedBox(width: 12),
-                                  Text(
-                                    'search_hint'.tr,
-                                    style: TextStyle(
-                                      color: isDark
-                                          ? Colors.white60
-                                          : Colors.grey.shade600,
-                                      fontSize: 15,
+                                  Expanded(
+                                    child: Text(
+                                      'search_hint'.tr,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: isDark
+                                            ? Colors.white60
+                                            : Colors.grey.shade600,
+                                        fontSize: 15,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -272,7 +287,43 @@ class CategoriesScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
+                    Obx(() {
+                      final isAdFree = AdService().isAdFree;
+                      return GestureDetector(
+                        onTap: () => Get.to(
+                          () => const RewardsHubScreen(),
+                          transition: Transition.rightToLeft,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: isAdFree
+                                  ? [const Color(0xFF11998E), const Color(0xFF38EF7D)]
+                                  : [const Color(0xFFFF8008), const Color(0xFFFFC837)],
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (isAdFree
+                                        ? const Color(0xFF11998E)
+                                        : const Color(0xFFFF8008))
+                                    .withValues(alpha: 0.35),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            isAdFree ? Icons.bolt_rounded : Icons.card_giftcard_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(width: 8),
                     Obx(
                       () => GestureDetector(
                         onTap: () => themeController.toggleTheme(),
@@ -1309,6 +1360,128 @@ class _LearnMoreSection extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+        // Developer Roadmap & Certificates row
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: _LearnCard(
+                  emoji: '🗺️',
+                  title: 'Flutter Roadmap',
+                  subtitle: 'Career path 2025/2026',
+                  gradient: const [Color(0xFF00C6FF), Color(0xFF0072FF)],
+                  onTap: () => Get.to(
+                    () => const RoadmapScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _LearnCard(
+                  emoji: '📜',
+                  title: 'Certificates',
+                  subtitle: 'Earn & share badges',
+                  gradient: const [Color(0xFFFFB75E), Color(0xFFED8F03)],
+                  onTap: () => Get.to(
+                    () => const CertificateScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Animation Lab & UI Cookbook row
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: _LearnCard(
+                  emoji: '🎬',
+                  title: 'Animation Studio',
+                  subtitle: 'Physics & live curves',
+                  gradient: const [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+                  onTap: () => Get.to(
+                    () => const AnimationLabScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _LearnCard(
+                  emoji: '👨‍🍳',
+                  title: 'UI Cookbook',
+                  subtitle: 'Modern code recipes',
+                  gradient: const [Color(0xFFF857A6), Color(0xFFFF5858)],
+                  onTap: () => Get.to(
+                    () => const UICookbookScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Top Packages Guide row
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: GestureDetector(
+            onTap: () => Get.to(
+              () => const PackagesGuideScreen(),
+              transition: Transition.rightToLeft,
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF203A43).withValues(alpha: 0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Text('📦', style: TextStyle(fontSize: 32)),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Top Pub.dev Packages Guide',
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Essential libraries with installation and quickstarts',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios_rounded,
+                      color: Colors.white70, size: 16),
+                ],
+              ),
+            ),
           ),
         ),
       ],

@@ -256,93 +256,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showFontSizePicker(
-      BuildContext context, ThemeController themeController) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('font_size'.tr,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('font_size_sub'.tr,
-                style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 24),
-            Obx(() => Row(
-                  children:
-                      List.generate(ThemeController.fontScaleLabels.length,
-                          (i) {
-                    final isSelected =
-                        themeController.fontScaleIndex.value == i;
-                    final primary = themeController.primaryColor.value;
-                    return Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                            right: i < 2 ? 12 : 0),
-                        child: GestureDetector(
-                          onTap: () => themeController.setFontScale(i),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 16),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? primary
-                                  : primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Aa',
-                                  style: TextStyle(
-                                    fontSize: 14.0 +
-                                        i * 4,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  ThemeController.fontScaleLabels[i],
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                )),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('done'.tr),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showRatingSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -393,166 +306,6 @@ class SettingsScreen extends StatelessWidget {
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => const _StatsBottomSheet(),
-    );
-  }
-
-  void _showWhatsNewDialog(BuildContext context) {
-    final themeController = Get.find<ThemeController>();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.75,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (ctx, scrollController) {
-          return Obx(() {
-            final primary = themeController.primaryColor.value;
-            return Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Text('🎉',
-                            style: const TextStyle(fontSize: 24)),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'whats_new'.tr,
-                              style: const TextStyle(
-                                  fontSize: 22, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              'Learn Flutter',
-                              style: TextStyle(
-                                  color: primary,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(ctx),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: ListView(
-                      controller: scrollController,
-                      children: [
-                        _ChangelogVersion(
-                          version: 'v1.0.7',
-                          label: 'whats_new_current'.tr,
-                          primary: primary,
-                          isDark: isDark,
-                          items: const [
-                            ('🚀', 'In-App Updates: check & install latest updates directly in Settings'),
-                            ('✨', 'Ultra-smooth scrolling: zero ad layout jumps / Cumulative Layout Shift'),
-                            ('⏱️', 'Smart ad cooldown: protection against rapid-fire full-screen interruptions'),
-                            ('🎁', 'Invite Friends reward in Settings: share to unlock 2 hours ad-free'),
-                            ('📤', 'Direct Share Flutter Widget tips & Interview Q&A with deep links'),
-                            ('⚡', 'Performance optimizations & smoother 60fps animations'),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _ChangelogVersion(
-                          version: 'v1.0.5',
-                          label: null,
-                          primary: primary,
-                          isDark: isDark,
-                          items: const [
-                            ('🖼️', 'Shareable achievement image cards for social'),
-                            ('🔗', 'HTTPS deep links via ukrsolutions.in — share any widget URL'),
-                            ('📱', 'Android home screen widget — streak & widget of the day'),
-                            ('📚', '50 quiz questions & 55 interview Q&A added'),
-                            ('👋', 'Welcome onboarding for new learners'),
-                            ('👥', 'Invite Friends — share & earn 2hr ad-free'),
-                            ('📢', 'Widget shares now include Play Store link'),
-                            ('💰', 'Quiz completion interstitial for better monetization'),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _ChangelogVersion(
-                          version: 'v1.0.4',
-                          label: null,
-                          primary: primary,
-                          isDark: isDark,
-                          items: const [
-                            ('🎯', 'Daily Goal — learn 3 widgets + quiz each day'),
-                            ('🔔', 'Daily reminder notifications at 9 AM'),
-                            ('📢', 'Share achievements to invite friends'),
-                            ('💰', 'Watch ad for 1-hour ad-free learning'),
-                            ('📚', '52 new widgets — Animation, Cupertino, Slivers & more'),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _ChangelogVersion(
-                          version: 'v1.0.2',
-                          label: null,
-                          primary: primary,
-                          isDark: isDark,
-                          items: const [
-                            ('📊', 'Learning Stats in Settings — track every milestone'),
-                            ('🎉', 'What\'s New changelog added'),
-                            ('🐛', 'Minor bug fixes & performance improvements'),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _ChangelogVersion(
-                          version: 'v1.0.1',
-                          label: null,
-                          primary: primary,
-                          isDark: isDark,
-                          items: const [
-                            ('🎮', 'Flutter Quiz mode with lifetime stats'),
-                            ('🔥', 'Daily learning streak tracker'),
-                            ('📝', 'Dart Cheatsheet quick reference'),
-                            ('🎤', 'Interview Q&A with 45 Flutter questions'),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _ChangelogVersion(
-                          version: 'v1.0.0',
-                          label: null,
-                          primary: primary,
-                          isDark: isDark,
-                          items: const [
-                            ('🚀', 'Initial release — 100+ Flutter widgets'),
-                            ('🌍', '13 language support'),
-                            ('🎨', 'Custom themes, dark mode & font size'),
-                            ('❤️', 'Favorites & learning progress tracking'),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          });
-        },
-      ),
     );
   }
 
@@ -680,57 +433,6 @@ class SettingsScreen extends StatelessWidget {
 
                         const Divider(height: 1, indent: 60, endIndent: 20),
 
-                        // Haptic Feedback
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 14),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Colors.deepPurple
-                                      .withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                    Icons.vibration_rounded,
-                                    color: Colors.deepPurple),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'haptic_feedback'.tr,
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    Text(
-                                      'haptic_feedback_sub'.tr,
-                                      style: const TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Obx(() => Switch(
-                                    value: themeController
-                                        .hapticsEnabled.value,
-                                    onChanged: (_) =>
-                                        themeController.toggleHaptics(),
-                                  )),
-                            ],
-                          ),
-                        ),
-
-                        const Divider(height: 1, indent: 60, endIndent: 20),
-
                         // Daily Reminder
                         Padding(
                           padding: const EdgeInsets.symmetric(
@@ -806,36 +508,6 @@ class SettingsScreen extends StatelessWidget {
 
                         const Divider(height: 1, indent: 60, endIndent: 20),
 
-                        // Font Size
-                        _SettingsTile(
-                          icon: Icons.text_fields_rounded,
-                          iconColor: Colors.orange,
-                          title: 'font_size'.tr,
-                          subtitle: 'font_size_sub'.tr,
-                          trailing: Obx(() => Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: themeController.primaryColor.value
-                                      .withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  ThemeController.fontScaleLabels[
-                                      themeController.fontScaleIndex.value],
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        themeController.primaryColor.value,
-                                  ),
-                                ),
-                              )),
-                          onTap: () =>
-                              _showFontSizePicker(context, themeController),
-                          showDivider: true,
-                        ),
-
                         // Language
                         _SettingsTile(
                           icon: Icons.language_rounded,
@@ -884,31 +556,6 @@ class SettingsScreen extends StatelessWidget {
                           title: 'my_stats'.tr,
                           subtitle: 'my_stats_sub'.tr,
                           onTap: () => _showStatsSheet(context),
-                          showDivider: true,
-                        ),
-                        _SettingsTile(
-                          icon: Icons.widgets_rounded,
-                          iconColor: Colors.teal,
-                          title: 'home_widget_title'.tr,
-                          subtitle: 'home_widget_sub'.tr,
-                          onTap: () {
-                            Get.snackbar(
-                              'home_widget_title'.tr,
-                              'home_widget_hint'.tr,
-                              snackPosition: SnackPosition.BOTTOM,
-                              duration: const Duration(seconds: 5),
-                              margin: const EdgeInsets.all(16),
-                              borderRadius: 12,
-                            );
-                          },
-                          showDivider: true,
-                        ),
-                        _SettingsTile(
-                          icon: Icons.share_rounded,
-                          iconColor: Colors.blue,
-                          title: 'share_app'.tr,
-                          subtitle: 'share_app_sub'.tr,
-                          onTap: () => Get.find<EngagementController>().shareApp(),
                           showDivider: true,
                         ),
                         _SettingsTile(
@@ -1025,14 +672,6 @@ class SettingsScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         _SettingsTile(
-                          icon: Icons.new_releases_rounded,
-                          iconColor: Colors.deepOrange,
-                          title: 'whats_new'.tr,
-                          subtitle: 'whats_new_sub'.tr,
-                          onTap: () => _showWhatsNewDialog(context),
-                          showDivider: true,
-                        ),
-                        _SettingsTile(
                           icon: Icons.privacy_tip_rounded,
                           iconColor: Colors.green,
                           title: 'privacy_policy'.tr,
@@ -1049,21 +688,13 @@ class SettingsScreen extends StatelessWidget {
                           showDivider: true,
                         ),
                         _SettingsTile(
-                          icon: Icons.system_update_rounded,
-                          iconColor: Colors.blueAccent,
-                          title: 'check_for_updates'.tr,
-                          subtitle: 'check_for_updates_sub'.tr,
-                          onTap: () => InAppUpdateService().checkManually(context: context),
-                          showDivider: true,
-                        ),
-                        _SettingsTile(
                           icon: Icons.info_rounded,
-                          iconColor: Colors.grey,
+                          iconColor: Colors.blueAccent,
                           title: 'version'.tr,
-                          subtitle: '1.0.7 (Build 8)',
+                          subtitle: '1.0.8 (Build 9) • ${'check_for_updates'.tr}',
                           onTap: () => InAppUpdateService().checkManually(context: context),
                           showDivider: false,
-                          showArrow: false,
+                          showArrow: true,
                         ),
                       ],
                     ),
@@ -1071,39 +702,6 @@ class SettingsScreen extends StatelessWidget {
 
 
 
-                  const SizedBox(height: 40),
-
-                  // Footer
-                  Center(
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('made_with'.tr,
-                                style:
-                                    const TextStyle(color: Colors.grey)),
-                            const SizedBox(width: 6),
-                            const Icon(Icons.favorite,
-                                color: Colors.red, size: 18),
-                            const SizedBox(width: 6),
-                            Text('in_flutter'.tr,
-                                style:
-                                    const TextStyle(color: Colors.grey)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '© 2025 UK Solutions',
-                          style: TextStyle(
-                              fontSize: 11,
-                              color: isDark
-                                  ? Colors.white38
-                                  : Colors.grey.shade400),
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 120),
                 ],
               ),
@@ -1415,107 +1013,6 @@ class _StatCard extends StatelessWidget {
                 ),
               ],
             ),
-    );
-  }
-}
-
-// ─── What's New Changelog version block ──────────────────────
-class _ChangelogVersion extends StatelessWidget {
-  final String version;
-  final String? label;
-  final Color primary;
-  final bool isDark;
-  final List<(String, String)> items;
-
-  const _ChangelogVersion({
-    required this.version,
-    required this.label,
-    required this.primary,
-    required this.isDark,
-    required this.items,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[850] : Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
-        border: label != null
-            ? Border.all(color: primary.withValues(alpha: 0.3), width: 1.5)
-            : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: label != null
-                      ? primary
-                      : (isDark ? Colors.grey[700] : Colors.grey[300]),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  version,
-                  style: TextStyle(
-                    color: label != null
-                        ? Colors.white
-                        : (isDark ? Colors.white70 : Colors.grey[600]),
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              if (label != null) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    label!,
-                    style: const TextStyle(
-                        color: Colors.green,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.$1,
-                        style: const TextStyle(fontSize: 16)),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        item.$2,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: isDark
-                              ? Colors.white70
-                              : Colors.grey[800],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-        ],
-      ),
     );
   }
 }

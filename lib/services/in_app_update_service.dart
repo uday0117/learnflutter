@@ -33,7 +33,7 @@ class InAppUpdateService {
     await checkForUpdate(autoStart: true);
   }
 
-  /// Manually checks for updates with complete user feedback (dialogs/snackbars).
+  /// Manually checks for updates with complete user feedback.
   Future<void> checkManually({BuildContext? context}) async {
     if (_isChecking) return;
 
@@ -47,8 +47,16 @@ class InAppUpdateService {
     );
 
     if (!Platform.isAndroid) {
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        _showUpToDateDialog('1.0.7');
+      Future.delayed(const Duration(milliseconds: 600), () {
+        Get.closeCurrentSnackbar();
+        Get.snackbar(
+          'app_up_to_date_title'.tr,
+          'app_up_to_date_msg'.trParams({'version': '1.0.8'}),
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
       });
       return;
     }
@@ -69,6 +77,8 @@ class InAppUpdateService {
           'immediate': info.immediateUpdateAllowed.toString(),
         });
 
+        Get.closeCurrentSnackbar();
+
         if (info.flexibleUpdateAllowed) {
           await _startFlexibleUpdate();
         } else if (info.immediateUpdateAllowed) {
@@ -77,77 +87,44 @@ class InAppUpdateService {
           _showUpdateAvailableDialog();
         }
       } else {
-        _showUpToDateDialog('1.0.7');
+        Get.closeCurrentSnackbar();
+        Get.snackbar(
+          'app_up_to_date_title'.tr,
+          'app_up_to_date_msg'.trParams({'version': '1.0.8'}),
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
       }
     } catch (e, stack) {
       debugPrint('[InAppUpdate] manual check error: $e');
-      AnalyticsService().recordError(e, stack, reason: 'Manual update check');
-      _showStoreFallbackDialog();
+      final errStr = e.toString();
+      final isNotOwned =
+          errStr.contains('-10') || errStr.contains('ERROR_APP_NOT_OWNED');
+
+      if (!isNotOwned) {
+        AnalyticsService().recordError(e, stack, reason: 'Manual update check');
+      }
+
+      Get.closeCurrentSnackbar();
+
+      if (isNotOwned) {
+        // App is sideloaded or running locally via flutter run / debug APK
+        Get.snackbar(
+          'app_up_to_date_title'.tr,
+          'app_up_to_date_msg'.trParams({'version': '1.0.8'}),
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+      } else {
+        _showStoreFallbackDialog();
+      }
     } finally {
       _isChecking = false;
     }
-  }
-
-  void _showUpToDateDialog(String version) {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check_circle_rounded,
-                  color: Colors.green,
-                  size: 38,
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'app_up_to_date_title'.tr,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'app_up_to_date_msg'.trParams({'version': version}),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  onPressed: () => Get.back(),
-                  child: Text('ok'.tr),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   void _showStoreFallbackDialog() {
@@ -328,7 +305,10 @@ class InAppUpdateService {
       }
     } catch (e, stack) {
       debugPrint('[InAppUpdate] check failed: $e');
-      AnalyticsService().recordError(e, stack, reason: 'In-app update check');
+      final errStr = e.toString();
+      if (!errStr.contains('-10') && !errStr.contains('ERROR_APP_NOT_OWNED')) {
+        AnalyticsService().recordError(e, stack, reason: 'In-app update check');
+      }
     } finally {
       _isChecking = false;
     }
