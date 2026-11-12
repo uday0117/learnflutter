@@ -571,8 +571,6 @@ class _InterviewDetailScreenState extends State<InterviewDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Track every 5 interview questions viewed, then show an interstitial
-    AdService().incrementInterviewQuestionCounter();
   }
 
   void _copyAnswer() {
@@ -603,7 +601,12 @@ class _InterviewDetailScreenState extends State<InterviewDetailScreen> {
     final InterviewReviewController review =
         Get.find<InterviewReviewController>();
 
-    return Scaffold(
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        AdService().incrementInterviewQuestionCounter();
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text('question'.tr),
         actions: [
@@ -851,7 +854,7 @@ class _InterviewDetailScreenState extends State<InterviewDetailScreen> {
           ),
         );
       }),
-    );
+    ));
   }
 }
 

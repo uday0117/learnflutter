@@ -40,14 +40,19 @@ class StreakController extends GetxController {
     } else if (lastStr == todayStr) {
       newStreak = savedStreak;
     } else {
-      final parts = lastStr.split('-');
-      final last = DateTime(
-        int.parse(parts[0]),
-        int.parse(parts[1]),
-        int.parse(parts[2]),
-      );
-      final todayDate = DateTime(today.year, today.month, today.day);
-      final diff = todayDate.difference(last).inDays;
+      int diff;
+      try {
+        final parts = lastStr.split('-');
+        final last = DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
+        final todayDate = DateTime(today.year, today.month, today.day);
+        diff = todayDate.difference(last).inDays;
+      } catch (_) {
+        diff = -1;
+      }
       if (diff == 1) {
         newStreak = savedStreak + 1;
         newTotal = total + 1;

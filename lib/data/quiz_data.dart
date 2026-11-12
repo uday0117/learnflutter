@@ -507,5 +507,19 @@ class QuizData {
           'Navigator manages a stack of Route objects for screen transitions.',
       category: QuizCategory.navigation,
     ),
+    QuizQuestion(
+      question:
+          'Which method removes all previous routes and pushes a new one in Flutter?',
+      options: [
+        'Navigator.pushNamedAndRemoveUntil',
+        'Navigator.popAllAndPush',
+        'Navigator.replaceRouteStack',
+        'Navigator.clearAndPush'
+      ],
+      correctIndex: 0,
+      explanation:
+          'Navigator.pushNamedAndRemoveUntil pushes a route and removes all previous routes satisfying the predicate.',
+      category: QuizCategory.navigation,
+    ),
   ];
 }

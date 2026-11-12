@@ -50,10 +50,9 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
     _tabController = TabController(length: 4, vsync: this);
     _initPlaygroundParams();
 
-    // Track progress & trigger interstitial
+    // Track progress
     Future.delayed(const Duration(milliseconds: 300), () {
       progressController.markAsViewed(widget.widgetModel.id);
-      AdService().incrementDetailScreenCounter();
       AnalyticsService().logWidgetViewed(
         widgetId: widget.widgetModel.id,
         widgetName: widget.widgetModel.name,
@@ -95,7 +94,12 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        AdService().incrementDetailScreenCounter();
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text(widget.widgetModel.name),
         actions: [
@@ -255,7 +259,7 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
         icon: const Icon(Icons.code),
         label: Text('view_full_example'.tr),
       ),
-    );
+    ));
   }
 
   Widget _buildSyntaxTab(String code, bool isDark) {
@@ -1180,6 +1184,7 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
           ),
         );
 
+      case 'elevatedbutton':
       case 'elevated_button':
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -1600,6 +1605,7 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
         );
 
       case 'dialog':
+      case 'alertdialog':
         return ElevatedButton(
           onPressed: () {
             showDialog(

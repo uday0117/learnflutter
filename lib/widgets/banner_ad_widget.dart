@@ -1,11 +1,21 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
 
 class BannerAdWidget extends StatefulWidget {
   final VoidCallback? onAdLoaded;
-  const BannerAdWidget({super.key, this.onAdLoaded});
+  final double? customWidth;
+  final bool isCollapsible;
+
+  const BannerAdWidget({
+    super.key,
+    this.onAdLoaded,
+    this.customWidth,
+    this.isCollapsible = true,
+  });
 
   @override
   State<BannerAdWidget> createState() => _BannerAdWidgetState();
@@ -15,6 +25,21 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
   bool _isAdLoading = false;
+  int _retryCount = 0;
+  Timer? _retryTimer;
+  StreamSubscription? _adFreeSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    // Reactively watch ad-free pass status to immediately dispose ad if activated
+    _adFreeSubscription = AdService().adFreeUntil.listen((until) {
+      if (AdService().isAdFree && mounted) {
+        _cleanupAd();
+        setState(() {});
+      }
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -24,13 +49,30 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     }
   }
 
+  void _cleanupAd() {
+    _retryTimer?.cancel();
+    _bannerAd?.dispose();
+    _bannerAd = null;
+    _isAdLoaded = false;
+    _isAdLoading = false;
+  }
+
   Future<void> _loadAd() async {
-    if (AdService().isAdFree || _isAdLoading) return;
-    
+    if (AdService().isAdFree || _isAdLoading || !mounted) return;
+
     _isAdLoading = true;
-    final width = MediaQuery.of(context).size.width.truncate();
+    final screenWidth = MediaQuery.of(context).size.width.truncate();
+    final int bannerWidth = widget.customWidth != null
+        ? widget.customWidth!.truncate().clamp(100, screenWidth)
+        : screenWidth;
+
     final AnchoredAdaptiveBannerAdSize? size =
-        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width);
+        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(bannerWidth);
+
+    if (!mounted) {
+      _isAdLoading = false;
+      return;
+    }
 
     if (size == null) {
       debugPrint('[BannerAdWidget] Unable to get height of anchored banner.');
@@ -41,25 +83,57 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     _bannerAd = BannerAd(
       adUnitId: AdService.bannerAdUnitId,
       size: size,
-      request: const AdRequest(),
+      request: AdRequest(
+        extras: widget.isCollapsible ? const {'collapsible': 'bottom'} : null,
+      ),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          if (mounted) {
-            setState(() {
-              _isAdLoaded = true;
-              _isAdLoading = false;
-            });
-            widget.onAdLoaded?.call();
+          if (!mounted) {
+            ad.dispose();
+            return;
           }
+          _retryCount = 0;
+          setState(() {
+            _isAdLoaded = true;
+            _isAdLoading = false;
+          });
+          widget.onAdLoaded?.call();
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
-          if (mounted) {
-            setState(() {
-              _isAdLoaded = false;
-              _isAdLoading = false;
+          AnalyticsService().logAdFailure(
+            adType: 'banner',
+            errorCode: '${error.code}',
+            errorMessage: error.message,
+          );
+
+          if (!mounted) return;
+
+          setState(() {
+            _bannerAd = null;
+            _isAdLoaded = false;
+            _isAdLoading = false;
+          });
+
+          // Exponential backoff retry on transient failure (max 2 retries: 15s, 30s)
+          if (_retryCount < 2 && !AdService().isAdFree) {
+            _retryCount++;
+            final delay = Duration(seconds: _retryCount * 15);
+            _retryTimer?.cancel();
+            _retryTimer = Timer(delay, () {
+              if (mounted && _bannerAd == null) {
+                _loadAd();
+              }
             });
           }
+        },
+        onPaidEvent: (ad, valueMicros, precision, currencyCode) {
+          AnalyticsService().logAdImpression(
+            adType: 'banner',
+            value: valueMicros / 1000000.0,
+            currency: currencyCode,
+            adUnitId: ad.adUnitId,
+          );
         },
       ),
     );
@@ -69,7 +143,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   void dispose() {
-    _bannerAd?.dispose();
+    _adFreeSubscription?.cancel();
+    _cleanupAd();
     super.dispose();
   }
 

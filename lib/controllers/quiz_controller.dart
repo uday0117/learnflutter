@@ -106,19 +106,9 @@ class QuizController extends GetxController {
     if (currentIndex.value + 1 >= totalQuestions) {
       _finishQuiz();
     } else {
-      final nextIndex = currentIndex.value + 1;
-      // Show interstitial before every 3rd question transition
-      if (nextIndex % 3 == 0) {
-        AdService().showInterstitialAdWithCallback(() {
-          currentIndex.value = nextIndex;
-          selectedAnswer.value = -1;
-          isAnswered.value = false;
-        });
-      } else {
-        currentIndex.value = nextIndex;
-        selectedAnswer.value = -1;
-        isAnswered.value = false;
-      }
+      currentIndex.value++;
+      selectedAnswer.value = -1;
+      isAnswered.value = false;
     }
   }
 
@@ -211,5 +201,6 @@ class QuizController extends GetxController {
   double get accuracy =>
       totalPlayed.value == 0
           ? 0
-          : totalCorrect.value / (totalPlayed.value * totalQuestions);
+          : (totalCorrect.value / (totalPlayed.value * totalQuestions))
+              .clamp(0.0, 1.0);
 }

@@ -15,7 +15,7 @@ class UpdateController extends GetxController {
   final phase = UpdateUiPhase.hidden.obs;
   final progress = 0.0.obs;
   final statusMessage = ''.obs;
-  final appVersion = '1.0.9+10'.obs;
+  final appVersion = '1.1.0+11'.obs;
 
   @override
   void onInit() {

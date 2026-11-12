@@ -87,6 +87,7 @@ class AppTranslations extends Translations {
     'update_downloading': 'Downloading update in the background…',
     'update_downloading_sub': 'Keep using the app — we\'ll install automatically.',
     'update_ready': 'Update ready — installing now…',
+    'update_installing': 'Installing update…',
     'update_installing_title': 'Installing update',
     'check_for_updates': 'Check for Updates',
     'check_for_updates_sub': 'Get the latest features & fixes',

@@ -211,16 +211,18 @@ class _SplashScreenState extends State<SplashScreen>
       return;
     }
 
-    AdService().showAppOpenAdIfAvailable();
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    Get.off(
-      () => const HomeScreen(),
-      transition: Transition.fadeIn,
-      duration: const Duration(milliseconds: 500),
-    );
-    DeepLinkService().handlePendingLink();
-    _syncHomeWidget();
+    void proceedToHome() {
+      if (!mounted) return;
+      Get.off(
+        () => const HomeScreen(),
+        transition: Transition.fadeIn,
+        duration: const Duration(milliseconds: 500),
+      );
+      DeepLinkService().handlePendingLink();
+      _syncHomeWidget();
+    }
+
+    AdService().showAppOpenAdIfAvailable(onDismissed: proceedToHome);
   }
 
   void _syncHomeWidget() {

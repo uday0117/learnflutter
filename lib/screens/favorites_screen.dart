@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
+import '../models/widget_category.dart';
 import 'widget_detail_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
@@ -93,6 +94,14 @@ class FavoritesScreen extends StatelessWidget {
             final widget = favoriteWidgets[index];
             final category = WidgetsData.getCategories().firstWhere(
               (c) => c.id == widget.categoryId,
+              orElse: () => WidgetCategory(
+                id: widget.categoryId,
+                name: widget.categoryId.capitalizeFirst ?? widget.categoryId,
+                description: '',
+                icon: Icons.widgets,
+                color: Theme.of(context).colorScheme.primary,
+                widgetCount: 0,
+              ),
             );
 
             return Card(

@@ -14,7 +14,7 @@ class ThemeController extends GetxController {
 
   final _box = GetStorage();
 
-  late var isDarkMode = false.obs;
+  final isDarkMode = false.obs;
   late final Rx<Color> primaryColor;
   late final Rx<Locale> currentLocale;
   var fontScaleIndex = 1.obs; // 0=small, 1=medium, 2=large
@@ -47,7 +47,7 @@ class ThemeController extends GetxController {
   void onInit() {
     super.onInit();
     final savedDark = _box.read<bool>(_darkKey) ?? false;
-    isDarkMode = savedDark.obs;
+    isDarkMode.value = savedDark;
 
     final colorIndex = _box.read<int>(_colorKey) ?? 0;
     final safeIndex = colorIndex.clamp(0, availableColors.length - 1);
@@ -65,6 +65,7 @@ class ThemeController extends GetxController {
     isDarkMode.value = !isDarkMode.value;
     _box.write(_darkKey, isDarkMode.value);
     triggerHaptic();
+    update();
   }
 
   void changeColor(Color color) {
@@ -72,12 +73,14 @@ class ThemeController extends GetxController {
     final index = availableColors.indexOf(color);
     if (index >= 0) _box.write(_colorKey, index);
     triggerHaptic();
+    update();
   }
 
   void setFontScale(int index) {
     fontScaleIndex.value = index.clamp(0, 2);
     _box.write(_fontScaleKey, fontScaleIndex.value);
     triggerHaptic();
+    update();
   }
 
   void toggleHaptics() {

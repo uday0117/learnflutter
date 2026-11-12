@@ -167,6 +167,25 @@ class AnalyticsService {
     );
   }
 
+  Future<void> logAdImpression({
+    required String adType,
+    required double value,
+    required String currency,
+    required String adUnitId,
+  }) async {
+    await logEvent(
+      'ad_impression',
+      parameters: {
+        'ad_platform': 'admob',
+        'ad_source': 'admob',
+        'ad_format': adType,
+        'ad_unit_name': adUnitId,
+        'value': value,
+        'currency': currency,
+      },
+    );
+  }
+
   Future<void> logAdFailure({
     required String adType,
     required String errorCode,

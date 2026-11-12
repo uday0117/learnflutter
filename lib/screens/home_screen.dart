@@ -2086,165 +2086,160 @@ class _HomeAdCard extends StatefulWidget {
 
 class _HomeAdCardState extends State<_HomeAdCard> {
   bool _adLoaded = false;
-  late final Widget _banner;
-
-  @override
-  void initState() {
-    super.initState();
-    _banner = BannerAdWidget(
-      onAdLoaded: () {
-        if (mounted && !_adLoaded) {
-          setState(() => _adLoaded = true);
-        }
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     if (AdService().isAdFree) return const SizedBox.shrink();
 
     final ThemeController themeController = Get.find<ThemeController>();
+    final double availableWidth = MediaQuery.of(context).size.width - 64;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOutCubic,
-      child: !_adLoaded
-          ? SizedBox(
-              height: 0,
-              width: double.infinity,
-              child: _banner,
-            )
-          : Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-              child: Obx(() {
-                final primaryColor = themeController.primaryColor.value;
-                return Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: widget.isDark
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : Colors.grey.shade300,
-                    ),
-                  ),
-                  color: widget.isDark ? const Color(0xFF1E1E2E) : Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      child: Visibility(
+        visible: _adLoaded,
+        maintainState: true,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+          child: Obx(() {
+            final primaryColor = themeController.primaryColor.value;
+            return Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: widget.isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.grey.shade300,
+                ),
+              ),
+              color: widget.isDark ? const Color(0xFF1E1E2E) : Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.campaign_rounded,
-                                  color: primaryColor,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'sponsored_ad'.tr,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: widget.isDark
-                                        ? Colors.white70
-                                        : Colors.black87,
-                                  ),
-                                ),
-                              ],
+                            Icon(
+                              Icons.campaign_rounded,
+                              color: primaryColor,
+                              size: 20,
                             ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(6),
-                                    onTap: () {
-                                      AdService().showRewardedAd(
-                                        onRewarded: () {
-                                          AdService().grantAdFreePass();
-                                          Get.snackbar(
-                                            'ad_free_active'.tr,
-                                            'ad_free_sub'.tr,
-                                            snackPosition: SnackPosition.BOTTOM,
-                                          );
-                                        },
-                                        onNotReady: () {
-                                          Get.snackbar(
-                                            'ad_not_ready'.tr,
-                                            'ad_not_ready_sub'.tr,
-                                            snackPosition: SnackPosition.BOTTOM,
-                                          );
-                                        },
-                                      );
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 6, vertical: 2),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.block_rounded,
-                                            size: 11,
-                                            color: primaryColor,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            'ad_free_reward_btn'.tr,
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                              color: primaryColor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: widget.isDark
-                                          ? Colors.white30
-                                          : Colors.black26,
-                                    ),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    'AD',
-                                    style: TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: widget.isDark
-                                          ? Colors.white60
-                                          : Colors.black54,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(width: 8),
+                            Text(
+                              'sponsored_ad'.tr,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: widget.isDark
+                                    ? Colors.white70
+                                    : Colors.black87,
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        Center(child: _banner),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(6),
+                                onTap: () {
+                                  AdService().showRewardedAd(
+                                    onRewarded: () {
+                                      AdService().grantAdFreePass();
+                                      Get.snackbar(
+                                        'ad_free_active'.tr,
+                                        'ad_free_sub'.tr,
+                                        snackPosition: SnackPosition.BOTTOM,
+                                      );
+                                    },
+                                    onNotReady: () {
+                                      Get.snackbar(
+                                        'ad_not_ready'.tr,
+                                        'ad_not_ready_sub'.tr,
+                                        snackPosition: SnackPosition.BOTTOM,
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.block_rounded,
+                                        size: 11,
+                                        color: primaryColor,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'ad_free_reward_btn'.tr,
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: primaryColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: widget.isDark
+                                      ? Colors.white30
+                                      : Colors.black26,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'AD',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: widget.isDark
+                                      ? Colors.white60
+                                      : Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  ),
-                );
-              }),
-            ),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: BannerAdWidget(
+                        customWidth: availableWidth,
+                        onAdLoaded: () {
+                          if (mounted && !_adLoaded) {
+                            setState(() => _adLoaded = true);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
     );
   }
 }
