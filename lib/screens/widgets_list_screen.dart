@@ -5,6 +5,7 @@ import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
 import '../models/widget_category.dart';
 import '../models/widget_model.dart';
+import '../services/analytics_service.dart';
 import '../widgets/banner_ad_widget.dart';
 import 'widget_detail_screen.dart';
 
@@ -24,6 +25,7 @@ class _WidgetsListScreenState extends State<WidgetsListScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService().logScreenView('WidgetsListScreen_${widget.category.id}');
     _filteredWidgets = WidgetsData.getWidgetsByCategory(widget.category.id);
   }
 
@@ -95,6 +97,9 @@ class _WidgetsListScreenState extends State<WidgetsListScreen> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   color: Theme.of(
                     context,
                   ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),

@@ -8,6 +8,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../controllers/customizer_controller.dart';
+import '../services/analytics_service.dart';
 import '../services/deep_link_service.dart';
 
 class WidgetCustomizerScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _WidgetCustomizerScreenState extends State<WidgetCustomizerScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    AnalyticsService().logScreenView('WidgetCustomizerScreen');
   }
 
   @override

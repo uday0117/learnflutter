@@ -35,15 +35,11 @@ void main() async {
     // Firebase Analytics + Crashlytics (free tier)
     await AnalyticsService().initialize();
 
-    // Initialize AdMob
-    await AdService().initialize();
-
-    // Daily learning reminders
-    await NotificationService().initialize();
-
-    // Deep links & home screen widget
-    await DeepLinkService().initialize();
-    await HomeWidgetService().initialize();
+    // Non-blocking initialization of AdMob, notifications, deep links & home widget
+    unawaited(AdService().initialize());
+    unawaited(NotificationService().initialize());
+    unawaited(DeepLinkService().initialize());
+    unawaited(HomeWidgetService().initialize());
 
     // Initialize controllers (order matters — ThemeController first for locale)
     final themeController = Get.put(ThemeController());

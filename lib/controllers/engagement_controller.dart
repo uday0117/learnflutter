@@ -207,8 +207,9 @@ class EngagementController extends GetxController {
 
     _box.write(_inviteShareDateKey, _todayStr());
     inviteRewardClaimedToday.value = true;
-    AdService().grantAdFreePass(duration: const Duration(hours: 2));
+    AdService().grantAdFreePass(duration: const Duration(minutes: 45));
     AnalyticsService().logEvent('invite_reward_granted');
+    AnalyticsService().logRewardCompleted(placement: 'invite_share');
 
     Get.snackbar(
       'invite_reward_title'.tr,

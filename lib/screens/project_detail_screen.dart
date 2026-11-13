@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../models/project_model.dart';
 import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final ProjectModel project;
@@ -25,6 +26,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    AnalyticsService().logScreenView('project_detail_${widget.project.id}');
+    AnalyticsService().logProjectViewed(
+      projectId: widget.project.id,
+      projectName: widget.project.name,
+      category: widget.project.category,
+    );
   }
 
   @override
@@ -62,10 +69,14 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
   }
 
   void _watchAdToUnlock() {
+    AnalyticsService().logRewardAccepted(placement: 'project_unlock_${widget.project.id}');
     AdService().showRewardedAd(
+      context: context,
       onRewarded: () {
         final expiry = DateTime.now().add(const Duration(hours: 24)).millisecondsSinceEpoch;
         GetStorage().write('project_unlocked_${widget.project.id}', expiry);
+        AnalyticsService().logRewardCompleted(placement: 'project_unlock_${widget.project.id}');
+        AnalyticsService().logProjectUnlocked(projectId: widget.project.id);
         setState(() {});
         Get.snackbar(
           'Unlocked',
@@ -100,10 +111,10 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
           isScrollable: true,
           indicatorWeight: 3.5,
           tabs: const [
-            Tab(text: 'Overview'),
-            Tab(text: 'Features'),
-            Tab(text: 'Structure'),
-            Tab(text: 'Source Code'),
+            Tab(icon: Icon(Icons.info_outline_rounded, size: 18), text: 'Overview'),
+            Tab(icon: Icon(Icons.checklist_rounded, size: 18), text: 'Features'),
+            Tab(icon: Icon(Icons.folder_open_rounded, size: 18), text: 'Structure'),
+            Tab(icon: Icon(Icons.code_rounded, size: 18), text: 'Source Code'),
           ],
         ),
       ),
@@ -160,26 +171,108 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
             widget.project.description,
             style: const TextStyle(height: 1.5, fontSize: 15),
           ),
+
+          // ── SETUP & CONFIGURATION GUIDE (IF PRESENT) ──
+          if (widget.project.setupGuide != null) ...[
+            const SizedBox(height: 28),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Backend & Setup Instructions',
+                  style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy_rounded, size: 18),
+                  tooltip: 'Copy Setup Guide',
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: widget.project.setupGuide!));
+                    AnalyticsService().logCodeCopied(contentType: 'setup_guide', contentId: widget.project.id);
+                    Get.snackbar(
+                      'Copied',
+                      'Setup guide copied to clipboard!',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E1E2E) : const Color(0xFFF8F9FA),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isDark ? Colors.amber.withValues(alpha: 0.25) : Colors.amber.shade200,
+                ),
+              ),
+              child: SelectableText(
+                widget.project.setupGuide!,
+                style: GoogleFonts.firaCode(fontSize: 13, height: 1.5),
+              ),
+            ),
+          ],
+
           const SizedBox(height: 30),
-          Text(
-            'Dependencies Required',
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Dependencies Required',
+                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.copy_all_rounded, size: 16),
+                label: const Text('Copy All', style: TextStyle(fontSize: 12)),
+                onPressed: () {
+                  final text = widget.project.libraries.join('\n');
+                  Clipboard.setData(ClipboardData(text: text));
+                  AnalyticsService().logCodeCopied(contentType: 'dependencies', contentId: widget.project.id);
+                  Get.snackbar(
+                    'Copied',
+                    'All dependencies copied to clipboard!',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                  );
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           ...widget.project.libraries.map((lib) => Container(
                 margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF1E1E2E) : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.code_rounded, color: Colors.blue, size: 20),
+                    const Icon(Icons.code_rounded, color: Colors.blue, size: 18),
                     const SizedBox(width: 12),
-                    Text(
-                      lib,
-                      style: GoogleFonts.firaCode(fontSize: 13, fontWeight: FontWeight.w500),
+                    Expanded(
+                      child: Text(
+                        lib,
+                        style: GoogleFonts.firaCode(fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.copy_rounded, size: 16, color: Colors.grey),
+                      tooltip: 'Copy dependency',
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: lib));
+                        Get.snackbar(
+                          'Copied',
+                          '$lib copied!',
+                          snackPosition: SnackPosition.BOTTOM,
+                          duration: const Duration(seconds: 1),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -228,11 +321,31 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Recommended Folder Structure',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Recommended Folder Structure',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey),
+              ),
+              IconButton(
+                icon: const Icon(Icons.copy_rounded, size: 18),
+                tooltip: 'Copy Folder Structure',
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: widget.project.folderStructure));
+                  AnalyticsService().logCodeCopied(contentType: 'structure', contentId: widget.project.id);
+                  Get.snackbar(
+                    'Copied',
+                    'Folder structure copied to clipboard!',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                  );
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -241,7 +354,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
             ),
-            child: Text(
+            child: SelectableText(
               widget.project.folderStructure,
               style: GoogleFonts.firaCode(fontSize: 14, height: 1.6),
             ),

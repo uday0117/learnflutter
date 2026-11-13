@@ -15,6 +15,7 @@ import '../controllers/theme_controller.dart';
 import '../controllers/update_controller.dart';
 import '../data/interview_data.dart';
 import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
 import '../services/in_app_update_service.dart';
 import '../services/notification_service.dart';
 import '../translations/app_translations.dart';
@@ -312,6 +313,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AnalyticsService().logScreenView('SettingsScreen');
     final ThemeController themeController = Get.find<ThemeController>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -593,9 +595,12 @@ class SettingsScreen extends StatelessWidget {
                               title: 'watch_ad_adfree'.tr,
                               subtitle: 'watch_ad_adfree_sub'.tr,
                               onTap: () {
+                                AnalyticsService().logRewardAccepted(placement: 'settings_ad_free_tile');
                                 AdService().showRewardedAd(
+                                  context: context,
                                   onRewarded: () {
                                     AdService().grantAdFreePass();
+                                    AnalyticsService().logRewardCompleted(placement: 'settings_ad_free_tile');
                                     Get.snackbar(
                                       'ad_free_active'.tr,
                                       'ad_free_sub'.tr,
@@ -672,6 +677,18 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
+                        _SettingsTile(
+                          icon: Icons.shield_rounded,
+                          iconColor: Colors.teal,
+                          title: 'privacy_consent_settings'.tr.isNotEmpty
+                              ? 'privacy_consent_settings'.tr
+                              : 'Ad Privacy & Consent',
+                          subtitle: 'ad_privacy_sub'.tr.isNotEmpty
+                              ? 'ad_privacy_sub'.tr
+                              : 'Manage personalized ad consent choices',
+                          onTap: () => AdService().showPrivacyOptionsForm(context),
+                          showDivider: true,
+                        ),
                         _SettingsTile(
                           icon: Icons.privacy_tip_rounded,
                           iconColor: Colors.green,

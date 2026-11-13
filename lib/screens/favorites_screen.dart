@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
 import '../models/widget_category.dart';
+import '../services/analytics_service.dart';
 import 'widget_detail_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
@@ -11,6 +12,7 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AnalyticsService().logScreenView('FavoritesScreen');
     final FavoritesController favoritesController =
         Get.find<FavoritesController>();
 

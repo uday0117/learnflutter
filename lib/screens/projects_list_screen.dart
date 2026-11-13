@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../data/projects_data.dart';
 import '../models/project_model.dart';
+import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
 import 'project_detail_screen.dart';
 
 class ProjectsListScreen extends StatelessWidget {
   const ProjectsListScreen({super.key});
 
+  bool _isUnlocked(String projectId) {
+    if (AdService().isAdFree) return true;
+    final allExpiry = GetStorage().read<int>('all_projects_unlocked_expiry');
+    if (allExpiry != null && DateTime.now().millisecondsSinceEpoch < allExpiry) {
+      return true;
+    }
+    final expiry = GetStorage().read<int>('project_unlocked_$projectId');
+    if (expiry != null && DateTime.now().millisecondsSinceEpoch < expiry) {
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    AnalyticsService().logScreenView('ProjectsListScreen');
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final projects = ProjectsData.getAll();
 
@@ -34,6 +51,9 @@ class ProjectsListScreen extends StatelessWidget {
   }
 
   Widget _buildProjectCard(BuildContext context, ProjectModel project, bool isDark) {
+    final unlocked = _isUnlocked(project.id);
+    final isFirebase = project.id.contains('firebase');
+
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
@@ -61,19 +81,51 @@ class ProjectsListScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Header Row (Name + Difficulty) ──
+              // ── Header Row (Name + Difficulty & Firebase Badges) ──
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
-                      project.name,
-                      style: GoogleFonts.outfit(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          project.name,
+                          style: GoogleFonts.outfit(
+                            fontSize: 19,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (isFirebase) ...[
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.cloud_sync_rounded, color: Colors.amber, size: 13),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Firebase Backend',
+                                  style: TextStyle(
+                                    color: Colors.amber,
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   _buildDifficultyBadge(project.difficulty),
                 ],
               ),
@@ -89,20 +141,31 @@ class ProjectsListScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               // ── Quick Info Features/Libs row ──
-              Row(
+              Wrap(
+                spacing: 16,
+                runSpacing: 8,
                 children: [
-                  Icon(Icons.checklist_rounded, size: 18, color: Colors.blue.shade400),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${project.features.length} Features',
-                    style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.checklist_rounded, size: 18, color: Colors.blue.shade400),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${project.features.length} Features',
+                        style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Icon(Icons.library_books_rounded, size: 18, color: Colors.purple.shade400),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${project.libraries.length} Libraries',
-                    style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.library_books_rounded, size: 18, color: Colors.purple.shade400),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${project.libraries.length} Libraries',
+                        style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -112,20 +175,28 @@ class ProjectsListScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.lock_outline_rounded, color: Colors.orange, size: 16),
-                      SizedBox(width: 4),
+                      Icon(
+                        unlocked ? Icons.lock_open_rounded : Icons.lock_outline_rounded,
+                        color: unlocked ? Colors.green : Colors.orange,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
                       Text(
-                        'Rewarded Ad Lock',
-                        style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 12),
+                        unlocked ? 'Unlocked & Ready' : 'Rewarded Ad Pass',
+                        style: TextStyle(
+                          color: unlocked ? Colors.green : Colors.orange,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
                   Row(
                     children: [
                       Text(
-                        'Get Source Code',
+                        'View Blueprint',
                         style: TextStyle(
                           color: Colors.blue.shade600,
                           fontWeight: FontWeight.bold,

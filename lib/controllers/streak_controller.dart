@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../services/analytics_service.dart';
+
 class StreakController extends GetxController {
   static const _lastDateKey = 'streak_last_date';
   static const _streakKey = 'streak_count';
@@ -14,6 +16,8 @@ class StreakController extends GetxController {
   var longestStreak = 0.obs;
   var totalDays = 0.obs;
   var streakShields = 0.obs;
+  var canRecoverStreak = false.obs;
+  int lostStreakValue = 0;
 
   @override
   void onInit() {
@@ -56,18 +60,27 @@ class StreakController extends GetxController {
       if (diff == 1) {
         newStreak = savedStreak + 1;
         newTotal = total + 1;
-      } else {
+      } else if (diff == 2) {
         final shields = _box.read<int>(_shieldsKey) ?? 0;
         if (shields > 0) {
-          // Shield saved the streak!
+          // Shield protected exactly 1 missed day
           newStreak = savedStreak + 1;
           newTotal = total + 1;
           streakShields.value = shields - 1;
           _box.write(_shieldsKey, streakShields.value);
         } else {
+          // 1 missed day without shield -> offer streak recovery via rewarded ad
           newStreak = 1;
           newTotal = total + 1;
+          if (savedStreak > 1) {
+            canRecoverStreak.value = true;
+            lostStreakValue = savedStreak;
+          }
         }
+      } else {
+        // Extended absence (>2 days)
+        newStreak = 1;
+        newTotal = total + 1;
       }
     }
 
@@ -79,6 +92,22 @@ class StreakController extends GetxController {
     _box.write(_streakKey, newStreak);
     _box.write(_longestKey, longestStreak.value);
     _box.write(_totalDaysKey, newTotal);
+
+    AnalyticsService().setUserProperties(currentStreak: newStreak);
+  }
+
+  /// Restores a broken streak using a rewarded ad lifeline.
+  void restoreBrokenStreak() {
+    if (!canRecoverStreak.value || lostStreakValue <= 1) return;
+    final restoredStreak = lostStreakValue + 1;
+    currentStreak.value = restoredStreak;
+    if (restoredStreak > longestStreak.value) {
+      longestStreak.value = restoredStreak;
+      _box.write(_longestKey, longestStreak.value);
+    }
+    _box.write(_streakKey, restoredStreak);
+    canRecoverStreak.value = false;
+    AnalyticsService().setUserProperties(currentStreak: restoredStreak);
   }
 
   void addShield() {

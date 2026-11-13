@@ -198,7 +198,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigateToHome() async {
-    await Future.delayed(const Duration(milliseconds: 2800));
+    await Future.delayed(const Duration(milliseconds: 1600));
     if (!mounted) return;
 
     final onboarding = Get.find<OnboardingController>();

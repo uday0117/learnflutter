@@ -64,6 +64,8 @@ class AnalyticsService {
     String? locale,
     int? widgetsViewed,
     int? quizTotalPlayed,
+    int? currentStreak,
+    bool? isAdFree,
   }) async {
     if (!_initialized) return;
     final crashlytics = _crashlytics!;
@@ -82,6 +84,14 @@ class AnalyticsService {
     }
     if (quizTotalPlayed != null) {
       await crashlytics.setCustomKey('quiz_total_played', quizTotalPlayed);
+    }
+    if (currentStreak != null) {
+      await analytics.setUserProperty(name: 'current_streak', value: '$currentStreak');
+      await crashlytics.setCustomKey('current_streak', currentStreak);
+    }
+    if (isAdFree != null) {
+      await analytics.setUserProperty(name: 'is_ad_free', value: isAdFree ? 'true' : 'false');
+      await crashlytics.setCustomKey('is_ad_free', isAdFree ? 1 : 0);
     }
   }
 
@@ -172,6 +182,7 @@ class AnalyticsService {
     required double value,
     required String currency,
     required String adUnitId,
+    String? precision,
   }) async {
     await logEvent(
       'ad_impression',
@@ -182,8 +193,25 @@ class AnalyticsService {
         'ad_unit_name': adUnitId,
         'value': value,
         'currency': currency,
+        'precision': ?precision,
       },
     );
+  }
+
+  Future<void> logRewardPromptShown({required String placement}) async {
+    await logEvent('ad_reward_prompt_shown', parameters: {'placement': placement});
+  }
+
+  Future<void> logRewardAccepted({required String placement}) async {
+    await logEvent('ad_reward_accepted', parameters: {'placement': placement});
+  }
+
+  Future<void> logRewardCompleted({required String placement}) async {
+    await logEvent('ad_reward_completed', parameters: {'placement': placement});
+  }
+
+  Future<void> logSearch({required String query}) async {
+    await logEvent('search', parameters: {'search_term': query});
   }
 
   Future<void> logAdFailure({
@@ -245,5 +273,80 @@ class AnalyticsService {
   Future<void> logLogout() async {
     if (!_initialized) return;
     await logEvent('logout');
+  }
+
+  /// Appends breadcrumb log to Crashlytics for debugging session crashes.
+  Future<void> logBreadcrumb(String message) async {
+    if (!_initialized) return;
+    await _crashlytics?.log(message);
+  }
+
+  Future<void> logInterviewQuestionViewed({
+    required String questionId,
+    required String category,
+    required String level,
+    int? questionIndex,
+  }) async {
+    await logEvent(
+      'interview_question_viewed',
+      parameters: {
+        'question_id': questionId,
+        'category': category,
+        'level': level,
+        'question_index': ?questionIndex,
+      },
+    );
+    await logBreadcrumb('Viewed interview question: $questionId ($level)');
+  }
+
+  Future<void> logInterviewMastered({
+    required String questionId,
+    required int revisionCount,
+  }) async {
+    await logEvent(
+      'interview_question_mastered',
+      parameters: {
+        'question_id': questionId,
+        'revision_count': revisionCount,
+      },
+    );
+    await logBreadcrumb('Mastered interview question: $questionId');
+  }
+
+  Future<void> logProjectViewed({
+    required String projectId,
+    required String projectName,
+    String? category,
+  }) async {
+    await logEvent(
+      'project_blueprint_viewed',
+      parameters: {
+        'project_id': projectId,
+        'project_name': projectName,
+        'category': ?category,
+      },
+    );
+    await logBreadcrumb('Viewed project blueprint: $projectId');
+  }
+
+  Future<void> logProjectUnlocked({required String projectId}) async {
+    await logEvent(
+      'project_blueprint_unlocked',
+      parameters: {'project_id': projectId},
+    );
+    await logBreadcrumb('Unlocked project blueprint: $projectId');
+  }
+
+  Future<void> logCodeCopied({
+    required String contentType,
+    required String contentId,
+  }) async {
+    await logEvent(
+      'code_copied',
+      parameters: {
+        'content_type': contentType,
+        'content_id': contentId,
+      },
+    );
   }
 }

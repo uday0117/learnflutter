@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -28,10 +29,11 @@ class AdService {
   static const String _prodIosRewardedId =
       'ca-app-pub-1451522103593938/8064623584';
 
+  // Dedicated App Open Ad Unit IDs
   static const String _prodAndroidAppOpenId =
-      'ca-app-pub-1451522103593938/8546005746';
+      'ca-app-pub-1451522103593938/9257395921';
   static const String _prodIosAppOpenId =
-      'ca-app-pub-1451522103593938/8546005746';
+      'ca-app-pub-1451522103593938/5575463023';
 
   // ── Google Official Test Ad Unit IDs (for safe development / testing) ──
   static const String _testAndroidBannerId =
@@ -79,16 +81,54 @@ class AdService {
   static const Duration maxFullScreenAdAge = Duration(hours: 1);
   static const Duration maxAppOpenAdAge = Duration(hours: 4);
 
-  // ── Interstitial state ──────────────────────────────────────────────
+  // ── Interstitial Frequency & Daily Caps ──────────────────────────────
+  static const int maxInterstitialsPerSession = 4;
+  static const int maxInterstitialsPerDay = 8;
+  static const Duration minInterstitialInterval = Duration(seconds: 60);
+  static const _dailyInterstitialDateKey = 'ad_daily_int_date';
+  static const _dailyInterstitialCountKey = 'ad_daily_int_count';
+
+  int _sessionInterstitials = 0;
   InterstitialAd? _interstitialAd;
   bool _isInterstitialAdReady = false;
   bool _isLoadingInterstitial = false;
   int _interstitialRetry = 0;
   DateTime? _interstitialLoadedAt;
   DateTime? _lastInterstitialTime;
-  static const Duration minInterstitialInterval = Duration(seconds: 60);
+
+  String _todayStr() {
+    final n = DateTime.now();
+    return '${n.year}-${n.month}-${n.day}';
+  }
+
+  int get _dailyInterstitialsCount {
+    final today = _todayStr();
+    if (_box.read<String>(_dailyInterstitialDateKey) != today) {
+      _box.write(_dailyInterstitialDateKey, today);
+      _box.write(_dailyInterstitialCountKey, 0);
+      return 0;
+    }
+    return _box.read<int>(_dailyInterstitialCountKey) ?? 0;
+  }
+
+  void _recordInterstitialShown() {
+    final today = _todayStr();
+    final next = _dailyInterstitialsCount + 1;
+    _box.write(_dailyInterstitialDateKey, today);
+    _box.write(_dailyInterstitialCountKey, next);
+    _sessionInterstitials++;
+    _lastInterstitialTime = DateTime.now();
+  }
 
   bool get canShowInterstitial {
+    if (_sessionInterstitials >= maxInterstitialsPerSession) {
+      debugPrint('[AdService] Interstitial capped: session limit reached ($maxInterstitialsPerSession).');
+      return false;
+    }
+    if (_dailyInterstitialsCount >= maxInterstitialsPerDay) {
+      debugPrint('[AdService] Interstitial capped: daily limit reached ($maxInterstitialsPerDay).');
+      return false;
+    }
     if (_lastInterstitialTime == null) return true;
     return DateTime.now().difference(_lastInterstitialTime!) >=
         minInterstitialInterval;
@@ -139,8 +179,12 @@ class AdService {
     return until.difference(DateTime.now());
   }
 
-  void grantAdFreePass({Duration duration = const Duration(hours: 1)}) {
-    adFreeUntil.value = DateTime.now().add(duration);
+  void grantAdFreePass({Duration duration = const Duration(minutes: 30)}) {
+    final currentUntil = adFreeUntil.value;
+    final baseTime = (currentUntil != null && currentUntil.isAfter(DateTime.now()))
+        ? currentUntil
+        : DateTime.now();
+    adFreeUntil.value = baseTime.add(duration);
     _box.write(_adFreeUntilKey, adFreeUntil.value!.millisecondsSinceEpoch);
   }
 
@@ -156,9 +200,14 @@ class AdService {
     }
   }
 
-  // ── Counters ────────────────────────────────────────────────────────
+  // ── Screen Entry Dwell Time & Counters ──────────────────────────────
+  DateTime? _detailScreenEnterTime;
   int _detailScreenCounter = 0;
   int _interviewQuestionCounter = 0;
+
+  void onDetailScreenEntered() {
+    _detailScreenEnterTime = DateTime.now();
+  }
 
   void _logAdFailure(String adType, AdError error) {
     AnalyticsService().logAdFailure(
@@ -168,13 +217,71 @@ class AdService {
     );
   }
 
-  // ── Initialisation ──────────────────────────────────────────────────
+  // ── Initialisation & UMP Consent ────────────────────────────────────
   Future<void> initialize() async {
     _restoreAdFreePass();
+
+    // 1. Setup RequestConfiguration (compliance & developer targeting)
+    try {
+      final configuration = RequestConfiguration(
+        tagForChildDirectedTreatment: TagForChildDirectedTreatment.no,
+        tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.no,
+      );
+      await MobileAds.instance.updateRequestConfiguration(configuration);
+    } catch (e) {
+      debugPrint('[AdService] RequestConfiguration error: $e');
+    }
+
+    // 2. Initialize Mobile Ads SDK
     await MobileAds.instance.initialize();
+
+    // 3. Request UMP Consent asynchronously (EU / UK / Swiss compliance)
+    requestConsentInfoUpdate();
+
+    // 4. Preload ads
     loadInterstitialAd();
     loadRewardedAd();
     if (!isAdFree) loadAppOpenAd();
+  }
+
+  /// Requests Google UMP (User Messaging Platform) consent for EEA & UK users.
+  void requestConsentInfoUpdate({VoidCallback? onConsentComplete}) {
+    final params = ConsentRequestParameters();
+    ConsentInformation.instance.requestConsentInfoUpdate(
+      params,
+      () async {
+        ConsentForm.loadAndShowConsentFormIfRequired((loadAndShowError) {
+          if (loadAndShowError != null) {
+            debugPrint('[AdService] UMP Form Error: ${loadAndShowError.message}');
+          }
+          onConsentComplete?.call();
+        });
+      },
+      (formError) {
+        debugPrint('[AdService] UMP Consent Info Update Error: ${formError.message}');
+        onConsentComplete?.call();
+      },
+    );
+  }
+
+  /// Checks if privacy options (consent management) is required for the user's jurisdiction.
+  Future<bool> isPrivacyOptionsRequired() async {
+    try {
+      final status =
+          await ConsentInformation.instance.getPrivacyOptionsRequirementStatus();
+      return status == PrivacyOptionsRequirementStatus.required;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Presents the Google UMP privacy options form so users can update consent.
+  void showPrivacyOptionsForm(BuildContext context) {
+    ConsentForm.showPrivacyOptionsForm((formError) {
+      if (formError != null) {
+        debugPrint('[AdService] Privacy options error: ${formError.message}');
+      }
+    });
   }
 
   void onAppPaused() {
@@ -185,7 +292,8 @@ class AdService {
     if (_lastBackgroundTime == null) return;
     final away = DateTime.now().difference(_lastBackgroundTime!);
     _lastBackgroundTime = null;
-    if (away.inMinutes >= 3 && !_isShowingFullScreenAd && !isAdFree) {
+    // 2-minute away threshold for warm resume app-open ads
+    if (away.inSeconds >= 120 && !_isShowingFullScreenAd && !isAdFree) {
       showAppOpenAdIfAvailable();
     }
   }
@@ -193,10 +301,19 @@ class AdService {
   // ── Detail / Interview counters (triggered on screen exit) ──────────
 
   /// Triggered at natural transitions (e.g. exiting detail screen).
+  /// Requires minimum 5 seconds dwell time to avoid counting quick bounces.
   void incrementDetailScreenCounter() {
     if (isAdFree) return;
+    if (_detailScreenEnterTime != null) {
+      final dwell = DateTime.now().difference(_detailScreenEnterTime!);
+      _detailScreenEnterTime = null;
+      if (dwell.inSeconds < 5) {
+        // Quick glance / accidental bounce: do not count towards ad trigger
+        return;
+      }
+    }
     _detailScreenCounter++;
-    if (_detailScreenCounter % 3 == 0) {
+    if (_detailScreenCounter % 4 == 0) {
       showInterstitialAd();
     }
   }
@@ -205,7 +322,7 @@ class AdService {
   void incrementInterviewQuestionCounter() {
     if (isAdFree) return;
     _interviewQuestionCounter++;
-    if (_interviewQuestionCounter % 3 == 0) {
+    if (_interviewQuestionCounter % 4 == 0) {
       showInterstitialAd();
     }
   }
@@ -261,6 +378,7 @@ class AdService {
               value: valueMicros / 1000000.0,
               currency: currencyCode,
               adUnitId: ad.adUnitId,
+              precision: precision.name,
             );
           };
 
@@ -315,11 +433,11 @@ class AdService {
       return;
     }
     if (!canShowInterstitial) {
-      debugPrint('[AdService] Interstitial deferred to protect user experience (60s cooldown).');
+      debugPrint('[AdService] Interstitial deferred to protect user experience.');
       return;
     }
     if (_isInterstitialAdReady && _interstitialAd != null) {
-      _lastInterstitialTime = DateTime.now();
+      _recordInterstitialShown();
       _isShowingFullScreenAd = true;
       _interstitialAd!.show();
     } else {
@@ -347,7 +465,7 @@ class AdService {
       return;
     }
     if (_isInterstitialAdReady && _interstitialAd != null) {
-      _lastInterstitialTime = DateTime.now();
+      _recordInterstitialShown();
       _isShowingFullScreenAd = true;
       _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
         onAdShowedFullScreenContent: (ad) {
@@ -404,6 +522,7 @@ class AdService {
               value: valueMicros / 1000000.0,
               currency: currencyCode,
               adUnitId: ad.adUnitId,
+              precision: precision.name,
             );
           };
 
@@ -452,6 +571,7 @@ class AdService {
   void showRewardedAd({
     required VoidCallback onRewarded,
     VoidCallback? onNotReady,
+    BuildContext? context,
   }) {
     if (_isShowingFullScreenAd) {
       onNotReady?.call();
@@ -463,22 +583,87 @@ class AdService {
       _rewardedAd = null;
       _isRewardedAdReady = false;
       loadRewardedAd();
-      onNotReady?.call();
+    }
+
+    if (_isRewardedAdReady && _rewardedAd != null) {
+      _isShowingFullScreenAd = true;
+      _rewardedAd!.show(
+        onUserEarnedReward: (ad, reward) {
+          onRewarded();
+        },
+      );
       return;
     }
 
-    if (!_isRewardedAdReady || _rewardedAd == null) {
-      loadRewardedAd();
-      onNotReady?.call();
+    // Graceful fallback: If ad is currently loading, wait up to 3 seconds with a lightweight dialog
+    if (_isLoadingRewarded && context != null && context.mounted) {
+      _waitForRewardedAd(context, onRewarded, onNotReady);
       return;
     }
 
-    _isShowingFullScreenAd = true;
-    _rewardedAd!.show(
-      onUserEarnedReward: (ad, reward) {
-        onRewarded();
-      },
+    loadRewardedAd();
+    onNotReady?.call();
+  }
+
+  void _waitForRewardedAd(
+    BuildContext context,
+    VoidCallback onRewarded,
+    VoidCallback? onNotReady,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'ad_loading'.tr.isNotEmpty ? 'ad_loading'.tr : 'Loading sponsor video...',
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
+
+    int elapsedMs = 0;
+    Timer.periodic(const Duration(milliseconds: 250), (timer) {
+      elapsedMs += 250;
+      if (!context.mounted) {
+        timer.cancel();
+        return;
+      }
+
+      if (_isRewardedAdReady && _rewardedAd != null) {
+        timer.cancel();
+        Navigator.of(context, rootNavigator: true).pop();
+        _isShowingFullScreenAd = true;
+        _rewardedAd!.show(
+          onUserEarnedReward: (ad, reward) {
+            onRewarded();
+          },
+        );
+      } else if (elapsedMs >= 3000 || !_isLoadingRewarded) {
+        timer.cancel();
+        Navigator.of(context, rootNavigator: true).pop();
+        onNotReady?.call();
+      }
+    });
   }
 
   // ── App Open ────────────────────────────────────────────────────────
@@ -504,6 +689,7 @@ class AdService {
               value: valueMicros / 1000000.0,
               currency: currencyCode,
               adUnitId: ad.adUnitId,
+              precision: precision.name,
             );
           };
 

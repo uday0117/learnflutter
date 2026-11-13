@@ -113,9 +113,8 @@ class QuizController extends GetxController {
   }
 
   void _finishQuiz() {
-    AdService().showInterstitialAdWithCallback(() {
-      _applyQuizResults();
-    });
+    // Show results immediately so user celebration and feedback are uninterrupted
+    _applyQuizResults();
   }
 
   void _applyQuizResults() {
@@ -144,7 +143,9 @@ class QuizController extends GetxController {
   }
 
   void restart() {
-    _startNewQuiz();
+    AdService().showInterstitialAdWithCallback(() {
+      _startNewQuiz();
+    });
   }
 
   // ── Hint logic ───────────────────────────────────────────────────────

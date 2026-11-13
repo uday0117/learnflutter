@@ -6,12 +6,14 @@ import 'package:share_plus/share_plus.dart';
 
 import '../controllers/theme_controller.dart';
 import '../data/dart_cheatsheet_data.dart';
+import '../services/analytics_service.dart';
 
 class DartCheatsheetScreen extends StatelessWidget {
   const DartCheatsheetScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    AnalyticsService().logScreenView('DartCheatsheetScreen');
     final sections = DartCheatsheetData.getSections();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ThemeController theme = Get.find<ThemeController>();

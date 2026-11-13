@@ -56,13 +56,16 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
   }
 
   void _claimAdFreePass() {
+    AnalyticsService().logRewardAccepted(placement: 'ad_free_pass');
     _adService.showRewardedAd(
+      context: context,
       onRewarded: () {
         _adService.grantAdFreePass(duration: const Duration(hours: 1));
         _updateRemaining();
+        AnalyticsService().logRewardCompleted(placement: 'ad_free_pass');
         Get.snackbar(
           'Ad-Free Activated! 🚀',
-          'Enjoy 1 hour completely ad-free across the entire app!',
+          'Enjoy 60 minutes completely ad-free across the entire app!',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -73,9 +76,12 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
   }
 
   void _claimStreakShield() {
+    AnalyticsService().logRewardAccepted(placement: 'streak_shield');
     _adService.showRewardedAd(
+      context: context,
       onRewarded: () {
         _streakController.addShield();
+        AnalyticsService().logRewardCompleted(placement: 'streak_shield');
         Get.snackbar(
           'Streak Shield Claimed! 🛡️',
           'Your learning streak is protected if you miss a day.',
@@ -89,10 +95,13 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
   }
 
   void _unlockAllProjects() {
+    AnalyticsService().logRewardAccepted(placement: 'unlock_all_projects');
     _adService.showRewardedAd(
+      context: context,
       onRewarded: () {
         final expiry = DateTime.now().add(const Duration(hours: 24)).millisecondsSinceEpoch;
         _box.write('all_projects_unlocked_expiry', expiry);
+        AnalyticsService().logRewardCompleted(placement: 'unlock_all_projects');
         Get.snackbar(
           'Projects Unlocked! 📦',
           'Full source code for all mini-projects unlocked for 24 hours!',

@@ -14,7 +14,7 @@ class BannerAdWidget extends StatefulWidget {
     super.key,
     this.onAdLoaded,
     this.customWidth,
-    this.isCollapsible = true,
+    this.isCollapsible = false,
   });
 
   @override
@@ -133,6 +133,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
             value: valueMicros / 1000000.0,
             currency: currencyCode,
             adUnitId: ad.adUnitId,
+            precision: precision.name,
           );
         },
       ),

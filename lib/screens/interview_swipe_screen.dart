@@ -8,6 +8,7 @@ import '../controllers/interview_review_controller.dart';
 import '../data/interview_data.dart';
 import '../models/interview_question.dart';
 import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
 
 class InterviewSwipeScreen extends StatefulWidget {
   const InterviewSwipeScreen({super.key});
@@ -24,6 +25,7 @@ class _InterviewSwipeScreenState extends State<InterviewSwipeScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService().logScreenView('InterviewSwipeScreen');
     // Copy and shuffle the questions
     _questions = List.from(InterviewData.getAll())..shuffle();
   }
@@ -53,8 +55,8 @@ class _InterviewSwipeScreenState extends State<InterviewSwipeScreen> {
       _swipeCount++;
     });
 
-    // Interstitial ad every 10 swipes
-    if (_swipeCount % 10 == 0) {
+    // Natural transition: present interstitial upon deck completion rather than interrupting active swiping
+    if (_questions.isEmpty) {
       AdService().showInterstitialAd();
     }
   }

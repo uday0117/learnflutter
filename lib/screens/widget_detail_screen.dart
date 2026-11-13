@@ -49,6 +49,7 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _initPlaygroundParams();
+    AdService().onDetailScreenEntered();
 
     // Track progress
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -97,7 +98,9 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
-        AdService().incrementDetailScreenCounter();
+        if (didPop) {
+          AdService().incrementDetailScreenCounter();
+        }
       },
       child: Scaffold(
       appBar: AppBar(

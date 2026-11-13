@@ -79,13 +79,16 @@ class _CertificateScreenState extends State<CertificateScreen> {
   }
 
   void _unlockGoldThemeWithAd() {
+    AnalyticsService().logRewardAccepted(placement: 'certificate_gold_theme');
     AdService().showRewardedAd(
+      context: context,
       onRewarded: () {
         setState(() {
           _isGoldUnlocked = true;
           _selectedTheme = 'prestige_gold';
         });
         _box.write(_goldThemeUnlockedKey, true);
+        AnalyticsService().logRewardCompleted(placement: 'certificate_gold_theme');
         Get.snackbar(
           'Unlocked! 🏆',
           'Prestige Gold Certificate Theme is now permanently unlocked!',

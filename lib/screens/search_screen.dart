@@ -5,6 +5,7 @@ import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
 import '../models/widget_category.dart';
 import '../models/widget_model.dart';
+import '../services/analytics_service.dart';
 import '../widgets/highlighted_text.dart';
 import 'widget_detail_screen.dart';
 
@@ -23,6 +24,12 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _isSearching = false;
 
   @override
+  void initState() {
+    super.initState();
+    AnalyticsService().logScreenView('SearchScreen');
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -35,6 +42,10 @@ class _SearchScreenState extends State<SearchScreen> {
         _isSearching = false;
       });
       return;
+    }
+
+    if (query.trim().length >= 3) {
+      AnalyticsService().logSearch(query: query.trim());
     }
 
     setState(() {

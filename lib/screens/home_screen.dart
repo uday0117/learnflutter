@@ -51,6 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    AnalyticsService().logScreenView('HomeScreen');
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
@@ -691,9 +697,12 @@ class _DailyGoalCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 TextButton.icon(
                   onPressed: () {
+                    AnalyticsService().logRewardAccepted(placement: 'home_ad_free_banner');
                     AdService().showRewardedAd(
+                      context: context,
                       onRewarded: () {
                         AdService().grantAdFreePass();
+                        AnalyticsService().logRewardCompleted(placement: 'home_ad_free_banner');
                         Get.snackbar(
                           'ad_free_active'.tr,
                           'ad_free_sub'.tr,
@@ -1153,6 +1162,76 @@ class _StreakBanner extends StatelessWidget {
     final theme = Get.find<ThemeController>();
 
     return Obx(() {
+      if (streak.canRecoverStreak.value) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.amber.shade700.withValues(alpha: 0.2),
+                  Colors.orange.shade800.withValues(alpha: 0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.amber.shade600),
+            ),
+            child: Row(
+              children: [
+                const Text('⚡', style: TextStyle(fontSize: 28)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Restore ${streak.lostStreakValue}-Day Streak!',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Colors.amber,
+                        ),
+                      ),
+                      const Text(
+                        'Missed yesterday? Watch a sponsor video to revive it.',
+                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    AnalyticsService().logRewardAccepted(placement: 'streak_restore');
+                    AdService().showRewardedAd(
+                      context: context,
+                      onRewarded: () {
+                        streak.restoreBrokenStreak();
+                        AnalyticsService().logRewardCompleted(placement: 'streak_restore');
+                        Get.snackbar(
+                          'Streak Restored! 🔥',
+                          'Your ${streak.currentStreak.value}-day learning streak is back!',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.amber.shade800,
+                          colorText: Colors.white,
+                        );
+                      },
+                      onNotReady: () {
+                        Get.snackbar(
+                          'Ad Loading',
+                          'Video ad is preparing. Please try again in a moment.',
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Revive', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
       if (streak.currentStreak.value < 2) return const SizedBox.shrink();
       final primary = theme.primaryColor.value;
       return Padding(
@@ -2152,9 +2231,12 @@ class _HomeAdCardState extends State<_HomeAdCard> {
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(6),
                                 onTap: () {
+                                  AnalyticsService().logRewardAccepted(placement: 'home_bottom_ad_free_btn');
                                   AdService().showRewardedAd(
+                                    context: context,
                                     onRewarded: () {
                                       AdService().grantAdFreePass();
+                                      AnalyticsService().logRewardCompleted(placement: 'home_bottom_ad_free_btn');
                                       Get.snackbar(
                                         'ad_free_active'.tr,
                                         'ad_free_sub'.tr,
@@ -2226,6 +2308,7 @@ class _HomeAdCardState extends State<_HomeAdCard> {
                     Center(
                       child: BannerAdWidget(
                         customWidth: availableWidth,
+                        isCollapsible: true,
                         onAdLoaded: () {
                           if (mounted && !_adLoaded) {
                             setState(() => _adLoaded = true);

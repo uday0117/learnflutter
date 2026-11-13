@@ -7,6 +7,8 @@ class ProjectModel {
   final String difficulty;
   final String folderStructure;
   final String sourceCode;
+  final String? setupGuide;
+  final String? category;
 
   const ProjectModel({
     required this.id,
@@ -17,5 +19,7 @@ class ProjectModel {
     required this.difficulty,
     required this.folderStructure,
     required this.sourceCode,
+    this.setupGuide,
+    this.category,
   });
 }

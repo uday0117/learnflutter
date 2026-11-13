@@ -5,6 +5,7 @@ import '../controllers/quiz_controller.dart';
 import '../controllers/theme_controller.dart';
 import '../data/quiz_data.dart';
 import '../services/ad_service.dart';
+import '../services/analytics_service.dart';
 import '../services/share_card_service.dart';
 import '../widgets/banner_ad_widget.dart';
 
@@ -13,6 +14,7 @@ class QuizScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AnalyticsService().logScreenView('QuizScreen');
     final quiz = Get.find<QuizController>();
     final theme = Get.find<ThemeController>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -435,8 +437,13 @@ class _QuizView extends StatelessWidget {
             ),
             onPressed: () {
               Get.back();
+              AnalyticsService().logRewardAccepted(placement: 'quiz_hint');
               AdService().showRewardedAd(
-                onRewarded: () => quiz.revealHint(),
+                context: context,
+                onRewarded: () {
+                  AnalyticsService().logRewardCompleted(placement: 'quiz_hint');
+                  quiz.revealHint();
+                },
                 onNotReady: () => _showAdNotReady(context),
               );
             },
@@ -734,7 +741,11 @@ class _ResultView extends StatelessWidget {
                         padding:
                             const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      onPressed: () => Get.back(),
+                      onPressed: () {
+                        AdService().showInterstitialAdWithCallback(() {
+                          Get.back();
+                        });
+                      },
                       icon: const Icon(Icons.home_rounded,
                           color: Colors.grey),
                       label: Text('home'.tr,
@@ -780,8 +791,13 @@ class _ResultView extends StatelessWidget {
             ),
             onPressed: () {
               Get.back();
+              AnalyticsService().logRewardAccepted(placement: 'quiz_bonus_round');
               AdService().showRewardedAd(
-                onRewarded: () => quiz.unlockBonusRound(),
+                context: context,
+                onRewarded: () {
+                  AnalyticsService().logRewardCompleted(placement: 'quiz_bonus_round');
+                  quiz.unlockBonusRound();
+                },
                 onNotReady: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

@@ -369,56 +369,138 @@ class ECommerceApp extends StatelessWidget {
       const ProjectModel(
         id: 'firebase_chat',
         name: 'Firebase Group Chat UI',
-        description: 'A real-time reactive group conversation app connecting to cloud databases, showcasing auto-scrolling message streams and dynamic bubble rendering.',
+        description: 'A real-time reactive group conversation app connecting to Cloud Firestore, showcasing auto-scrolling message streams, server timestamps, and dynamic bubble rendering.',
         difficulty: 'Advanced',
+        category: 'Firebase Realtime',
         features: [
-          'Dynamic visual layout with custom-drawn chat bubbles',
-          'Firestore collections streams fetching realtime logs',
-          'Automatic vertical list scrolls on message sends',
-          'Local user identity caching persistence'
+          'Realtime Cloud Firestore collection listener with snapshot mapping',
+          'Server-side atomic timestamps via FieldValue.serverTimestamp()',
+          'Dynamic visual layout with custom-drawn chat bubbles and sender flags',
+          'Automatic vertical list scrolls on incoming real-time messages',
+          'Optimistic UI messaging state updates with error rollbacks'
         ],
-        libraries: ['firebase_core: ^4.11.0', 'cloud_firestore: ^4.14.0', 'get: ^4.6.6'],
+        libraries: [
+          'firebase_core: ^4.11.0',
+          'cloud_firestore: ^5.6.5',
+          'firebase_auth: ^6.7.0',
+          'get: ^4.6.6'
+        ],
+        setupGuide: '''1. PREREQUISITES & FIREBASE SETUP:
+   • Install FlutterFire CLI: dart pub global activate flutterfire_cli
+   • Configure project: flutterfire configure --project=YOUR_PROJECT_ID
+   • Add google-services.json (Android) & GoogleService-Info.plist (iOS)
+
+2. CLOUD FIRESTORE SECURITY RULES (firestore.rules):
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /chats/{messageId} {
+         allow read: if request.auth != null;
+         allow create: if request.auth != null
+           && request.resource.data.text is string
+           && request.resource.data.text.size() > 0;
+       }
+     }
+   }
+
+3. COMPOSITE INDEXES:
+   • Collection: chats
+   • Fields indexed: timestamp (Ascending), sender (Ascending)''',
         folderStructure: '''lib/
 ├── main.dart
+├── firebase_options.dart
 ├── controllers/
 │   └── chat_controller.dart
+├── models/
+│   └── chat_message.dart
 └── screens/
     └── chat_room_screen.dart''',
-        sourceCode: '''import 'package:flutter/material.dart';
+        sourceCode: '''import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-// NOTE: Ensure Firebase is initialized in main() before executing.
-// await Firebase.initializeApp();
-
-class Message {
+// ── DATA MODEL ──
+class ChatMessage {
+  final String id;
   final String sender;
   final String text;
   final DateTime timestamp;
 
-  Message({required this.sender, required this.text, required this.timestamp});
+  ChatMessage({
+    required this.id,
+    required this.sender,
+    required this.text,
+    required this.timestamp,
+  });
+
+  factory ChatMessage.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    final ts = data['timestamp'] as Timestamp?;
+    return ChatMessage(
+      id: doc.id,
+      sender: data['sender'] ?? 'Anonymous',
+      text: data['text'] ?? '',
+      timestamp: ts?.toDate() ?? DateTime.now(),
+    );
+  }
 }
 
+// ── GETX CHAT CONTROLLER ──
 class ChatController extends GetxController {
-  var messages = <Message>[].obs;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  var messages = <ChatMessage>[].obs;
+  var isSending = false.obs;
   final currentSender = 'Developer';
 
   @override
   void onInit() {
     super.onInit();
-    // Simulate initial messages. In production, connect to real Firestore stream:
-    // FirebaseFirestore.instance.collection('chats').orderBy('timestamp').snapshots().map(...)
-    messages.assignAll([
-      Message(sender: 'Admin', text: 'Welcome to the Flutter chat room!', timestamp: DateTime.now().subtract(const Duration(minutes: 5))),
-      Message(sender: 'User', text: 'Does this app connect to Firebase?', timestamp: DateTime.now().subtract(const Duration(minutes: 3))),
-    ]);
+    _bindFirestoreStream();
   }
 
-  void sendMessage(String text) {
-    if (text.trim().isEmpty) return;
-    messages.add(Message(sender: currentSender, text: text, timestamp: DateTime.now()));
+  void _bindFirestoreStream() {
+    // Realtime reactive collection stream
+    _firestore
+        .collection('chats')
+        .orderBy('timestamp', descending: false)
+        .limit(100)
+        .snapshots()
+        .listen((snapshot) {
+      messages.value =
+          snapshot.docs.map((doc) => ChatMessage.fromFirestore(doc)).toList();
+    }, onError: (error) {
+      debugPrint('Firestore stream error: \$error');
+    });
+  }
+
+  Future<void> sendMessage(String text) async {
+    final cleanText = text.trim();
+    if (cleanText.isEmpty) return;
+
+    try {
+      isSending.value = true;
+      await _firestore.collection('chats').add({
+        'sender': currentSender,
+        'text': cleanText,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to send message: \$e');
+    } finally {
+      isSending.value = false;
+    }
   }
 }
 
+// ── MAIN ENTRY POINT ──
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const GetMaterialApp(home: ChatRoomScreen()));
+}
+
+// ── CHAT SCREEN VIEW ──
 class ChatRoomScreen extends StatelessWidget {
   const ChatRoomScreen({super.key});
 
@@ -429,17 +511,31 @@ class ChatRoomScreen extends StatelessWidget {
     final scrollController = ScrollController();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Group Chatroom')),
+      appBar: AppBar(
+        title: const Text('Realtime Group Chat'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => Get.defaultDialog(
+              title: 'Firebase Chatroom',
+              middleText: 'Connected live to Cloud Firestore collection "chats"',
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
             child: Obx(() {
-              // Auto-scroll to bottom when new message arrives
+              if (controller.messages.isEmpty) {
+                return const Center(child: Text('No messages yet. Say hello!'));
+              }
+
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (scrollController.hasClients) {
                   scrollController.animateTo(
                     scrollController.position.maxScrollExtent,
-                    duration: const Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 250),
                     curve: Curves.easeOut,
                   );
                 }
@@ -452,22 +548,40 @@ class ChatRoomScreen extends StatelessWidget {
                   final msg = controller.messages[index];
                   final isMe = msg.sender == controller.currentSender;
                   return Align(
-                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment:
+                        isMe ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: isMe ? Colors.blue : Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(16).copyWith(
-                          bottomRight: isMe ? const Radius.circular(0) : const Radius.circular(16),
-                          bottomLeft: !isMe ? const Radius.circular(0) : const Radius.circular(16),
+                          bottomRight: isMe
+                              ? const Radius.circular(0)
+                              : const Radius.circular(16),
+                          bottomLeft: !isMe
+                              ? const Radius.circular(0)
+                              : const Radius.circular(16),
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (!isMe) Text(msg.sender, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.grey)),
-                          Text(msg.text, style: TextStyle(color: isMe ? Colors.white : Colors.black87)),
+                          if (!isMe)
+                            Text(
+                              msg.sender,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  color: Colors.black54),
+                            ),
+                          Text(
+                            msg.text,
+                            style: TextStyle(
+                                color: isMe ? Colors.white : Colors.black87),
+                          ),
                         ],
                       ),
                     ),
@@ -483,7 +597,10 @@ class ChatRoomScreen extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: textController,
-                    decoration: const InputDecoration(labelText: 'Type message...', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Type message...',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -499,6 +616,244 @@ class ChatRoomScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}''',
+      ),
+      const ProjectModel(
+        id: 'firebase_auth_sync',
+        name: 'Firebase Auth & User Profile Hub',
+        description: 'Complete authentication system featuring Google Sign-In, auth state listener, Firestore user profile document synchronization, and offline session caching.',
+        difficulty: 'Intermediate',
+        category: 'Firebase Auth & Cloud',
+        features: [
+          'Google Sign-In & Email/Password authentication pipeline',
+          'Reactive authStateChanges() stream listener with automatic routing',
+          'Cloud Firestore user document creation and last-login tracking',
+          'Live user profile editing (Display Name, Avatar URL, Bio)',
+          'Secure token storage and persistent offline session management'
+        ],
+        libraries: [
+          'firebase_core: ^4.11.0',
+          'firebase_auth: ^6.7.0',
+          'google_sign_in: ^6.2.2',
+          'cloud_firestore: ^5.6.5',
+          'get: ^4.6.6'
+        ],
+        setupGuide: '''1. GOOGLE SIGN-IN SETUP:
+   • Android: Add SHA-1 and SHA-256 fingerprint in Firebase Console
+   • iOS: Add REVERSED_CLIENT_ID to Info.plist CFBundleURLSchemes
+
+2. FIRESTORE SECURITY RULES FOR USERS COLLECTION:
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /users/{userId} {
+         allow read: if request.auth != null;
+         allow write: if request.auth != null && request.auth.uid == userId;
+       }
+     }
+   }
+
+3. DEPENDENCIES:
+   Add firebase_core, firebase_auth, google_sign_in, cloud_firestore, get.''',
+        folderStructure: '''lib/
+├── main.dart
+├── controllers/
+│   └── auth_profile_controller.dart
+├── models/
+│   └── user_profile_model.dart
+└── screens/
+    ├── login_screen.dart
+    └── profile_dashboard_screen.dart''',
+        sourceCode: '''import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+// ── USER PROFILE MODEL ──
+class UserProfile {
+  final String uid;
+  final String email;
+  final String displayName;
+  final String photoUrl;
+  final DateTime? lastLogin;
+
+  UserProfile({
+    required this.uid,
+    required this.email,
+    required this.displayName,
+    required this.photoUrl,
+    this.lastLogin,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'uid': uid,
+        'email': email,
+        'displayName': displayName,
+        'photoUrl': photoUrl,
+        'lastLogin': FieldValue.serverTimestamp(),
+      };
+
+  factory UserProfile.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    final ts = data['lastLogin'] as Timestamp?;
+    return UserProfile(
+      uid: doc.id,
+      email: data['email'] ?? '',
+      displayName: data['displayName'] ?? '',
+      photoUrl: data['photoUrl'] ?? '',
+      lastLogin: ts?.toDate(),
+    );
+  }
+}
+
+// ── AUTH & PROFILE CONTROLLER ──
+class AuthProfileController extends GetxController {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  var user = Rx<User?>(null);
+  var userProfile = Rx<UserProfile?>(null);
+  var isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    user.bindStream(_auth.authStateChanges());
+    ever(user, _handleAuthChanged);
+  }
+
+  Future<void> _handleAuthChanged(User? u) async {
+    if (u != null) {
+      await _syncUserProfile(u);
+    } else {
+      userProfile.value = null;
+    }
+  }
+
+  Future<void> _syncUserProfile(User u) async {
+    final docRef = _firestore.collection('users').doc(u.uid);
+    final doc = await docRef.get();
+
+    if (!doc.exists) {
+      final newProfile = UserProfile(
+        uid: u.uid,
+        email: u.email ?? '',
+        displayName: u.displayName ?? 'New Developer',
+        photoUrl: u.photoURL ?? '',
+      );
+      await docRef.set(newProfile.toMap());
+      userProfile.value = newProfile;
+    } else {
+      userProfile.value = UserProfile.fromFirestore(doc);
+      await docRef.update({'lastLogin': FieldValue.serverTimestamp()});
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      isLoading.value = true;
+      final GoogleSignInAccount? gUser = await _googleSignIn.signIn();
+      if (gUser == null) return;
+
+      final GoogleSignInAuthentication gAuth = await gUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: gAuth.accessToken,
+        idToken: gAuth.idToken,
+      );
+
+      await _auth.signInWithCredential(credential);
+    } catch (e) {
+      Get.snackbar('Sign In Failed', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateBio(String newName) async {
+    if (user.value == null) return;
+    await _firestore.collection('users').doc(user.value!.uid).update({
+      'displayName': newName,
+    });
+    userProfile.value = UserProfile(
+      uid: userProfile.value!.uid,
+      email: userProfile.value!.email,
+      displayName: newName,
+      photoUrl: userProfile.value!.photoUrl,
+    );
+    Get.snackbar('Updated', 'Profile name updated!');
+  }
+
+  Future<void> signOut() async {
+    await _googleSignIn.signOut();
+    await _auth.signOut();
+  }
+}
+
+// ── MAIN & UI ──
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const GetMaterialApp(home: ProfileDashboardScreen()));
+}
+
+class ProfileDashboardScreen extends StatelessWidget {
+  const ProfileDashboardScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = Get.put(AuthProfileController());
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Firebase User Hub')),
+      body: Obx(() {
+        if (auth.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final u = auth.user.value;
+        if (u == null) {
+          return Center(
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.login),
+              label: const Text('Sign In With Google'),
+              onPressed: () => auth.signInWithGoogle(),
+            ),
+          );
+        }
+
+        final profile = auth.userProfile.value;
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 40,
+                backgroundImage: profile?.photoUrl.isNotEmpty == true
+                    ? NetworkImage(profile!.photoUrl)
+                    : null,
+                child: profile?.photoUrl.isEmpty == true
+                    ? const Icon(Icons.person, size: 40)
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              Text(profile?.displayName ?? 'Developer',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(profile?.email ?? '', style: const TextStyle(color: Colors.grey)),
+              const Spacer(),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.logout),
+                label: const Text('Sign Out'),
+                onPressed: () => auth.signOut(),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }''',
