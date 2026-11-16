@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'controllers/auth_controller.dart';
 import 'controllers/engagement_controller.dart';
@@ -41,6 +42,12 @@ void main() async {
     unawaited(DeepLinkService().initialize());
     unawaited(HomeWidgetService().initialize());
 
+    // Load package info dynamically from pubspec / platform bundle
+    PackageInfo? packageInfo;
+    try {
+      packageInfo = await PackageInfo.fromPlatform();
+    } catch (_) {}
+
     // Initialize controllers (order matters — ThemeController first for locale)
     final themeController = Get.put(ThemeController());
     Get.put(FavoritesController());
@@ -51,7 +58,7 @@ void main() async {
     Get.put(QuizController());
     Get.put(EngagementController());
     Get.put(WeeklyChallengeController());
-    Get.put(UpdateController());
+    Get.put(UpdateController(packageInfo: packageInfo));
     Get.put(AuthController());
 
     // Restore saved locale (or null = system default)

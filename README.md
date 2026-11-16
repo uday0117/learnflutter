@@ -2,7 +2,7 @@
 
 [![Flutter Version](https://img.shields.io/badge/Flutter-3.10%2B-02569B?logo=flutter)](https://flutter.dev)
 [![Dart Version](https://img.shields.io/badge/Dart-3.0%2B-0175C2?logo=dart)](https://dart.dev)
-[![Version](https://img.shields.io/badge/Version-1.1.0%2B11-success.svg)](pubspec.yaml)
+[![Version](https://img.shields.io/badge/Version-1.1.1%2B12-success.svg)](pubspec.yaml)
 [![State Management](https://img.shields.io/badge/State-GetX%204.6.6-8A2BE2)](https://pub.dev/packages/get)
 [![Backend & Auth](https://img.shields.io/badge/Firebase-Auth%20%7C%20Analytics%20%7C%20Crashlytics-FFA611?logo=firebase)](https://firebase.google.com)
 [![Code Push](https://img.shields.io/badge/OTA-Shorebird-2C3E50)](https://shorebird.dev)
@@ -38,7 +38,7 @@
 ## 📱 Application Overview
 
 - **Application ID / Package:** `com.uksolutions.learnflutter`
-- **Current Version:** `1.1.0+11`
+- **Current Version:** `1.1.1+12`
 - **Target SDK / Platforms:**
   - **Android:** `minSdkVersion 21`, `targetSdkVersion 34+`, Gradle Kotlin DSL with Java 17 & `desugar_jdk_libs:2.1.4`
   - **iOS:** `iOS 15.0+` deployment target, CocoaPods with dynamic frameworks (`use_frameworks!`), unified URL schemes (`learnflutter://` + Google Sign-In)
@@ -455,4 +455,4 @@ Add `-FIRDebugEnabled`.
 - **License:** Proprietary - All rights reserved by UK Solutions.
 
 ---
-*Updated & Verified against Codebase • Learn Flutter & Dart v1.1.0+11*
+*Updated & Verified against Codebase • Learn Flutter & Dart v1.1.1+12*

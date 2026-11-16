@@ -228,14 +228,74 @@ class _HomeScreenState extends State<HomeScreen> {
 // CATEGORIES / HOME DASHBOARD SCREEN
 // ─────────────────────────────────────────────────────────────
 
-class CategoriesScreen extends StatelessWidget {
+class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
+
+  @override
+  State<CategoriesScreen> createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends State<CategoriesScreen> {
+  int _activeTab = 0; // 0: Widgets Catalog, 1: Dev Labs & Tools
+
+  Widget _buildPulsePill({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.grey.shade200,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 15, color: iconColor),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.9)
+                    : Colors.grey.shade800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final categories = WidgetsData.getCategories();
     final ThemeController themeController = Get.find<ThemeController>();
     final ProgressController progress = Get.find<ProgressController>();
+    final StreakController streakController = Get.find<StreakController>();
+    final EngagementController engagementController =
+        Get.find<EngagementController>();
+    final WeeklyChallengeController weeklyController =
+        Get.find<WeeklyChallengeController>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -313,8 +373,14 @@ class CategoriesScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: isAdFree
-                                  ? [const Color(0xFF11998E), const Color(0xFF38EF7D)]
-                                  : [const Color(0xFFFF8008), const Color(0xFFFFC837)],
+                                  ? [
+                                      const Color(0xFF11998E),
+                                      const Color(0xFF38EF7D)
+                                    ]
+                                  : [
+                                      const Color(0xFFFF8008),
+                                      const Color(0xFFFFC837)
+                                    ],
                             ),
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
@@ -329,7 +395,9 @@ class CategoriesScreen extends StatelessWidget {
                             ],
                           ),
                           child: Icon(
-                            isAdFree ? Icons.bolt_rounded : Icons.card_giftcard_rounded,
+                            isAdFree
+                                ? Icons.bolt_rounded
+                                : Icons.card_giftcard_rounded,
                             color: Colors.white,
                             size: 22,
                           ),
@@ -361,109 +429,350 @@ class CategoriesScreen extends StatelessWidget {
               ),
             ),
 
-            // ── Widget of the Day ──
-            SliverToBoxAdapter(
-              child: _WidgetOfTheDay(isDark: isDark),
-            ),
-
-            // ── Daily Goal ──
-            SliverToBoxAdapter(
-              child: _DailyGoalCard(isDark: isDark),
-            ),
-
-            // ── Weekly Challenge ──
-            SliverToBoxAdapter(
-              child: _WeeklyChallengeCard(isDark: isDark),
-            ),
-
-            // ── Sponsored Ad Card ──
-            SliverToBoxAdapter(
-              child: _HomeAdCard(isDark: isDark),
-            ),
-
-            // ── Invite Friends (viral growth) ──
-            SliverToBoxAdapter(
-              child: _InviteFriendsCard(isDark: isDark),
-            ),
-
-            // ── Progress card ──
-            SliverToBoxAdapter(
-              child: Obx(() {
-                final viewed = progress.viewedCount;
-                final total = progress.totalWidgets;
-                if (viewed == 0) return const SizedBox.shrink();
-                return _ProgressCard(
-                  viewed: viewed,
-                  total: total,
-                  percent: progress.progressPercent,
-                  label: progress.progressLabel.tr,
-                  isDark: isDark,
-                );
-              }),
-            ),
-
-            // ── Streak Banner ──
-            SliverToBoxAdapter(
-              child: _StreakBanner(isDark: isDark),
-            ),
-
-            // ── Daily Flutter Tip ──
-            SliverToBoxAdapter(
-              child: _DailyTipCard(isDark: isDark),
-            ),
-
-            // ── Learn More section ──
-            SliverToBoxAdapter(
-              child: _LearnMoreSection(isDark: isDark),
-            ),
-
-            // ── Quick Stats ──
-            SliverToBoxAdapter(
-              child: _QuickStatsCard(isDark: isDark),
-            ),
-
-            // ── Recently Viewed ──
-            SliverToBoxAdapter(
-              child: Obx(() {
-                final ids = progress.recentIds;
-                if (ids.isEmpty) return const SizedBox.shrink();
-                return _RecentlyViewedSection(ids: ids, isDark: isDark);
-              }),
-            ),
-
-            // ── Categories heading ──
+            // ── Modern Segmented Navigation Pill ──
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-                child: Text(
-                  'categories'.tr,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black,
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                child: Obx(() {
+                  final primaryColor = themeController.primaryColor.value;
+                  return Container(
+                    height: 48,
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF1E1E2E)
+                          : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        // Tab 0: Widgets
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_activeTab != 0) {
+                                setState(() => _activeTab = 0);
+                              }
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                              decoration: BoxDecoration(
+                                color: _activeTab == 0
+                                    ? primaryColor
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: _activeTab == 0
+                                    ? [
+                                        BoxShadow(
+                                          color: primaryColor
+                                              .withValues(alpha: 0.35),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.widgets_rounded,
+                                    size: 18,
+                                    color: _activeTab == 0
+                                        ? Colors.white
+                                        : (isDark
+                                            ? Colors.white60
+                                            : Colors.black54),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'categories'.tr,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: _activeTab == 0
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                      color: _activeTab == 0
+                                          ? Colors.white
+                                          : (isDark
+                                              ? Colors.white70
+                                              : Colors.black87),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Tab 1: Dev Labs & Tools
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_activeTab != 1) {
+                                setState(() => _activeTab = 1);
+                              }
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                              decoration: BoxDecoration(
+                                color: _activeTab == 1
+                                    ? primaryColor
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: _activeTab == 1
+                                    ? [
+                                        BoxShadow(
+                                          color: primaryColor
+                                              .withValues(alpha: 0.35),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.science_rounded,
+                                    size: 18,
+                                    color: _activeTab == 1
+                                        ? Colors.white
+                                        : (isDark
+                                            ? Colors.white60
+                                            : Colors.black54),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Dev Labs',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: _activeTab == 1
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                      color: _activeTab == 1
+                                          ? Colors.white
+                                          : (isDark
+                                              ? Colors.white70
+                                              : Colors.black87),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ),
+
+            if (_activeTab == 0) ...[
+              // ── Quick Pulse interactive chip row ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: [
+                        // Streak pill
+                        Obx(() {
+                          final curStreak =
+                              streakController.currentStreak.value;
+                          return _buildPulsePill(
+                            icon: Icons.local_fire_department_rounded,
+                            iconColor: Colors.deepOrange,
+                            label: '$curStreak ${'day_streak'.tr}',
+                            isDark: isDark,
+                            onTap: () => setState(() => _activeTab = 1),
+                          );
+                        }),
+                        const SizedBox(width: 8),
+                        // Daily Goal pill
+                        Obx(() {
+                          final viewed =
+                              engagementController.dailyWidgetsViewed.value;
+                          final isComplete =
+                              engagementController.isDailyGoalComplete;
+                          return _buildPulsePill(
+                            icon: isComplete
+                                ? Icons.check_circle_rounded
+                                : Icons.track_changes_rounded,
+                            iconColor:
+                                isComplete ? Colors.green : Colors.blueAccent,
+                            label: isComplete ? 'Goal Done! 🎉' : 'Goal: $viewed/3',
+                            isDark: isDark,
+                            onTap: () => setState(() => _activeTab = 1),
+                          );
+                        }),
+                        const SizedBox(width: 8),
+                        // Weekly Challenge score
+                        Obx(() {
+                          final score =
+                              weeklyController.weeklyPoints.value;
+                          return _buildPulsePill(
+                            icon: Icons.emoji_events_rounded,
+                            iconColor: Colors.amber[700] ?? Colors.amber,
+                            label: '$score pts',
+                            isDark: isDark,
+                            onTap: () => setState(() => _activeTab = 1),
+                          );
+                        }),
+                        const SizedBox(width: 8),
+                        // Rewards / Ad-free status
+                        Obx(() {
+                          final isAdFree = AdService().isAdFree;
+                          return _buildPulsePill(
+                            icon: isAdFree
+                                ? Icons.bolt_rounded
+                                : Icons.card_giftcard_rounded,
+                            iconColor: isAdFree ? Colors.teal : Colors.orange,
+                            label: isAdFree ? 'Ad-Free Active' : 'Free Rewards',
+                            isDark: isDark,
+                            onTap: () => Get.to(() => const RewardsHubScreen()),
+                          );
+                        }),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // ── Categories grid ──
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 160),
-              sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) =>
-                      ModernCategoryCard(category: categories[index]),
-                  childCount: categories.length,
-                ),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount:
-                      MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.0,
+              // ── Widget of the Day ──
+              SliverToBoxAdapter(
+                child: _WidgetOfTheDay(isDark: isDark),
+              ),
+
+              // ── Recently Viewed ──
+              SliverToBoxAdapter(
+                child: Obx(() {
+                  final ids = progress.recentIds;
+                  if (ids.isEmpty) return const SizedBox.shrink();
+                  return _RecentlyViewedSection(ids: ids, isDark: isDark);
+                }),
+              ),
+
+              // ── Categories heading ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'categories'.tr,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      Obx(
+                        () => Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: themeController.primaryColor.value
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${categories.length} Topics',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: themeController.primaryColor.value,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+
+              // ── Categories grid ──
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                sliver: SliverGrid(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) =>
+                        ModernCategoryCard(category: categories[index]),
+                    childCount: categories.length,
+                  ),
+                  gridDelegate:
+                      SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount:
+                        MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.0,
+                  ),
+                ),
+              ),
+
+              // ── Sponsored Ad Card ──
+              SliverToBoxAdapter(
+                child: _HomeAdCard(isDark: isDark),
+              ),
+
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 140),
+              ),
+            ] else ...[
+              // ── Tab 1: Dev Labs & Tools ──
+
+              // Daily Goal & Challenge
+              SliverToBoxAdapter(
+                child: _DailyGoalCard(isDark: isDark),
+              ),
+
+              SliverToBoxAdapter(
+                child: _WeeklyChallengeCard(isDark: isDark),
+              ),
+
+              // Streak & Daily Tip
+              SliverToBoxAdapter(
+                child: _StreakBanner(isDark: isDark),
+              ),
+
+              SliverToBoxAdapter(
+                child: _DailyTipCard(isDark: isDark),
+              ),
+
+              // Interactive Dev Tools & Labs (16 features)
+              SliverToBoxAdapter(
+                child: _LearnMoreSection(isDark: isDark),
+              ),
+
+              // Quick Stats
+              SliverToBoxAdapter(
+                child: _QuickStatsCard(isDark: isDark),
+              ),
+
+              // Invite Friends
+              SliverToBoxAdapter(
+                child: _InviteFriendsCard(isDark: isDark),
+              ),
+
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 140),
+              ),
+            ],
           ],
         ),
       ),

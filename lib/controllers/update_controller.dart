@@ -15,22 +15,39 @@ class UpdateController extends GetxController {
   final phase = UpdateUiPhase.hidden.obs;
   final progress = 0.0.obs;
   final statusMessage = ''.obs;
-  final appVersion = '1.1.0+11'.obs;
+  final appVersion = ''.obs;
+
+  UpdateController({PackageInfo? packageInfo}) {
+    if (packageInfo != null) {
+      _applyPackageInfo(packageInfo);
+    }
+  }
 
   @override
   void onInit() {
     super.onInit();
-    _loadAppVersion();
+    if (appVersion.value.isEmpty) {
+      _loadAppVersion();
+    }
+  }
+
+  void _applyPackageInfo(PackageInfo info) {
+    final v = info.version;
+    final b = info.buildNumber.isNotEmpty ? '+${info.buildNumber}' : '';
+    if (v.isNotEmpty) {
+      appVersion.value = '$v$b';
+    }
   }
 
   Future<void> _loadAppVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
-      if (info.version.isNotEmpty) {
-        appVersion.value = '${info.version}+${info.buildNumber}';
-      }
+      _applyPackageInfo(info);
     } catch (_) {
-      // Keep fallback
+      // Fallback when platform channels unavailable (e.g. headless tests)
+      if (appVersion.value.isEmpty) {
+        appVersion.value = '';
+      }
     }
   }
 

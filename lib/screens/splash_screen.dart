@@ -9,6 +9,7 @@ import '../controllers/theme_controller.dart';
 import '../controllers/onboarding_controller.dart';
 import '../controllers/progress_controller.dart';
 import '../controllers/streak_controller.dart';
+import '../controllers/update_controller.dart';
 import '../services/ad_service.dart';
 import '../services/deep_link_service.dart';
 import '../services/home_widget_service.dart';
@@ -539,15 +540,21 @@ class _SplashScreenState extends State<SplashScreen>
                       right: 0,
                       child: Opacity(
                         opacity: _subtitleFade.value * 0.5,
-                        child: Text(
-                          'v1.0.5',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.4),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
+                        child: Obx(() {
+                          final version = Get.isRegistered<UpdateController>()
+                              ? Get.find<UpdateController>().appVersion.value
+                              : '';
+                          if (version.isEmpty) return const SizedBox.shrink();
+                          return Text(
+                            'v$version',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: Colors.white.withValues(alpha: 0.4),
+                              letterSpacing: 1.2,
+                            ),
+                          );
+                        }),
                       ),
                     ),
                   ],

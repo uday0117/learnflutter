@@ -64,8 +64,8 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
         _updateRemaining();
         AnalyticsService().logRewardCompleted(placement: 'ad_free_pass');
         Get.snackbar(
-          'Ad-Free Activated! 🚀',
-          'Enjoy 60 minutes completely ad-free across the entire app!',
+          'ad_free_activated_title'.tr,
+          'ad_free_activated_msg'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -83,8 +83,8 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
         _streakController.addShield();
         AnalyticsService().logRewardCompleted(placement: 'streak_shield');
         Get.snackbar(
-          'Streak Shield Claimed! 🛡️',
-          'Your learning streak is protected if you miss a day.',
+          'streak_shield_claimed_title'.tr,
+          'streak_shield_claimed_msg'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF00C6FF),
           colorText: Colors.white,
@@ -103,8 +103,8 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
         _box.write('all_projects_unlocked_expiry', expiry);
         AnalyticsService().logRewardCompleted(placement: 'unlock_all_projects');
         Get.snackbar(
-          'Projects Unlocked! 📦',
-          'Full source code for all mini-projects unlocked for 24 hours!',
+          'projects_unlocked_title'.tr,
+          'projects_unlocked_msg'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.purple,
           colorText: Colors.white,
@@ -116,8 +116,8 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
 
   void _showAdNotReady() {
     Get.snackbar(
-      'Sponsor Video Loading',
-      'Please wait a few seconds and try again.',
+      'sponsor_loading_title'.tr,
+      'sponsor_loading_msg'.tr,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.orange,
       colorText: Colors.white,
@@ -140,7 +140,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Rewards & Power-Ups',
+          'reward_hub_title'.tr,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -191,7 +191,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            isAdFree ? 'AD-FREE ACTIVE' : 'POWER PASS',
+                            isAdFree ? 'ad_free_active'.tr : 'power_pass'.tr,
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 11,
@@ -215,7 +215,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  isAdFree ? 'Zero Ads Running' : '1-Hour Ad-Free Experience',
+                  isAdFree ? 'zero_ads_running'.tr : 'one_hour_ad_free'.tr,
                   style: GoogleFonts.outfit(
                     color: Colors.white,
                     fontSize: 22,
@@ -225,8 +225,8 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                 const SizedBox(height: 6),
                 Text(
                   isAdFree
-                      ? 'All banners, interstitials, and popups are completely silenced.'
-                      : 'Watch a short 20-30s sponsor video to disable all ads across the app for 60 minutes.',
+                      ? 'ad_free_desc_active'.tr
+                      : 'ad_free_desc_inactive'.tr,
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 13,
@@ -249,7 +249,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                       size: 20,
                     ),
                     label: Text(
-                      isAdFree ? 'Extend by +1 Hour' : 'Watch Video to Activate (Free)',
+                      isAdFree ? 'extend_ad_free'.tr : 'watch_to_activate'.tr,
                       style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                     onPressed: _claimAdFreePass,
@@ -262,7 +262,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
 
           // ── Section Title ──
           Text(
-            'Daily Perks & Rewards',
+            'daily_perks_rewards'.tr,
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -278,10 +278,10 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
               isDark: isDark,
               icon: Icons.shield_rounded,
               iconGradient: const [Color(0xFF00C6FF), Color(0xFF0072FF)],
-              title: 'Streak Freeze Shield',
-              badge: '$shields Owned',
-              desc: 'Protects your daily learning streak if you ever miss a day of practice.',
-              actionLabel: 'Get +1 Shield',
+              title: 'streak_freeze_shield'.tr,
+              badge: '$shields ${'owned'.tr}',
+              desc: 'streak_shield_desc'.tr,
+              actionLabel: 'get_shield_btn'.tr,
               onTap: _claimStreakShield,
             );
           }),
@@ -292,10 +292,10 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
             isDark: isDark,
             icon: Icons.code_rounded,
             iconGradient: const [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
-            title: 'Full Projects Source Code (24h)',
+            title: 'full_projects_title'.tr,
             badge: '24h Pass',
-            desc: 'Unlock all 5+ complete Flutter app project architectures and source codes.',
-            actionLabel: 'Unlock 24h',
+            desc: 'full_projects_desc'.tr,
+            actionLabel: 'unlock_24h'.tr,
             onTap: _unlockAllProjects,
           ),
           const SizedBox(height: 14),
@@ -305,10 +305,10 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
             isDark: isDark,
             icon: Icons.stars_rounded,
             iconGradient: const [Color(0xFFFFD700), Color(0xFFFFA000)],
-            title: 'Prestige Gold Certificate',
-            badge: 'Exclusive',
-            desc: 'Unlock the high-end dark gold certificate theme to showcase on LinkedIn & resume.',
-            actionLabel: 'Customize',
+            title: 'prestige_gold_cert'.tr,
+            badge: 'exclusive'.tr,
+            desc: 'gold_cert_desc'.tr,
+            actionLabel: 'customize'.tr,
             onTap: () => Get.to(() => const CertificateScreen(), transition: Transition.rightToLeft),
           ),
           const SizedBox(height: 24),
@@ -349,7 +349,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Invite a Study Buddy',
+                          'invite_buddy_title'.tr,
                           style: GoogleFonts.outfit(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -357,7 +357,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Tap to share the app with a friend and learn Flutter together!',
+                          'invite_buddy_desc'.tr,
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark ? Colors.white60 : Colors.black54,

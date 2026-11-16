@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:in_app_review/in_app_review.dart';
 
 import '../controllers/auth_controller.dart';
@@ -267,6 +269,24 @@ class SettingsScreen extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const _InAppRatingSheet(),
+    );
+  }
+
+  void _showContactUsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _ContactUsSheet(),
+    );
+  }
+
+  void _showPrivacySettingsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _PrivacySettingsSheet(),
     );
   }
 
@@ -544,14 +564,15 @@ class SettingsScreen extends StatelessWidget {
 
                   const SizedBox(height: 28),
 
-                  // ── Support Section ──
-                  _SectionHeader(title: 'support'.tr, isDark: isDark),
+                  // ── Perks & Rewards Section ──
+                  _SectionHeader(
+                    title: 'rewards_hub'.tr,
+                    isDark: isDark,
+                  ),
                   const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.grey[850]
-                          : Colors.grey[100],
+                      color: isDark ? Colors.grey[850] : Colors.grey[100],
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -585,7 +606,8 @@ class SettingsScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          onTap: () => Get.find<EngagementController>().shareForInviteReward(),
+                          onTap: () => Get.find<EngagementController>()
+                              .shareForInviteReward(),
                           showDivider: true,
                         ),
                         Obx(() {
@@ -598,12 +620,14 @@ class SettingsScreen extends StatelessWidget {
                               title: 'watch_ad_adfree'.tr,
                               subtitle: 'watch_ad_adfree_sub'.tr,
                               onTap: () {
-                                AnalyticsService().logRewardAccepted(placement: 'settings_ad_free_tile');
+                                AnalyticsService().logRewardAccepted(
+                                    placement: 'settings_ad_free_tile');
                                 AdService().showRewardedAd(
                                   context: context,
                                   onRewarded: () {
                                     AdService().grantAdFreePass();
-                                    AnalyticsService().logRewardCompleted(placement: 'settings_ad_free_tile');
+                                    AnalyticsService().logRewardCompleted(
+                                        placement: 'settings_ad_free_tile');
                                     Get.snackbar(
                                       'ad_free_active'.tr,
                                       'ad_free_sub'.tr,
@@ -619,7 +643,7 @@ class SettingsScreen extends StatelessWidget {
                                   },
                                 );
                               },
-                              showDivider: true,
+                              showDivider: false,
                             );
                           }
                           final remaining = adFree.difference(DateTime.now());
@@ -628,13 +652,29 @@ class SettingsScreen extends StatelessWidget {
                             icon: Icons.block_rounded,
                             iconColor: Colors.green,
                             title: 'ad_free_active'.tr,
-                            subtitle: 'ad_free_remaining'.trParams(
-                                {'mins': '$mins'}),
+                            subtitle: 'ad_free_remaining'
+                                .trParams({'mins': '$mins'}),
                             onTap: () {},
-                            showDivider: true,
+                            showDivider: false,
                             showArrow: false,
                           );
                         }),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Support Section ──
+                  _SectionHeader(title: 'support'.tr, isDark: isDark),
+                  const SizedBox(height: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[850] : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
                         _SettingsTile(
                           icon: Icons.star_rounded,
                           iconColor: Colors.amber,
@@ -648,17 +688,7 @@ class SettingsScreen extends StatelessWidget {
                           iconColor: Colors.green,
                           title: 'contact_us'.tr,
                           subtitle: 'contact_us_sub'.tr,
-                          onTap: () =>
-                              UrlLauncherHelper.openEmail(),
-                          showDivider: true,
-                        ),
-                        _SettingsTile(
-                          icon: Icons.delete_sweep_rounded,
-                          iconColor: Colors.red,
-                          title: 'clear_progress'.tr,
-                          subtitle: 'clear_progress_sub'.tr,
-                          onTap: () =>
-                              _showClearProgressDialog(context),
+                          onTap: () => _showContactUsSheet(context),
                           showDivider: false,
                         ),
                       ],
@@ -683,24 +713,9 @@ class SettingsScreen extends StatelessWidget {
                         _SettingsTile(
                           icon: Icons.shield_rounded,
                           iconColor: Colors.teal,
-                          title: 'privacy_consent_settings'.tr.isNotEmpty
-                              ? 'privacy_consent_settings'.tr
-                              : 'Ad Privacy & Consent',
-                          subtitle: 'ad_privacy_sub'.tr.isNotEmpty
-                              ? 'ad_privacy_sub'.tr
-                              : 'Manage personalized ad consent choices',
-                          onTap: () {
-                            AdService().showPrivacyOptionsForm(
-                              context,
-                              onStatus: (msg) {
-                                Get.snackbar(
-                                  'Privacy Preferences',
-                                  msg,
-                                  snackPosition: SnackPosition.BOTTOM,
-                                );
-                              },
-                            );
-                          },
+                          title: 'privacy_consent_settings'.tr,
+                          subtitle: 'ad_privacy_sub'.tr,
+                          onTap: () => _showPrivacySettingsSheet(context),
                           showDivider: true,
                         ),
                         _SettingsTile(
@@ -725,7 +740,9 @@ class SettingsScreen extends StatelessWidget {
                             icon: Icons.info_rounded,
                             iconColor: Colors.blueAccent,
                             title: 'version'.tr,
-                            subtitle: '$version • ${'check_for_updates'.tr}',
+                            subtitle: version.isNotEmpty
+                                ? '$version • ${'check_for_updates'.tr}'
+                                : 'check_for_updates'.tr,
                             onTap: () => InAppUpdateService().checkManually(context: context),
                             showDivider: false,
                             showArrow: true,
@@ -735,7 +752,33 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
 
+                  const SizedBox(height: 28),
 
+                  // ── Data & Reset Section ──
+                  _SectionHeader(
+                    title: 'reset_progress'.tr.isNotEmpty
+                        ? 'reset_progress'.tr
+                        : 'Data & Reset',
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[850] : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.red.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    child: _SettingsTile(
+                      icon: Icons.delete_sweep_rounded,
+                      iconColor: Colors.redAccent,
+                      title: 'clear_progress'.tr,
+                      subtitle: 'clear_progress_sub'.tr,
+                      onTap: () => _showClearProgressDialog(context),
+                      showDivider: false,
+                    ),
+                  ),
 
                   const SizedBox(height: 120),
                 ],
@@ -1615,6 +1658,327 @@ class _SettingsTile extends StatelessWidget {
         if (showDivider)
           const Divider(height: 1, indent: 74, endIndent: 20),
       ],
+    );
+  }
+}
+
+// ─── Contact Us Bottom Sheet ─────────────────────────────────
+class _ContactUsSheet extends StatelessWidget {
+  const _ContactUsSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Get.find<ThemeController>();
+    final primary = theme.primaryColor.value;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 44,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(Icons.mail_rounded, color: Colors.green, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'contact_us'.tr,
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    Text(
+                      'contact_us_sub'.tr,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDark ? Colors.white12 : Colors.grey.shade300,
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Support Email',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white54 : Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      SelectableText(
+                        UrlLauncherHelper.supportEmail,
+                        style: GoogleFonts.sourceCodePro(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy_rounded, size: 20),
+                  tooltip: 'copy_email'.tr,
+                  onPressed: () async {
+                    await Clipboard.setData(
+                      const ClipboardData(text: UrlLauncherHelper.supportEmail),
+                    );
+                    Get.snackbar(
+                      'copy_email'.tr,
+                      'email_copied'.tr,
+                      snackPosition: SnackPosition.BOTTOM,
+                      duration: const Duration(seconds: 2),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  icon: const Icon(Icons.send_rounded, size: 18),
+                  label: Text('send_email'.tr),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    UrlLauncherHelper.openEmail();
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                icon: const Icon(Icons.code_rounded, size: 18),
+                label: const Text('GitHub'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  UrlLauncherHelper.openGitHubRepo();
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Privacy & Consent Bottom Sheet ───────────────────────────
+class _PrivacySettingsSheet extends StatelessWidget {
+  const _PrivacySettingsSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 44,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(Icons.shield_rounded, color: Colors.teal, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'privacy_data_settings'.tr,
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    Text(
+                      'ad_privacy_sub'.tr,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Privacy Card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDark ? Colors.white12 : Colors.grey.shade300,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.lock_rounded, size: 18, color: Colors.teal),
+                    const SizedBox(width: 8),
+                    Text(
+                      'privacy_summary_title'.tr,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'privacy_summary_desc'.tr,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Manage Consent UMP Action Button
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              icon: const Icon(Icons.tune_rounded, size: 18),
+              label: Text('privacy_consent_settings'.tr),
+              onPressed: () {
+                Navigator.pop(context);
+                AdService().showPrivacyOptionsForm(
+                  context,
+                  onStatus: (msg) {
+                    Get.snackbar(
+                      'privacy_preferences'.tr,
+                      msg,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Direct links
+          Row(
+            children: [
+              Expanded(
+                child: TextButton.icon(
+                  icon: const Icon(Icons.privacy_tip_outlined, size: 16),
+                  label: Text('privacy_policy'.tr),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    UrlLauncherHelper.openPrivacyPolicy();
+                  },
+                ),
+              ),
+              Expanded(
+                child: TextButton.icon(
+                  icon: const Icon(Icons.gavel_outlined, size: 16),
+                  label: Text('terms_conditions'.tr),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    UrlLauncherHelper.openTermsAndConditions();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -13,6 +14,7 @@ class UrlLauncherHelper {
   static const String playStoreUrl =
       'https://play.google.com/store/apps/details?id=com.uksolutions.learnflutter';
   static const String flutterDocsUrl = 'https://docs.flutter.dev/ui/widgets';
+  static const String supportEmail = 'apps.uksolutions@gmail.com';
 
   /// Open Google Play Store page
   static Future<void> openPlayStore() async {
@@ -22,7 +24,7 @@ class UrlLauncherHelper {
   /// Launch URL with error handling
   static Future<void> launchURL(
     String url, {
-    LaunchMode mode = LaunchMode.inAppWebView,
+    LaunchMode mode = LaunchMode.externalApplication,
   }) async {
     try {
       final uri = Uri.parse(url);
@@ -31,7 +33,7 @@ class UrlLauncherHelper {
       } else {
         Get.snackbar(
           'Error',
-          'Could not open URL',
+          'Could not open URL: $url',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -50,12 +52,12 @@ class UrlLauncherHelper {
 
   /// Open Privacy Policy
   static Future<void> openPrivacyPolicy() async {
-    await launchURL(privacyPolicyUrl);
+    await launchURL(privacyPolicyUrl, mode: LaunchMode.externalApplication);
   }
 
   /// Open Terms and Conditions
   static Future<void> openTermsAndConditions() async {
-    await launchURL(termsAndConditionsUrl);
+    await launchURL(termsAndConditionsUrl, mode: LaunchMode.externalApplication);
   }
 
   /// Open GitHub Repository
@@ -72,25 +74,25 @@ class UrlLauncherHelper {
   static Future<void> openEmail() async {
     final uri = Uri(
       scheme: 'mailto',
-      path: 'apps.uksolutions@gmail.com',
+      path: supportEmail,
       queryParameters: {'subject': 'Learn Flutter App - Feedback'},
     );
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
-      } else {
-        Get.snackbar(
-          'Email',
-          'apps.uksolutions@gmail.com',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        return;
       }
-    } catch (_) {
-      Get.snackbar(
-        'Email',
-        'apps.uksolutions@gmail.com',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+    } catch (_) {}
+
+    // Fallback: Copy to clipboard and notify
+    await Clipboard.setData(const ClipboardData(text: supportEmail));
+    Get.snackbar(
+      'contact_us'.tr,
+      '${'email_copied'.tr} ($supportEmail)',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFF1E88E5),
+      colorText: Colors.white,
+      duration: const Duration(seconds: 4),
+    );
   }
 }
