@@ -297,9 +297,12 @@ void main() {
           children: [
             const Icon(Icons.code_rounded, color: Color(0xFF11998E), size: 22),
             const SizedBox(width: 8),
-            Text(
-              'Coding Challenges',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                'Coding Challenges',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

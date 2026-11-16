@@ -168,7 +168,7 @@ class _WidgetsListScreenState extends State<WidgetsListScreen> {
               top: false,
               child: Padding(
                 padding: EdgeInsets.only(bottom: 8),
-                child: Center(child: BannerAdWidget()),
+                child: Center(child: BannerAdWidget(isCollapsible: true)),
               ),
             );
           }),

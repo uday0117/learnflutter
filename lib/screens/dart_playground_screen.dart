@@ -550,9 +550,12 @@ void main() {
           children: [
             const Icon(Icons.terminal_rounded, color: Color(0xFF00C6FF), size: 22),
             const SizedBox(width: 8),
-            Text(
-              'Dart Playground',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                'Dart Playground',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

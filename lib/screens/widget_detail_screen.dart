@@ -258,19 +258,13 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
         ],
       ),
       bottomNavigationBar: const SafeArea(
-        child: BannerAdWidget(),
+        child: BannerAdWidget(isCollapsible: true),
       ),
-      floatingActionButton: Obx(() {
-        final isAdFree = AdService().isAdFree;
-        return Padding(
-          padding: EdgeInsets.only(bottom: isAdFree ? 0 : 54),
-          child: FloatingActionButton.extended(
-            onPressed: () => _showSourceCode(context, isDark),
-            icon: const Icon(Icons.code),
-            label: Text('view_full_example'.tr),
-          ),
-        );
-      }),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showSourceCode(context, isDark),
+        icon: const Icon(Icons.code),
+        label: Text('view_full_example'.tr),
+      ),
     ));
   }
 

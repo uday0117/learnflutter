@@ -394,7 +394,7 @@ Share.shareXFiles([XFile('/path/to/image.png')], text: 'My Achievement!');
           if (!AdService().isAdFree)
             const SafeArea(
               top: false,
-              child: Center(child: BannerAdWidget()),
+              child: Center(child: BannerAdWidget(isCollapsible: true)),
             ),
         ],
       ),

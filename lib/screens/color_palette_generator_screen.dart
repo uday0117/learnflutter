@@ -188,9 +188,12 @@ class AppTheme {
           children: [
             const Icon(Icons.palette_rounded, color: Color(0xFFFF8008), size: 22),
             const SizedBox(width: 8),
-            Text(
-              'Color Palette Generator',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                'Color Palette Generator',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

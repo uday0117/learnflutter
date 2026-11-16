@@ -21,9 +21,12 @@ class FavoritesScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            Text(
-              'nav_favorites'.tr,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+            Flexible(
+              child: Text(
+                'nav_favorites'.tr,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const SizedBox(width: 10),
             Obx(() {

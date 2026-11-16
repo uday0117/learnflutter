@@ -426,7 +426,12 @@ class _QuizView extends StatelessWidget {
           children: [
             const Icon(Icons.lightbulb_rounded, color: Colors.amber),
             const SizedBox(width: 8),
-            Text('quiz_hint_title'.tr),
+            Expanded(
+              child: Text(
+                'quiz_hint_title'.tr,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         content: Text('quiz_hint_desc'.tr),
@@ -780,7 +785,12 @@ class _ResultView extends StatelessWidget {
           children: [
             const Text('🎁', style: TextStyle(fontSize: 22)),
             const SizedBox(width: 8),
-            Text('quiz_bonus_title'.tr),
+            Expanded(
+              child: Text(
+                'quiz_bonus_title'.tr,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         content: Text('quiz_bonus_confirm'.tr),
@@ -862,9 +872,13 @@ class _StatCard extends StatelessWidget {
               style: const TextStyle(
                   fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            Text(label,
-                style:
-                    const TextStyle(fontSize: 11, color: Colors.grey)),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ),
           ],
         ),
       ),

@@ -150,9 +150,12 @@ class SettingsScreen extends StatelessWidget {
               child: const Icon(Icons.logout_rounded, color: Colors.red, size: 22),
             ),
             const SizedBox(width: 12),
-            Text(
-              'sign_out'.tr.isNotEmpty ? 'sign_out'.tr : 'Sign Out',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                'sign_out'.tr.isNotEmpty ? 'sign_out'.tr : 'Sign Out',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

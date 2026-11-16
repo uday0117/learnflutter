@@ -392,9 +392,12 @@ for (var item in List.from(userList)) {
           children: [
             const Icon(Icons.bug_report_rounded, color: Colors.redAccent, size: 22),
             const SizedBox(width: 8),
-            Text(
-              'Error Dictionary',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                'Error Dictionary',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

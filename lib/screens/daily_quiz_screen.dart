@@ -94,9 +94,12 @@ class _DailyQuizScreenState extends State<DailyQuizScreen> {
         title: Row(
           children: [
             const Text('🔥 ', style: TextStyle(fontSize: 20)),
-            Text(
-              'Daily Quiz Challenge',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                'Daily Quiz Challenge',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
