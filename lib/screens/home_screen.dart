@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../controllers/engagement_controller.dart';
 import '../controllers/favorites_controller.dart';
@@ -17,10 +18,15 @@ import '../screens/widget_detail_screen.dart';
 import '../screens/widgets_list_screen.dart';
 import '../services/ad_service.dart';
 import '../services/analytics_service.dart';
-import '../widgets/banner_ad_widget.dart';
+import '../widgets/native_ad_widget.dart';
 import 'animation_lab_screen.dart';
 import 'certificate_screen.dart';
+import 'coding_challenges_screen.dart';
+import 'color_palette_generator_screen.dart';
+import 'daily_quiz_screen.dart';
+import 'dart_playground_screen.dart';
 import 'favorites_screen.dart';
+import 'flutter_error_dictionary_screen.dart';
 import 'packages_guide_screen.dart';
 import 'projects_list_screen.dart';
 import 'rewards_hub_screen.dart';
@@ -28,6 +34,7 @@ import 'roadmap_screen.dart';
 import 'search_screen.dart';
 import 'settings_screen.dart';
 import 'ui_cookbook_screen.dart';
+import 'ui_design_challenges_screen.dart';
 import 'widget_customizer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -1319,6 +1326,91 @@ class _LearnMoreSection extends StatelessWidget {
             ),
           ),
         ),
+        // Dart Playground — Featured Hero Card
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: GestureDetector(
+            onTap: () => Get.to(
+              () => const DartPlaygroundScreen(),
+              transition: Transition.rightToLeft,
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00C6FF), Color(0xFF0072FF)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0072FF).withValues(alpha: 0.35),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('⚡', style: TextStyle(fontSize: 28)),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Dart Playground',
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.25),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'INTERACTIVE',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Write, run & experiment with Dart 3 code in real time',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 18),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
@@ -1344,6 +1436,128 @@ class _LearnMoreSection extends StatelessWidget {
                   gradient: const [Color(0xFF11998E), Color(0xFF38EF7D)],
                   onTap: () => Get.to(
                     () => const DartCheatsheetScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Daily Quiz & Coding Challenges row
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: _LearnCard(
+                  emoji: '🔥',
+                  title: 'Daily Quiz',
+                  subtitle: '5 questions + streak boost',
+                  gradient: const [Color(0xFFFF8008), Color(0xFFFFC837)],
+                  onTap: () => Get.to(
+                    () => const DailyQuizScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _LearnCard(
+                  emoji: '💻',
+                  title: 'Challenges',
+                  subtitle: 'Dart algorithmic tests',
+                  gradient: const [Color(0xFF0BA360), Color(0xFF3CBA92)],
+                  onTap: () => Get.to(
+                    () => const CodingChallengesScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Flutter Error Dictionary — full width
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: GestureDetector(
+            onTap: () => Get.to(
+              () => const FlutterErrorDictionaryScreen(),
+              transition: Transition.rightToLeft,
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFED213A), Color(0xFF93291E)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFED213A).withValues(alpha: 0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Text('🐞', style: TextStyle(fontSize: 34)),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Flutter Error Dictionary',
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Troubleshoot 16+ common crashes, overflows & bugs with fixes',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios_rounded,
+                      color: Colors.white70, size: 18),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Color Palette Generator & UI Design Challenges row
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: _LearnCard(
+                  emoji: '🎨',
+                  title: 'Palette Studio',
+                  subtitle: 'Material 3 theme generator',
+                  gradient: const [Color(0xFFFA709A), Color(0xFFFEE140)],
+                  onTap: () => Get.to(
+                    () => const ColorPaletteGeneratorScreen(),
+                    transition: Transition.rightToLeft,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _LearnCard(
+                  emoji: '✨',
+                  title: 'UI Challenges',
+                  subtitle: 'Glass, Neumorphic & more',
+                  gradient: const [Color(0xFF654EA3), Color(0xFFEAAFC8)],
+                  onTap: () => Get.to(
+                    () => const UIDesignChallengesScreen(),
                     transition: Transition.rightToLeft,
                   ),
                 ),
@@ -2171,7 +2385,6 @@ class _HomeAdCardState extends State<_HomeAdCard> {
     if (AdService().isAdFree) return const SizedBox.shrink();
 
     final ThemeController themeController = Get.find<ThemeController>();
-    final double availableWidth = MediaQuery.of(context).size.width - 64;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 350),
@@ -2305,16 +2518,13 @@ class _HomeAdCardState extends State<_HomeAdCard> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Center(
-                      child: BannerAdWidget(
-                        customWidth: availableWidth,
-                        isCollapsible: true,
-                        onAdLoaded: () {
-                          if (mounted && !_adLoaded) {
-                            setState(() => _adLoaded = true);
-                          }
-                        },
-                      ),
+                    NativeAdWidget(
+                      templateType: TemplateType.medium,
+                      onAdLoaded: () {
+                        if (mounted && !_adLoaded) {
+                          setState(() => _adLoaded = true);
+                        }
+                      },
                     ),
                   ],
                 ),

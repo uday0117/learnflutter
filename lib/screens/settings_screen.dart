@@ -686,7 +686,18 @@ class SettingsScreen extends StatelessWidget {
                           subtitle: 'ad_privacy_sub'.tr.isNotEmpty
                               ? 'ad_privacy_sub'.tr
                               : 'Manage personalized ad consent choices',
-                          onTap: () => AdService().showPrivacyOptionsForm(context),
+                          onTap: () {
+                            AdService().showPrivacyOptionsForm(
+                              context,
+                              onStatus: (msg) {
+                                Get.snackbar(
+                                  'Privacy Preferences',
+                                  msg,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              },
+                            );
+                          },
                           showDivider: true,
                         ),
                         _SettingsTile(

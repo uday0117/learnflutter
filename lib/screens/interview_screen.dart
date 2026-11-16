@@ -715,12 +715,17 @@ class _InterviewDetailScreenState extends State<InterviewDetailScreen> {
     final currentQuestion = _items[_currentIndex];
     final lvlColor = _levelColor(currentQuestion.level);
 
+    void handleBack() {
+      AdService().onInterviewQuestionExiting(() {
+        if (mounted) Get.back();
+      });
+    }
+
     return PopScope(
-      canPop: true,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          AdService().incrementInterviewQuestionCounter();
-        }
+        if (didPop) return;
+        handleBack();
       },
       child: Scaffold(
         backgroundColor: isDark ? const Color(0xFF0F111A) : const Color(0xFFF7F9FC),
@@ -729,7 +734,7 @@ class _InterviewDetailScreenState extends State<InterviewDetailScreen> {
           backgroundColor: isDark ? const Color(0xFF151824) : Colors.white,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            onPressed: () => Get.back(),
+            onPressed: handleBack,
           ),
           title: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

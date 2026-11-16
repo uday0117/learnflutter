@@ -183,12 +183,21 @@ class AnalyticsService {
     required String currency,
     required String adUnitId,
     String? precision,
+    String? adSource,
   }) async {
+    final effectiveSource = (adSource != null && adSource.isNotEmpty) ? adSource : 'admob';
+
+    if (kDebugMode) {
+      debugPrint(
+        '[AnalyticsService] 💰 Ad Impression | Format: $adType | Value: $value $currency | Source: $effectiveSource | Precision: $precision | Unit: $adUnitId',
+      );
+    }
+
     await logEvent(
       'ad_impression',
       parameters: {
         'ad_platform': 'admob',
-        'ad_source': 'admob',
+        'ad_source': effectiveSource,
         'ad_format': adType,
         'ad_unit_name': adUnitId,
         'value': value,

@@ -96,11 +96,14 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
-      canPop: true,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          AdService().incrementDetailScreenCounter();
-        }
+        if (didPop) return;
+        AdService().onDetailScreenExiting(() {
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
+        });
       },
       child: Scaffold(
       appBar: AppBar(
@@ -257,11 +260,17 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
       bottomNavigationBar: const SafeArea(
         child: BannerAdWidget(),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showSourceCode(context, isDark),
-        icon: const Icon(Icons.code),
-        label: Text('view_full_example'.tr),
-      ),
+      floatingActionButton: Obx(() {
+        final isAdFree = AdService().isAdFree;
+        return Padding(
+          padding: EdgeInsets.only(bottom: isAdFree ? 0 : 54),
+          child: FloatingActionButton.extended(
+            onPressed: () => _showSourceCode(context, isDark),
+            icon: const Icon(Icons.code),
+            label: Text('view_full_example'.tr),
+          ),
+        );
+      }),
     ));
   }
 

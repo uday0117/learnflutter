@@ -1,184 +1,54 @@
-# AdMob Integration Test Guide
+# AdMob Integration & Monetization Guide
 
-## ✅ What Was Implemented
+## 📊 Summary of Implemented Ad Formats & Placements
 
-### 1. **Google AdMob Package** ✅
-- Added `google_mobile_ads: ^5.3.1` to pubspec.yaml
-- Installed successfully via `flutter pub get`
-
-### 2. **Configuration** ✅
-- **Android**: AndroidManifest.xml configured with App ID
-- **iOS**: Info.plist configured with App ID
-- App ID: `ca-app-pub-1451522103593938~8406068234`
-
-### 3. **Ad Units** ✅
-- **Banner Ad**: `ca-app-pub-1451522103593938/8796950476`
-- **Interstitial Ad**: `ca-app-pub-1451522103593938/8546005746`
-
-### 4. **Test Ads Enabled** ✅
-- Currently using **TEST ADS** for safe testing
-- Test ads will show sample ads from Google
-- No risk to your AdMob account during testing
-
-### 5. **Ad Placements** ✅
-- **Banner Ads**: Bottom of home screen and widget detail screen
-- **Interstitial Ads**: Every 2 widget detail screen visits
+| Ad Format | Test Ad Unit ID (Android / iOS) | Placement in App | Policy Safeguards & Optimizations |
+| :--- | :--- | :--- | :--- |
+| **Anchored Banner** | `ca-app-pub-3940256099942544/6300978111`<br/>`ca-app-pub-3940256099942544/2934735716` | Bottom of `WidgetDetailScreen`, `WidgetsListScreen`, `QuizScreen`, `RoadmapScreen`, etc. | • Orientation adaptive sizing<br/>• Kept alive in scroll views (`AutomaticKeepAliveClientMixin`)<br/>• 54dp floating action button clearance (no accidental overlaps)<br/>• Visual divider separation in Quiz screen |
+| **Native Ad (Medium Template)** | `ca-app-pub-3940256099942544/2247696110`<br/>`ca-app-pub-3940256099942544/3986624511` | Home Feed (`_HomeAdCard`) | • Built with `NativeTemplateStyle` matching dark/light themes<br/>• Blends seamlessly with card styling<br/>• Higher CTR & eCPM |
+| **Interstitial Ad** | `ca-app-pub-3940256099942544/1033173712`<br/>`ca-app-pub-3940256099942544/4411468910` | Quiz completion, Interview deck completion, and detail exit transitions | • Minimum 6-second dwell time check<br/>• Frequency cap: max 4/session, max 8/day<br/>• 60s minimum interval<br/>• Safe navigation callbacks (never pops unexpectedly over parent) |
+| **Rewarded Ad** | `ca-app-pub-3940256099942544/5224354917`<br/>`ca-app-pub-3940256099942544/1712485313` | • Rewards Hub (`Ad-Free pass`, `Streak Shield`, `Project Unlocks`)<br/>• Quiz 50/50 hint<br/>• Settings Ad-Free pass | • Clear value exchange<br/>• Lightweight loading indicator with retry reset<br/>• Immediate Ad-Free reactivity across all active screens |
+| **App Open Ad** | `ca-app-pub-3940256099942544/9257395921`<br/>`ca-app-pub-3940256099942544/5575463023` | Warm app resume (>120s in background) & Splash screen exit | • Suppressed during active learning sessions (Quiz & Flashcards)<br/>• 90s global fullscreen ad cooldown<br/>• 4-hour max cached ad age |
 
 ---
 
-## 🧪 How to Test AdMob Integration
+## 🇪🇺 Google UMP Consent Flow (EU/EEA/UK GDPR & ePrivacy Compliance)
 
-### Step 1: Complete App Restart Required
-```bash
-# Stop the current app completely
-# Then run:
-flutter run
-```
-
-**IMPORTANT**: Hot reload will NOT work for AdMob initialization. You MUST do a full app restart.
-
-### Step 2: Test Banner Ads
-1. Open the app
-2. Look at the **bottom of the home screen** (above navigation bar)
-3. You should see a test banner ad with "Test Ad" text
-4. Tap any widget to open detail screen
-5. Scroll to bottom - another banner ad should appear
-
-### Step 3: Test Interstitial Ads
-1. From home screen, tap any widget to open detail screen
-2. Go back to home
-3. Tap another widget (2nd visit)
-4. **Full-screen interstitial test ad should appear**
-5. Close it and continue
-6. Every 2 widget visits, you'll see an interstitial ad
-
-### Step 4: Check Console Logs
-Watch for these logs in terminal:
-```
-✅ "Banner Ad loaded."
-✅ "Interstitial Ad loaded."
-✅ "Detail screen counter: 1"
-✅ "Detail screen counter: 2"
-✅ "Attempting to show interstitial ad..."
-✅ "Showing interstitial ad now!"
-✅ "Interstitial Ad showed full screen content."
-```
+1. **Consent-First Initialization:**
+   - AdMob SDK initialization is deferred until Google UMP consent parameters are resolved.
+   - All ad formats check `AdService().canRequestAds()` before issuing ad requests.
+2. **Testing EEA Consent in Debug Mode:**
+   - Call `AdService().initialize(debugEeaConsent: true)` during development to simulate EEA consent dialogs from any region.
+3. **User Privacy Management:**
+   - In Settings > "Ad Privacy & Consent", users can re-open their consent choices at any time via `showPrivacyOptionsForm()`.
 
 ---
 
-## 🐛 Troubleshooting
+## 📈 Firebase Analytics & Impression-Level Revenue Data (ILRD)
 
-### If Banner Ads Don't Show:
-1. **Check Internet Connection** - Ads require internet
-2. **Wait 5-10 seconds** - Ads take time to load
-3. **Check console** - Look for "Banner Ad loaded" message
-4. **Restart app** - Hot reload doesn't work for ads
-
-### If Interstitial Ads Don't Show:
-1. **Visit more screens** - Opens 2 widgets to trigger ad
-2. **Check counter** - Console shows "Detail screen counter: X"
-3. **Wait for ad to load** - First load takes 3-5 seconds
-4. **Check logs** - Should see "Interstitial Ad loaded"
-
-### Common Issues:
-
-**"Ad failed to load"**
-- Normal for first launch
-- Ads will retry automatically
-- Check internet connection
-
-**"Ad is not ready yet"**
-- Ad is still loading
-- Will load in background
-- Next trigger will show it
-
-**No ads visible**
-- Do FULL app restart (not hot reload)
-- Ads may be loading (check console)
-- Test ads should always work with internet
+On every ad impression, AdMob triggers `onPaidEvent`, which logs to Firebase Analytics:
+* **Event Name:** `ad_impression`
+* **Parameters Tracked:**
+  * `ad_platform`: `'admob'`
+  * `ad_source`: Adapter name (e.g., `'admob'`, `'Meta Audience Network'`, etc.)
+  * `ad_format`: `'banner'`, `'native'`, `'interstitial'`, `'rewarded'`, `'app_open'`
+  * `ad_unit_name`: Ad unit ID
+  * `value`: Revenue in standard currency units (`valueMicros / 1,000,000.0`)
+  * `currency`: Currency code (e.g., `'USD'`)
+  * `precision`: Precision type (e.g., `'ESTIMATED'`, `'PRECISE'`)
+* **Debug Logging:** In debug builds, real-time revenue events are printed to the console:
+  `[AnalyticsService] 💰 Ad Impression | Format: ... | Value: ... USD`
 
 ---
 
-## 📝 Important Notes
+## 🛡️ Production Readiness Checklist
 
-### Current Settings:
-- ✅ **Test Ads ENABLED** (`_useTestAds = true`)
-- ✅ **Interstitial Frequency**: Every 2 screen visits
-- ✅ **Debug Logging**: Enabled
+Before publishing to the Google Play Store or Apple App Store:
 
-### Before Production Release:
-1. Change `_useTestAds = true` to `false` in `ad_service.dart`
-2. Change interstitial frequency from 2 to 3+ visits
-3. Test with real ads thoroughly
-4. Submit for AdMob app review if required
-
----
-
-## 🎯 What Each Ad Type Looks Like
-
-### Test Banner Ad:
-```
-┌─────────────────────────┐
-│   Test Ad               │
-│   [Sample Banner]       │
-└─────────────────────────┘
-```
-- Small rectangular ad
-- Shows "Test Ad" text
-- Appears at bottom of screens
-
-### Test Interstitial Ad:
-```
-┌─────────────────────────┐
-│         [X]             │
-│                         │
-│    FULL SCREEN AD       │
-│    Test Ad Sample       │
-│                         │
-│   [Learn More]          │
-└─────────────────────────┘
-```
-- Full screen ad
-- Has X close button
-- Shows "Test Ad" watermark
-- Appears between screen transitions
-
----
-
-## ✅ Verification Checklist
-
-Before confirming ads work:
-
-- [ ] App fully restarted (not hot reload)
-- [ ] Internet connection active
-- [ ] Banner ad visible on home screen
-- [ ] Banner ad visible on widget detail screen
-- [ ] Interstitial ad shows after 2 widget visits
-- [ ] Console logs show ad loading messages
-- [ ] Ads closeable and don't crash app
-
----
-
-## 🔄 Next Steps
-
-### For Testing:
-1. **Run**: `flutter run`
-2. **Navigate** through app
-3. **Watch** for test ads
-4. **Check** console logs
-
-### For Production:
-1. Set `_useTestAds = false`
-2. Increase interstitial frequency
-3. Test thoroughly with real ads
-4. Monitor AdMob dashboard
-
----
-
-## 📞 Need Help?
-
-If ads still don't show after following all steps:
-1. Check you did FULL restart (not hot reload)
-2. Share console logs
-3. Verify internet connection
-4. Try on different device
+- [x] Production Ad Unit IDs configured in `ad_service.dart`.
+- [x] Automatic test ad switching enabled via `kDebugMode` (no manual booleans required).
+- [x] Google Mobile Ads App ID configured in `AndroidManifest.xml` and `Info.plist`.
+- [x] Android optimization flags (`OPTIMIZE_INITIALIZATION` and `OPTIMIZE_DATAPROCESSING`) enabled.
+- [x] Updated SKAdNetwork IDs configured in `Info.plist`.
+- [x] Consent Management Platform (UMP) configured in AdMob console (Privacy & Messaging).
+- [x] All GetX controllers and app features verified.

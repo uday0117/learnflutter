@@ -5,6 +5,7 @@ import '../controllers/favorites_controller.dart';
 import '../data/widgets_data.dart';
 import '../models/widget_category.dart';
 import '../models/widget_model.dart';
+import '../services/ad_service.dart';
 import '../services/analytics_service.dart';
 import '../widgets/banner_ad_widget.dart';
 import 'widget_detail_screen.dart';
@@ -161,8 +162,16 @@ class _WidgetsListScreenState extends State<WidgetsListScreen> {
             ),
           ),
 
-          const Center(child: BannerAdWidget()),
-          const SizedBox(height: 8),
+          Obx(() {
+            if (AdService().isAdFree) return const SizedBox.shrink();
+            return const SafeArea(
+              top: false,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 8),
+                child: Center(child: BannerAdWidget()),
+              ),
+            );
+          }),
         ],
       ),
     );

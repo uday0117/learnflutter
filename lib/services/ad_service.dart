@@ -35,6 +35,12 @@ class AdService {
   static const String _prodIosAppOpenId =
       'ca-app-pub-1451522103593938/5575463023';
 
+  // Dedicated Native Ad Unit IDs
+  static const String _prodAndroidNativeId =
+      'ca-app-pub-1451522103593938/4071254287';
+  static const String _prodIosNativeId =
+      'ca-app-pub-1451522103593938/4071254287';
+
   // ── Google Official Test Ad Unit IDs (for safe development / testing) ──
   static const String _testAndroidBannerId =
       'ca-app-pub-3940256099942544/6300978111';
@@ -56,6 +62,11 @@ class AdService {
   static const String _testIosAppOpenId =
       'ca-app-pub-3940256099942544/5575463023';
 
+  static const String _testAndroidNativeId =
+      'ca-app-pub-3940256099942544/2247696110';
+  static const String _testIosNativeId =
+      'ca-app-pub-3940256099942544/3986624511';
+
   static bool get _isAndroid => defaultTargetPlatform == TargetPlatform.android;
 
   // In debug mode, automatically use Google test units to prevent invalid-traffic policy strikes.
@@ -76,10 +87,24 @@ class AdService {
       ? (_isAndroid ? _testAndroidAppOpenId : _testIosAppOpenId)
       : (_isAndroid ? _prodAndroidAppOpenId : _prodIosAppOpenId);
 
+  static String get nativeAdUnitId => kDebugMode
+      ? (_isAndroid ? _testAndroidNativeId : _testIosNativeId)
+      : (_isAndroid ? _prodAndroidNativeId : _prodIosNativeId);
+
   // ── Global Fullscreen Lock & Expiration Limits ──────────────────────
   bool _isShowingFullScreenAd = false;
+  DateTime? _lastFullScreenDismissedTime;
+  static const Duration minFullScreenCooldown = Duration(seconds: 90);
   static const Duration maxFullScreenAdAge = Duration(hours: 1);
   static const Duration maxAppOpenAdAge = Duration(hours: 4);
+
+  bool get isFullScreenAdShowing => _isShowingFullScreenAd;
+
+  bool get isCooldownActive {
+    if (_lastFullScreenDismissedTime == null) return false;
+    return DateTime.now().difference(_lastFullScreenDismissedTime!) <
+        minFullScreenCooldown;
+  }
 
   // ── Interstitial Frequency & Daily Caps ──────────────────────────────
   static const int maxInterstitialsPerSession = 4;
@@ -122,11 +147,13 @@ class AdService {
 
   bool get canShowInterstitial {
     if (_sessionInterstitials >= maxInterstitialsPerSession) {
-      debugPrint('[AdService] Interstitial capped: session limit reached ($maxInterstitialsPerSession).');
+      debugPrint(
+          '[AdService] Interstitial capped: session limit reached ($maxInterstitialsPerSession).');
       return false;
     }
     if (_dailyInterstitialsCount >= maxInterstitialsPerDay) {
-      debugPrint('[AdService] Interstitial capped: daily limit reached ($maxInterstitialsPerDay).');
+      debugPrint(
+          '[AdService] Interstitial capped: daily limit reached ($maxInterstitialsPerDay).');
       return false;
     }
     if (_lastInterstitialTime == null) return true;
@@ -161,6 +188,16 @@ class AdService {
       _appOpenLoadedAt != null &&
       DateTime.now().difference(_appOpenLoadedAt!) > maxAppOpenAdAge;
 
+  bool get canShowAppOpenAd {
+    if (isAdFree || _isShowingFullScreenAd || isCooldownActive) return false;
+    // Suppress App Open ad if user is actively in a quiz or swiping flashcards
+    final currentRoute = Get.currentRoute;
+    if (currentRoute.contains('quiz') || currentRoute.contains('interview_swipe')) {
+      return false;
+    }
+    return true;
+  }
+
   // ── Ad-free pass (rewarded ad reward) ───────────────────────────────
   static const _adFreeUntilKey = 'ad_free_until';
   final _box = GetStorage();
@@ -181,9 +218,10 @@ class AdService {
 
   void grantAdFreePass({Duration duration = const Duration(minutes: 30)}) {
     final currentUntil = adFreeUntil.value;
-    final baseTime = (currentUntil != null && currentUntil.isAfter(DateTime.now()))
-        ? currentUntil
-        : DateTime.now();
+    final baseTime =
+        (currentUntil != null && currentUntil.isAfter(DateTime.now()))
+            ? currentUntil
+            : DateTime.now();
     adFreeUntil.value = baseTime.add(duration);
     _box.write(_adFreeUntilKey, adFreeUntil.value!.millisecondsSinceEpoch);
   }
@@ -217,8 +255,23 @@ class AdService {
     );
   }
 
-  // ── Initialisation & UMP Consent ────────────────────────────────────
-  Future<void> initialize() async {
+  static String extractAdSourceName(Ad ad) {
+    return ad.responseInfo?.loadedAdapterResponseInfo?.adSourceName ?? 'admob';
+  }
+
+  // ── Initialization & UMP Consent ────────────────────────────────────
+  bool _isMobileAdsInitialized = false;
+
+  /// Returns whether the app is permitted to request ads under UMP consent.
+  Future<bool> canRequestAds() async {
+    try {
+      return await ConsentInformation.instance.canRequestAds();
+    } catch (_) {
+      return true; // Fallback if UMP platform channel is unavailable
+    }
+  }
+
+  Future<void> initialize({bool debugEeaConsent = false}) async {
     _restoreAdFreePass();
 
     // 1. Setup RequestConfiguration (compliance & developer targeting)
@@ -232,36 +285,52 @@ class AdService {
       debugPrint('[AdService] RequestConfiguration error: $e');
     }
 
-    // 2. Initialize Mobile Ads SDK
-    await MobileAds.instance.initialize();
+    // 2. Request UMP Consent first (EU / UK / Swiss compliance)
+    final params = ConsentRequestParameters(
+      consentDebugSettings: (kDebugMode && debugEeaConsent)
+          ? ConsentDebugSettings(
+              debugGeography: DebugGeography.debugGeographyEea,
+            )
+          : null,
+    );
 
-    // 3. Request UMP Consent asynchronously (EU / UK / Swiss compliance)
-    requestConsentInfoUpdate();
-
-    // 4. Preload ads
-    loadInterstitialAd();
-    loadRewardedAd();
-    if (!isAdFree) loadAppOpenAd();
-  }
-
-  /// Requests Google UMP (User Messaging Platform) consent for EEA & UK users.
-  void requestConsentInfoUpdate({VoidCallback? onConsentComplete}) {
-    final params = ConsentRequestParameters();
     ConsentInformation.instance.requestConsentInfoUpdate(
       params,
       () async {
-        ConsentForm.loadAndShowConsentFormIfRequired((loadAndShowError) {
+        ConsentForm.loadAndShowConsentFormIfRequired((loadAndShowError) async {
           if (loadAndShowError != null) {
             debugPrint('[AdService] UMP Form Error: ${loadAndShowError.message}');
           }
-          onConsentComplete?.call();
+          await _onConsentResolved();
         });
       },
-      (formError) {
-        debugPrint('[AdService] UMP Consent Info Update Error: ${formError.message}');
-        onConsentComplete?.call();
+      (formError) async {
+        debugPrint(
+            '[AdService] UMP Consent Info Update Error: ${formError.message}');
+        await _onConsentResolved();
       },
     );
+  }
+
+  Future<void> _onConsentResolved() async {
+    final canRequest = await canRequestAds();
+    if (canRequest && !_isMobileAdsInitialized) {
+      _isMobileAdsInitialized = true;
+      try {
+        await MobileAds.instance.initialize();
+        debugPrint('[AdService] Mobile Ads SDK initialized successfully.');
+      } catch (e) {
+        debugPrint('[AdService] Mobile Ads SDK init error: $e');
+      }
+
+      // Preload ads only when consent allows
+      loadInterstitialAd();
+      loadRewardedAd();
+      if (!isAdFree) loadAppOpenAd();
+    } else if (!canRequest) {
+      debugPrint(
+          '[AdService] Ads request not permitted under current consent choices.');
+    }
   }
 
   /// Checks if privacy options (consent management) is required for the user's jurisdiction.
@@ -276,10 +345,21 @@ class AdService {
   }
 
   /// Presents the Google UMP privacy options form so users can update consent.
-  void showPrivacyOptionsForm(BuildContext context) {
+  Future<void> showPrivacyOptionsForm(
+    BuildContext context, {
+    void Function(String message)? onStatus,
+  }) async {
+    final isRequired = await isPrivacyOptionsRequired();
+    if (!isRequired) {
+      onStatus?.call('Privacy choices are not required in your region.');
+      return;
+    }
     ConsentForm.showPrivacyOptionsForm((formError) {
       if (formError != null) {
         debugPrint('[AdService] Privacy options error: ${formError.message}');
+        onStatus?.call(formError.message);
+      } else {
+        onStatus?.call('Privacy preferences updated.');
       }
     });
   }
@@ -293,12 +373,36 @@ class AdService {
     final away = DateTime.now().difference(_lastBackgroundTime!);
     _lastBackgroundTime = null;
     // 2-minute away threshold for warm resume app-open ads
-    if (away.inSeconds >= 120 && !_isShowingFullScreenAd && !isAdFree) {
+    if (away.inSeconds >= 120 && canShowAppOpenAd) {
       showAppOpenAdIfAvailable();
     }
   }
 
   // ── Detail / Interview counters (triggered on screen exit) ──────────
+
+  /// Safely handles exiting the detail screen.
+  /// If an interstitial is due, presents it with a callback that pops after dismissal.
+  void onDetailScreenExiting(VoidCallback onPop) {
+    if (isAdFree) {
+      onPop();
+      return;
+    }
+    if (_detailScreenEnterTime != null) {
+      final dwell = DateTime.now().difference(_detailScreenEnterTime!);
+      _detailScreenEnterTime = null;
+      if (dwell.inSeconds < 6) {
+        // Quick glance / accidental bounce: do not trigger ad
+        onPop();
+        return;
+      }
+    }
+    _detailScreenCounter++;
+    if (_detailScreenCounter % 4 == 0 && canShowInterstitial && !isCooldownActive) {
+      showInterstitialAdWithCallback(onPop);
+    } else {
+      onPop();
+    }
+  }
 
   /// Triggered at natural transitions (e.g. exiting detail screen).
   /// Requires minimum 5 seconds dwell time to avoid counting quick bounces.
@@ -315,6 +419,21 @@ class AdService {
     _detailScreenCounter++;
     if (_detailScreenCounter % 4 == 0) {
       showInterstitialAd();
+    }
+  }
+
+  /// Safely handles exiting an interview question.
+  /// If an interstitial is due, presents it with a callback that pops after dismissal.
+  void onInterviewQuestionExiting(VoidCallback onPop) {
+    if (isAdFree) {
+      onPop();
+      return;
+    }
+    _interviewQuestionCounter++;
+    if (_interviewQuestionCounter % 4 == 0 && canShowInterstitial && !isCooldownActive) {
+      showInterstitialAdWithCallback(onPop);
+    } else {
+      onPop();
     }
   }
 
@@ -347,6 +466,8 @@ class AdService {
             value: valueMicros / 1000000.0,
             currency: currencyCode,
             adUnitId: ad.adUnitId,
+            precision: precision.name,
+            adSource: extractAdSourceName(ad),
           );
         },
       ),
@@ -354,8 +475,10 @@ class AdService {
   }
 
   // ── Interstitial ────────────────────────────────────────────────────
-  void loadInterstitialAd() {
-    if (_isLoadingInterstitial || (_isInterstitialAdReady && !_isInterstitialExpired)) {
+  Future<void> loadInterstitialAd() async {
+    if (!await canRequestAds()) return;
+    if (_isLoadingInterstitial ||
+        (_isInterstitialAdReady && !_isInterstitialExpired)) {
       return;
     }
     _isLoadingInterstitial = true;
@@ -379,6 +502,7 @@ class AdService {
               currency: currencyCode,
               adUnitId: ad.adUnitId,
               precision: precision.name,
+              adSource: extractAdSourceName(ad),
             );
           };
 
@@ -388,6 +512,7 @@ class AdService {
             },
             onAdDismissedFullScreenContent: (ad) {
               _isShowingFullScreenAd = false;
+              _lastFullScreenDismissedTime = DateTime.now();
               ad.dispose();
               _interstitialAd = null;
               _isInterstitialAdReady = false;
@@ -395,6 +520,7 @@ class AdService {
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
               _isShowingFullScreenAd = false;
+              _lastFullScreenDismissedTime = DateTime.now();
               ad.dispose();
               _interstitialAd = null;
               _isInterstitialAdReady = false;
@@ -424,7 +550,7 @@ class AdService {
   }
 
   void showInterstitialAd() {
-    if (isAdFree || _isShowingFullScreenAd) return;
+    if (isAdFree || _isShowingFullScreenAd || isCooldownActive) return;
     if (_isInterstitialExpired) {
       _interstitialAd?.dispose();
       _interstitialAd = null;
@@ -433,7 +559,8 @@ class AdService {
       return;
     }
     if (!canShowInterstitial) {
-      debugPrint('[AdService] Interstitial deferred to protect user experience.');
+      debugPrint(
+          '[AdService] Interstitial deferred to protect user experience.');
       return;
     }
     if (_isInterstitialAdReady && _interstitialAd != null) {
@@ -448,7 +575,7 @@ class AdService {
   /// Shows an interstitial ad and invokes [onComplete] after the ad is
   /// dismissed (or immediately if no ad is ready).
   void showInterstitialAdWithCallback(void Function() onComplete) {
-    if (isAdFree || _isShowingFullScreenAd) {
+    if (isAdFree || _isShowingFullScreenAd || isCooldownActive) {
       onComplete();
       return;
     }
@@ -473,6 +600,7 @@ class AdService {
         },
         onAdDismissedFullScreenContent: (ad) {
           _isShowingFullScreenAd = false;
+          _lastFullScreenDismissedTime = DateTime.now();
           ad.dispose();
           _interstitialAd = null;
           _isInterstitialAdReady = false;
@@ -481,6 +609,7 @@ class AdService {
         },
         onAdFailedToShowFullScreenContent: (ad, error) {
           _isShowingFullScreenAd = false;
+          _lastFullScreenDismissedTime = DateTime.now();
           ad.dispose();
           _interstitialAd = null;
           _isInterstitialAdReady = false;
@@ -500,7 +629,8 @@ class AdService {
 
   bool get isRewardedAdReady => _isRewardedAdReady && !_isRewardedExpired;
 
-  void loadRewardedAd() {
+  Future<void> loadRewardedAd() async {
+    if (!await canRequestAds()) return;
     if (_isLoadingRewarded || (_isRewardedAdReady && !_isRewardedExpired)) return;
     _isLoadingRewarded = true;
 
@@ -523,6 +653,7 @@ class AdService {
               currency: currencyCode,
               adUnitId: ad.adUnitId,
               precision: precision.name,
+              adSource: extractAdSourceName(ad),
             );
           };
 
@@ -532,6 +663,7 @@ class AdService {
             },
             onAdDismissedFullScreenContent: (ad) {
               _isShowingFullScreenAd = false;
+              _lastFullScreenDismissedTime = DateTime.now();
               ad.dispose();
               _rewardedAd = null;
               _isRewardedAdReady = false;
@@ -539,6 +671,7 @@ class AdService {
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
               _isShowingFullScreenAd = false;
+              _lastFullScreenDismissedTime = DateTime.now();
               debugPrint('[AdService] Rewarded ad failed to show: $error');
               ad.dispose();
               _rewardedAd = null;
@@ -601,6 +734,8 @@ class AdService {
       return;
     }
 
+    // Reset retry counter on user action to ensure re-fetch
+    _rewardedRetry = 0;
     loadRewardedAd();
     onNotReady?.call();
   }
@@ -616,7 +751,8 @@ class AdService {
       builder: (_) => PopScope(
         canPop: false,
         child: Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Row(
@@ -630,8 +766,11 @@ class AdService {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    'ad_loading'.tr.isNotEmpty ? 'ad_loading'.tr : 'Loading sponsor video...',
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    'ad_loading'.tr.isNotEmpty
+                        ? 'ad_loading'.tr
+                        : 'Loading sponsor video...',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ),
               ],
@@ -667,8 +806,13 @@ class AdService {
   }
 
   // ── App Open ────────────────────────────────────────────────────────
-  void loadAppOpenAd() {
-    if (isAdFree || _isLoadingAppOpen || (_isAppOpenAdReady && !_isAppOpenExpired)) return;
+  Future<void> loadAppOpenAd() async {
+    if (!await canRequestAds()) return;
+    if (isAdFree ||
+        _isLoadingAppOpen ||
+        (_isAppOpenAdReady && !_isAppOpenExpired)) {
+      return;
+    }
     _isLoadingAppOpen = true;
 
     AppOpenAd.load(
@@ -690,6 +834,7 @@ class AdService {
               currency: currencyCode,
               adUnitId: ad.adUnitId,
               precision: precision.name,
+              adSource: extractAdSourceName(ad),
             );
           };
 
@@ -699,6 +844,7 @@ class AdService {
             },
             onAdDismissedFullScreenContent: (ad) {
               _isShowingFullScreenAd = false;
+              _lastFullScreenDismissedTime = DateTime.now();
               ad.dispose();
               _appOpenAd = null;
               _isAppOpenAdReady = false;
@@ -706,6 +852,7 @@ class AdService {
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
               _isShowingFullScreenAd = false;
+              _lastFullScreenDismissedTime = DateTime.now();
               ad.dispose();
               _appOpenAd = null;
               _isAppOpenAdReady = false;
@@ -734,7 +881,7 @@ class AdService {
   }
 
   void showAppOpenAdIfAvailable({VoidCallback? onDismissed}) {
-    if (isAdFree || _isShowingFullScreenAd) {
+    if (!canShowAppOpenAd) {
       onDismissed?.call();
       return;
     }
@@ -756,6 +903,7 @@ class AdService {
         },
         onAdDismissedFullScreenContent: (ad) {
           _isShowingFullScreenAd = false;
+          _lastFullScreenDismissedTime = DateTime.now();
           ad.dispose();
           _appOpenAd = null;
           _isAppOpenAdReady = false;
@@ -764,6 +912,7 @@ class AdService {
         },
         onAdFailedToShowFullScreenContent: (ad, error) {
           _isShowingFullScreenAd = false;
+          _lastFullScreenDismissedTime = DateTime.now();
           ad.dispose();
           _appOpenAd = null;
           _isAppOpenAdReady = false;

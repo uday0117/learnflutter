@@ -21,7 +21,8 @@ class BannerAdWidget extends StatefulWidget {
   State<BannerAdWidget> createState() => _BannerAdWidgetState();
 }
 
-class _BannerAdWidgetState extends State<BannerAdWidget> {
+class _BannerAdWidgetState extends State<BannerAdWidget>
+    with AutomaticKeepAliveClientMixin {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
   bool _isAdLoading = false;
@@ -30,13 +31,18 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   StreamSubscription? _adFreeSubscription;
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
-    // Reactively watch ad-free pass status to immediately dispose ad if activated
+    // Reactively watch ad-free pass status to dispose on active, or reload on expiration
     _adFreeSubscription = AdService().adFreeUntil.listen((until) {
       if (AdService().isAdFree && mounted) {
         _cleanupAd();
         setState(() {});
+      } else if (!AdService().isAdFree && mounted && _bannerAd == null && !_isAdLoading) {
+        _loadAd();
       }
     });
   }
@@ -59,6 +65,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   Future<void> _loadAd() async {
     if (AdService().isAdFree || _isAdLoading || !mounted) return;
+    if (!await AdService().canRequestAds()) return;
+    if (!mounted) return;
 
     _isAdLoading = true;
     final screenWidth = MediaQuery.of(context).size.width.truncate();
@@ -79,6 +87,9 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
       _isAdLoading = false;
       return;
     }
+
+    // Safely dispose existing ad if any before instantiating new one
+    _bannerAd?.dispose();
 
     _bannerAd = BannerAd(
       adUnitId: AdService.bannerAdUnitId,
@@ -134,6 +145,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
             currency: currencyCode,
             adUnitId: ad.adUnitId,
             precision: precision.name,
+            adSource: AdService.extractAdSourceName(ad),
           );
         },
       ),
@@ -151,6 +163,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
     if (AdService().isAdFree) {
       return const SizedBox.shrink();
     }

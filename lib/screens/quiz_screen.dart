@@ -319,8 +319,15 @@ class _QuizView extends StatelessWidget {
               ),
             ),
 
-            // ── Banner Ad ──
-            const Center(child: BannerAdWidget()),
+            // ── Banner Ad with Safe Divider & Separation ──
+            if (!AdService().isAdFree) ...[
+              const Divider(height: 1, thickness: 0.5),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: Center(child: BannerAdWidget()),
+              ),
+              const Divider(height: 1, thickness: 0.5),
+            ],
 
             // ── Score bar + Hint button + Next button ──
             Padding(

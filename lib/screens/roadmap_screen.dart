@@ -8,10 +8,15 @@ import '../services/analytics_service.dart';
 import '../services/deep_link_service.dart';
 import '../services/share_card_service.dart';
 import '../widgets/banner_ad_widget.dart';
+import 'coding_challenges_screen.dart';
+import 'color_palette_generator_screen.dart';
 import 'dart_cheatsheet_screen.dart';
+import 'dart_playground_screen.dart';
+import 'flutter_error_dictionary_screen.dart';
 import 'interview_screen.dart';
 import 'projects_list_screen.dart';
 import 'quiz_screen.dart';
+import 'ui_design_challenges_screen.dart';
 
 class RoadmapScreen extends StatefulWidget {
   const RoadmapScreen({super.key});
@@ -63,6 +68,20 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
           actionLabel: 'Interview Q&A',
           targetScreen: const InterviewScreen(),
         ),
+        RoadmapItem(
+          id: 'dart_playground_interactive',
+          title: 'Dart 3 Records, Patterns & Playground',
+          desc: 'Interactive code experimentation with records, patterns, null safety, and loops.',
+          actionLabel: 'Dart Playground',
+          targetScreen: const DartPlaygroundScreen(),
+        ),
+        RoadmapItem(
+          id: 'dart_coding_challenges',
+          title: 'Dart Problem Solving & Coding Challenges',
+          desc: 'Solve algorithmic challenges with live tests and pass/fail evaluation.',
+          actionLabel: 'Solve Challenges',
+          targetScreen: const CodingChallengesScreen(),
+        ),
       ],
     ),
     RoadmapStage(
@@ -97,8 +116,15 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
           id: 'flutter_theming',
           title: 'Themes, Styling & Adaptive Fonts',
           desc: 'ThemeData, Material 3, Dark/Light palettes, and Google Fonts.',
-          actionLabel: 'Cheatsheet',
-          targetScreen: const DartCheatsheetScreen(),
+          actionLabel: 'Color Palette',
+          targetScreen: const ColorPaletteGeneratorScreen(),
+        ),
+        RoadmapItem(
+          id: 'flutter_ui_challenges',
+          title: 'UI Design Challenges & Modern Visuals',
+          desc: 'Glassmorphism, Neumorphism, Animated story rings, and delivery cards.',
+          actionLabel: 'UI Challenges',
+          targetScreen: const UIDesignChallengesScreen(),
         ),
       ],
     ),
@@ -226,6 +252,13 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
           desc: 'Keystores, Android App Bundles (AAB), ProGuard, and App Store review.',
           actionLabel: 'Interview Q&A',
           targetScreen: const InterviewScreen(),
+        ),
+        RoadmapItem(
+          id: 'prod_error_dictionary',
+          title: 'Flutter Error Dictionary & Debugging Mastery',
+          desc: 'Diagnose and fix 16+ common runtime bugs, unbounded heights, and context issues.',
+          actionLabel: 'Error Dictionary',
+          targetScreen: const FlutterErrorDictionaryScreen(),
         ),
       ],
     ),
